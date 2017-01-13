@@ -1,0 +1,52 @@
+OFMC - A Variational Model for the Analysis of Membrane Cuts
+Version 1.0, 2017
+
+Lukas Lang (ll542@damtp.cam.ac.uk)
+University of Cambridge
+Department of Applied Mathematics and Theoretical Physics
+Wilberforce Road, Cambridge CB3 0WA, United Kingdom
+http://www.damtp.cam.ac.uk/
+
+1. Introduction
+
+This is a MATLAB implementation of Line Pixel Dejittering (LPDJ) as described in:
+
+J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb. A Variational Model for the Analysis of Membrane Cuts.
+
+If you use this software in your work you must cite the abovementioned paper in a resulting publication!
+
+BibTeX:
+
+@techreport{EtiLanSch17,
+  author     = {J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb},
+  title      = {A Variational Model for the Analysis of Membrane Cuts},
+  institution= {DAMTP, University of Cambridge, United Kingdom},
+  type       = {Preprint},
+  year       = {2017}
+}
+
+2. License & Disclaimer
+
+Copyright 2017 Lukas Lang.
+
+This file is part of OFMC. OFMC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+OFMC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+
+For the full license statement see the file COPYING.
+
+3. Requirements
+
+This software was written for and tested with Matlab R2015b.
+
+The following libraries are required for parts of this sofware:
+
+4. Usage
+
+For easier use we provide a startup script (startup.m), which sets up the Matlab search path. It includes required libraries and adds required subdirectories. Make sure to download the required packages and to set the library paths properly. Then simply run the startup script.
+
+To run the test cases in Matlab execute
+
+>> runtests('./test')

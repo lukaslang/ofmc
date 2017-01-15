@@ -14,7 +14,7 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = ofTest
+function tests = cmTest
     tests = functiontests(localfunctions);
 end
 

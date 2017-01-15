@@ -18,15 +18,15 @@ function [A, B, C, b] = cm(f, h, ht)
 %CM Creates a linear system for the 1D mass preservation flow problem with 
 %spatio-temporal regularisation.
 %
-%   [A, B, C, D, b] = CM(f, h, ht) takes matrix f of image intensities, and 
+%   [A, B, C, b] = CM(f, h, ht) takes matrix f of image intensities, and 
 %   spatial and temporal scaling parameters h and ht, and creates a linear
 %   system of the form
 %
-%   A + alpha*B + beta*C + gamma*D = b.
+%   A + alpha*B + beta*C = b.
 %
 %   f is a matrix of size [m, n] where m is the number of time steps and n
 %   the number of pixels.
-%   A, B, C, D are matrices of size [m*n, m*n].
+%   A, B, C are matrices of size [m*n, m*n].
 %   b is a vector of length m*n.
 
 % Get image size.

@@ -53,7 +53,7 @@ f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 [x, flag, relres] = gmres(A + alpha*B + beta*C, b, 20, 1e-3, 2000);
 
 % Recover flow.
-v = reshape(x(1:t*n), n, t)';
+v = reshape(x, n, t)';
 
 % Visualise flow.
 figure(1);
@@ -70,7 +70,6 @@ for k=1:t
     figure(3);
     subplot(2, 1, 1);
     imagesc(f(k, :));
-    
     colormap gray;
     
     subplot(2, 1, 2);    

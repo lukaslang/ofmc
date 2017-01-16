@@ -75,7 +75,7 @@ colormap gray;
 title('Input image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s.png', name)), '-png', '-q300', '-a1');
+export_fig(gcf, fullfile(outputPath, sprintf('%s.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 figure(2);
 imagesc(v);
@@ -84,7 +84,7 @@ colorbar;
 title('Velocity field for mass conservation with source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-velocity.png', name)), '-png', '-q300', '-a1');
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 figure(3);
 imagesc(k);
@@ -93,7 +93,7 @@ colorbar;
 title('Source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1');
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 % Create linear system for mass conservation.
 [A, B, C, b] = cm(f, h, ht);
@@ -114,4 +114,4 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1');
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');

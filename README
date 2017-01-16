@@ -43,10 +43,13 @@ This software was written for and tested with Matlab R2015b.
 
 The following libraries are required for parts of this sofware:
 
+export_fig
+URL: https://github.com/altmany/export_fig
+
 4. Usage
 
 For easier use we provide a startup script (startup.m), which sets up the Matlab search path. It includes required libraries and adds required subdirectories. Make sure to download the required packages and to set the library paths properly. Then simply run the startup script.
 
 To run the test cases in Matlab execute
 
->> runtests('./test')
+>> runtests('test')

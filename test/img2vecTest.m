@@ -14,7 +14,7 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = laplacian1dTest
+function tests = img2vecTest
     tests = functiontests(localfunctions);
 end
 
@@ -28,27 +28,10 @@ end
 
 function resultTest(testCase)
 
-n = 3;
-t = 1;
-h = 1;
+t = 3;
+n = 5;
+f = reshape(1:t*n, t, n)';
 
-L = [-2, 2, 0;
-      1,-2, 1;
-      0, 2,-2] ./ h^2;
-
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
-
-n = 3;
-t = 2;
-h = 2;
-
-L = [-2, 2, 0, 0, 0, 0;
-      1,-2, 1, 0, 0, 0;
-      0, 2,-2, 0, 0, 0;
-      0, 0, 0,-2, 2, 0;
-      0, 0, 0, 1,-2, 1;
-      0, 0, 0, 0, 2,-2] ./ h^2;
-
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
+verifyEqual(testCase, img2vec(f), (1:t*n)');
 
 end

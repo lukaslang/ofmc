@@ -36,10 +36,8 @@ function [A, B, C, b] = of(f, h, ht)
 [fx, ft] = gradient(f, h, ht);
 
 % Transpose data.
-fx = fx';
-fx = fx(:);
-ft = ft';
-ft = ft(:);
+fx = img2vec(fx);
+ft = img2vec(ft);
 
 % Create matrix A.
 A = spdiags(-fx.^2, 0, t*n, t*n);

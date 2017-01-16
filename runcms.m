@@ -27,6 +27,7 @@ path = 'data';
 % Set parameters.
 alpha = 0.01;
 beta = 0.05;
+gamma = 0.5;
 
 % Read data.
 f = imread(fullfile(path, sprintf('%s.png', name)));
@@ -46,15 +47,15 @@ f = (f - min(f(:))) / max(f(:) - min(f(:)));
 f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
 % Create linear system.
-%[A, B, C, b] = of(f, h, ht);
-[A, B, C, b] = cm(f, h, ht);
+[A, B, C, D, b] = cms(f, h, ht);
 
 % Solve system.
-[x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
+[x, flag, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], 1e-3, 2000);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
-v = reshape(x, n, t)';
+v = reshape(x(1:t*n), n, t)';
+k = reshape(x(t*n+1:end), n, t)';
 
 % Visualise flow.
 figure(1);
@@ -66,9 +67,13 @@ figure(2);
 imagesc(v);
 axis image;
 colorbar;
+figure(3);
+imagesc(k);
+axis image;
+colorbar;
 
 for k=1:t
-    figure(3);
+    figure(4);
     subplot(2, 1, 1);
     imagesc(f(k, :));
     colormap gray;

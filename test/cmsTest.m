@@ -14,7 +14,7 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = laplacian1dTest
+function tests = cmsTest
     tests = functiontests(localfunctions);
 end
 
@@ -28,27 +28,17 @@ end
 
 function resultTest(testCase)
 
-n = 3;
-t = 1;
-h = 1;
+n = 10;
 
-L = [-2, 2, 0;
-      1,-2, 1;
-      0, 2,-2] ./ h^2;
+% Create empty image with three time steps and n pixels.
+f = rand(3, n);
 
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
-
-n = 3;
-t = 2;
-h = 2;
-
-L = [-2, 2, 0, 0, 0, 0;
-      1,-2, 1, 0, 0, 0;
-      0, 2,-2, 0, 0, 0;
-      0, 0, 0,-2, 2, 0;
-      0, 0, 0, 1,-2, 1;
-      0, 0, 0, 0, 2,-2] ./ h^2;
-
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
+% Compute linear system.
+[A, B, C, D, b] = cms(f, 1, 1);
+verifyEqual(testCase, size(A), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(B), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(C), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(D), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(b), [2*3*n, 1]);
 
 end

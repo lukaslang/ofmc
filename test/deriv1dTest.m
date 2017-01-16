@@ -14,7 +14,7 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = laplacian1dTest
+function tests = deriv1dTest
     tests = functiontests(localfunctions);
 end
 
@@ -32,23 +32,24 @@ n = 3;
 t = 1;
 h = 1;
 
-L = [-2, 2, 0;
-      1,-2, 1;
-      0, 2,-2] ./ h^2;
+L = [ 0, 0, 0;
+     -1, 0, 1;
+      0, 0, 0] ./ (2*h);
 
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
+verifyEqual(testCase, full(deriv1d(n, t, h)), L);
+
 
 n = 3;
 t = 2;
 h = 2;
 
-L = [-2, 2, 0, 0, 0, 0;
-      1,-2, 1, 0, 0, 0;
-      0, 2,-2, 0, 0, 0;
-      0, 0, 0,-2, 2, 0;
-      0, 0, 0, 1,-2, 1;
-      0, 0, 0, 0, 2,-2] ./ h^2;
+L = [ 0, 0, 0, 0, 0, 0;
+     -1, 0, 1, 0, 0, 0;
+      0, 0, 0, 0, 0, 0;
+      0, 0, 0, 0, 0, 0;
+      0, 0, 0,-1, 0, 1;
+      0, 0, 0, 0, 0, 0] ./ (2*h);
 
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
+verifyEqual(testCase, full(deriv1d(n, t, h)), L);
 
 end

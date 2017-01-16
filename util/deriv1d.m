@@ -14,41 +14,24 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = laplacian1dTest
-    tests = functiontests(localfunctions);
-end
+function L = deriv1d(n, t, h)
+%DERIV1D Creates first difference matrix for 1D.
+%
+%   L = DERIV1D(n, t, h) takes number of pixels n, number of
+%   time instants t, and a scaling parameter h, and creates first order
+%   central difference matrix.
+%
+%   n, t are integers.
+%   h is a scalar.
+%   L is a matrix of size [n*t, n*t].
+%
+%   Note that n > 1 and t >= 1.
 
-function setupOnce(testCase)
-    cd('../');
-end
-
-function teardownOnce(testCase)
-    cd('test');
-end
-
-function resultTest(testCase)
-
-n = 3;
-t = 1;
-h = 1;
-
-L = [-2, 2, 0;
-      1,-2, 1;
-      0, 2,-2] ./ h^2;
-
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
-
-n = 3;
-t = 2;
-h = 2;
-
-L = [-2, 2, 0, 0, 0, 0;
-      1,-2, 1, 0, 0, 0;
-      0, 2,-2, 0, 0, 0;
-      0, 0, 0,-2, 2, 0;
-      0, 0, 0, 1,-2, 1;
-      0, 0, 0, 0, 2,-2] ./ h^2;
-
-verifyEqual(testCase, full(laplacian1d(n, t, h)), L);
+v1 = -ones(n, 1)/(2*h);
+v1(n-1) = 0;
+v2 = ones(n, 1)/(2*h);
+v2(2) = 0;
+L = spdiags([v1, v2], [-1, 1], n, n);
+L = kron(eye(t), L);
 
 end

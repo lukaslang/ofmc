@@ -24,10 +24,19 @@ clc;
 name = 'E2PSB1PMT-560-C1';
 path = 'data';
 
+% Create start date and time.
+startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
+
+% Define and create output folder.
+outputPath = fullfile('results', startdate);
+mkdir(outputPath);
+
 % Set parameters.
 alpha = 0.01;
 beta = 0.05;
-gamma = 0.5;
+gamma = 0.1;
+delta = 0.001;
+eta = 0.001;
 
 % Read data.
 f = imread(fullfile(path, sprintf('%s.png', name)));
@@ -47,10 +56,10 @@ f = (f - min(f(:))) / max(f(:) - min(f(:)));
 f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
 % Create linear system.
-[A, B, C, D, b] = cms(f, h, ht);
+[A, B, C, D, E, F, b] = cms(f, h, ht);
 
 % Solve system for mass conservation with source/sink term.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], 1e-3, 2000);
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], 1e-3, 2000);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
@@ -66,6 +75,7 @@ colormap gray;
 title('Input image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s.png', name)), '-png', '-q300', '-a1');
 
 figure(2);
 imagesc(v);
@@ -74,6 +84,7 @@ colorbar;
 title('Velocity field for mass conservation with source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-velocity.png', name)), '-png', '-q300', '-a1');
 
 figure(3);
 imagesc(k);
@@ -82,6 +93,7 @@ colorbar;
 title('Source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1');
 
 % Create linear system for mass conservation.
 [A, B, C, b] = cm(f, h, ht);
@@ -102,3 +114,4 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1');

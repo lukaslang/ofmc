@@ -27,7 +27,9 @@ path = 'data';
 % Set parameters.
 alpha = 0.01;
 beta = 0.05;
-gamma = 0.5;
+gamma = 0.1;
+delta = 0.001;
+eta = 0.001;
 
 % Read data.
 f = imread(fullfile(path, sprintf('%s.png', name)));
@@ -47,10 +49,10 @@ f = (f - min(f(:))) / max(f(:) - min(f(:)));
 f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
 % Create linear system.
-[A, B, C, D, b] = cms(f, h, ht);
+[A, B, C, D, E, F, b] = cms(f, h, ht);
 
 % Solve system.
-[x, flag, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], 1e-3, 2000);
+[x, flag, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], 1e-3, 2000);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.

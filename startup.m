@@ -18,6 +18,12 @@
 % This script sets up the paths of the libraries and adds all subfolders.
 clear;
 
+% Set library path.
+libraryPath = '../';
+
+% export_fig is required for saving figures.
+addpath(fullfile(libraryPath, 'export_fig'));
+
 % Add all subfolders.
 y = dir('.');
 y = y([y.isdir]);
@@ -27,4 +33,5 @@ cellfun(@(x) addpath(genpath(fullfile(pwd, x))), {y.name});
 
 % Clean up.
 clear y;
+clear libraryPath;
 clear path;

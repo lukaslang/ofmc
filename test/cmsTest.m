@@ -34,11 +34,13 @@ n = 10;
 f = rand(3, n);
 
 % Compute linear system.
-[A, B, C, D, b] = cms(f, 1, 1);
+[A, B, C, D, E, F, b] = cms(f, 1, 1);
 verifyEqual(testCase, size(A), [2*3*n, 2*3*n]);
 verifyEqual(testCase, size(B), [2*3*n, 2*3*n]);
 verifyEqual(testCase, size(C), [2*3*n, 2*3*n]);
 verifyEqual(testCase, size(D), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(E), [2*3*n, 2*3*n]);
+verifyEqual(testCase, size(F), [2*3*n, 2*3*n]);
 verifyEqual(testCase, size(b), [2*3*n, 1]);
 
 end

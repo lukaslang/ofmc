@@ -14,19 +14,19 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function [A, B, C, D, b] = cms(f, h, ht)
+function [A, B, C, D, E, F, b] = cms(f, h, ht)
 %CM Creates a linear system for the 1D mass preservation flow problem with
 %source terms with spatio-temporal regularisation.
 %
-%   [A, B, C, D, b] = CMS(f, h, ht) takes matrix f of image intensities, 
+%   [A, B, C, D, E, F, b] = CMS(f, h, ht) takes matrix f of image intensities, 
 %   and spatial and temporal scaling parameters h and ht, and creates a 
 %   linear system of the form
 %
-%   A + alpha*B + beta*C + gamma*D = b.
+%   A + alpha*B + beta*C + gamma*D + delta*E = b.
 %
 %   f is a matrix of size [m, n] where m is the number of time steps and n
 %   the number of pixels.
-%   A, B, C, D are matrices of size [m*n, m*n].
+%   A, B, C, D, E, F are matrices of size [m*n, m*n].
 %   b is a vector of length m*n.
 
 % Get image size.
@@ -59,6 +59,12 @@ C = [templaplacian1d(n, t, ht), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
 
 % Create regularisation matrix for k.
 D = -spdiags([zeros(t*n, 1); ones(t*n, 1)], 0, 2*t*n, 2*t*n);
+
+% Create spatial regularisation matrix for k.
+E = [sparse(t*n, 2*t*n); sparse(t*n, t*n), laplacian1d(n, t, h)];
+
+% Create temporal regularisation matrix for k.
+F = [sparse(t*n, 2*t*n); sparse(t*n, t*n), templaplacian1d(n, t, h)];
 
 % Create right-hand side.
 b = [-fxt.*f; -ft];

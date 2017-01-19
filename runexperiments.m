@@ -53,6 +53,9 @@ f = double(f(7:end, 1:140));
 h = 1/n;
 ht = 1/t;
 
+% Set streamline scaling factor.
+hs = 5;
+
 % Scale image to [0, 1].
 f = (f - min(f(:))) / max(f(:) - min(f(:)));
 
@@ -78,10 +81,11 @@ imagesc(f);
 axis image;
 colorbar;
 colormap gray;
-title('Input image.', 'FontName', 'Helvetica', 'FontSize', 14);
+streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
+title('Mass conservation with source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 figure(2);
 imagesc(v);
@@ -114,6 +118,17 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 v = reshape(x, n, t)';
 
 figure(4);
+imagesc(f);
+axis image;
+colorbar;
+colormap gray;
+streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
+title('Mass conservation without source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(5);
 imagesc(v);
 axis image;
 colorbar;
@@ -127,10 +142,10 @@ export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png
 %% Convective regularisation.
 
 % Create linear system.
-[A, B, C, b] = cm(f, h, ht);
+[A, B, C, D, b, c] = cmcrv(f, zeros(t, n), h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], 1e-3, 1000);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
@@ -158,7 +173,18 @@ for j=1:niter
     % Recover flow.
     v = reshape(x, n, t)';
     
-    figure(5);
+    figure(6);
+    imagesc(f);
+    axis image;
+    colorbar;
+    colormap gray;
+    streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
+    title('MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(7);
     imagesc(v);
     axis image;
     colorbar;
@@ -167,7 +193,7 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(6);
+    figure(8);
     imagesc(k);
     axis image;
     colorbar;

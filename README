@@ -9,7 +9,7 @@ http://www.damtp.cam.ac.uk/
 
 1. Introduction
 
-This is a MATLAB implementation of Line Pixel Dejittering (LPDJ) as described in:
+This is a MATLAB implementation of:
 
 J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb. A Variational Model for the Analysis of Membrane Cuts.
 

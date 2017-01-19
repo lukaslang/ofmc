@@ -15,7 +15,7 @@
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 function [A, B, C, D, E, F, b] = cms(f, h, ht)
-%CM Creates a linear system for the 1D mass preservation flow problem with
+%CMS Creates a linear system for the 1D mass preservation flow problem with
 %source terms with spatio-temporal regularisation.
 %
 %   [A, B, C, D, E, F, b] = CMS(f, h, ht) takes matrix f of image intensities, 

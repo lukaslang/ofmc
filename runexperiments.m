@@ -32,11 +32,15 @@ outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
 % Set parameters.
-alpha = 0.01;
+alpha = 0.1;
 beta = 0.05;
 gamma = 0.1;
 delta = 0.001;
 eta = 0.001;
+theta = 0.005;
+
+% Number of iterations for convective regularisation.
+niter = 5;
 
 % Read data.
 f = imread(fullfile(path, sprintf('%s.png', name)));
@@ -54,6 +58,8 @@ f = (f - min(f(:))) / max(f(:) - min(f(:)));
 
 % Filter image.
 f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
+
+%% Mass conservation with source/sink term.
 
 % Create linear system.
 [A, B, C, D, E, F, b] = cms(f, h, ht);
@@ -95,6 +101,8 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+%% Mass conservation.
+
 % Create linear system for mass conservation.
 [A, B, C, b] = cm(f, h, ht);
 
@@ -115,3 +123,57 @@ ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+%% Convective regularisation.
+
+% Create linear system.
+[A, B, C, b] = cm(f, h, ht);
+
+% Solve system.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
+fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+% Recover flow.
+v = reshape(x, n, t)';
+
+for j=1:niter
+
+    % Create linear system.
+    [A, B, b] = cmcrk(f, v, h, ht);
+
+    % Solve system.
+    [x, ~, relres, iter] = gmres(A + theta*B, b, [], 1e-3, 1000);
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Recover source.
+    k = reshape(x, n, t)';
+    
+    % Create linear system.
+    [A, B, C, D, b, c] = cmcrv(f, k, h, ht);
+
+    % Solve system.
+    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], 1e-3, 1000);
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Recover flow.
+    v = reshape(x, n, t)';
+    
+    figure(5);
+    imagesc(v);
+    axis image;
+    colorbar;
+    title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(6);
+    imagesc(k);
+    axis image;
+    colorbar;
+    title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    drawnow();
+end

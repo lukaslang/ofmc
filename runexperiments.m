@@ -142,14 +142,14 @@ export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png
 %% Convective regularisation.
 
 % Create linear system.
-[A, B, C, D, b, c] = cmcrv(f, zeros(t, n), h, ht);
+[A, B, C, D, E, F, b] = cms(f, h, ht);
 
-% Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], 1e-3, 1000);
+% Solve system for mass conservation with source/sink term.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], 1e-3, 2000);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
-v = reshape(x, n, t)';
+v = reshape(x(1:t*n), n, t)';
 
 for j=1:niter
 

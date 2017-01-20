@@ -14,18 +14,18 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function [A, B, C, D, b, c] = cmcrv(f, k, h, ht)
-%CMCRV Creates a linear system for the 1D mass preservation flow problem 
+function [A, B, C, D, b, c] = cmcrf(f, v, k, h, ht)
+%CMCRF Creates a linear system for the 1D mass preservation flow problem 
 %with spatio-temporal and convective regularisation.
 %
 %   [A, B, C, D, b, c] = CMCRV(f, k, h, ht) takes matrix f of image 
 %   intensities, a source term, and spatial and temporal scaling parameters
 %   h and ht, and creates a linear system of the form
 %
-%   A + alpha*B + beta*C + gamma*D = b + gamma*c.
+%   A + kappa*B + lambda*C + mu*D = kappa*b + c.
 %
-%   f and k are matrices of size [m, n] where m is the number of time steps
-%   and n the number of pixels.
+%   f, v, and k are matrices of size [m, n] where m is the number of time 
+%   steps and n the number of pixels.
 %   A, B, C, D are matrices of size [m*n, m*n].
 %   b and c are vectors of length m*n.
 
@@ -33,35 +33,36 @@ function [A, B, C, D, b, c] = cmcrv(f, k, h, ht)
 [t, n] = size(f);
 
 % Compute partial derivatives.
-[fx, ft] = gradient(f, h, ht);
-[fxx, ~] = gradient(fx, h, ht);
-[fxt, ~] = gradient(ft, h, ht);
+[vx, vt] = gradient(v, h, ht);
+[vxx, vxt] = gradient(vx, h, ht);
 [kx, kt] = gradient(k, h, ht);
 
 % Transpose data.
 f = img2vec(f);
-fx = img2vec(fx);
-fxx = img2vec(fxx);
-fxt = img2vec(fxt);
+v = img2vec(v);
 kx = img2vec(kx);
 kt = img2vec(kt);
+vx = img2vec(vx);
+vt = img2vec(vt);
+vxx = img2vec(vxx);
+vxt = img2vec(vxt);
 
-% Create matrix A.
-A = bsxfun(@times, f.^2, laplacian1d(n, t, h)) + spdiags(fxx.*f, 0, t*n, t*n) + bsxfun(@times, 2*fx.*f, deriv1d(n, t, h));
+% Create matrix associated with mass conservation.
+A = bsxfun(@times, v.^2, laplacian1d(n, t, h)) + templaplacian1d(n, t, ht) + bsxfun(@times, 2*v, secondderiv1d(n, t, h, ht)) + bsxfun(@times, vt + 2*vx.*v, deriv1d(n, t, h)) + bsxfun(@times, vx, tempderiv1d(n, t, ht)) + spdiags(vxt + vxx.*v, 0, t*n, t*n);
 
-% Create spatial regularisation matrix for v.
-B = laplacian1d(n, t, h);
+% Create matrix accosicated with data term.
+B = spdiags(-ones(t*n, 1), 0, t*n, t*n);
 
-% Create temporal regularisation matrix for v.
-C = templaplacian1d(n, t, ht);
+% Create spatial regularisation matrix for f.
+C = laplacian1d(n, t, h);
 
-% Create convective regularisation term.
-D = spdiags(kx.^2, 0, t*n, t*n);
+% Create temporal regularisation matrix for f.
+D = templaplacian1d(n, t, ht);
 
 % Create right-hand side.
-b = -fxt.*f;
+b = -f;
 
 % Create second term on right-hand side.
-c = -kt.*kx;
+c = kx.*v + kt;
 
 end

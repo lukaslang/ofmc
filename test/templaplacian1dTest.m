@@ -30,11 +30,11 @@ function resultTest(testCase)
 
 n = 1;
 t = 3;
-ht = 1;
+ht = 2;
 
 L = [-2, 2, 0;
       1,-2, 1;
-      0, 2,-2];
+      0, 2,-2] / ht^2;
 
 verifyEqual(testCase, full(templaplacian1d(n, t, ht)), L);
 

@@ -25,13 +25,11 @@ function L = templaplacian1d(n, t, ht)
 %   ht is a scalar.
 %   L is a matrix of size [n*t, n*t].
 %
-%   Note that n >= 1 and t >= 3.
+%   Note that n >= 1 and t >= 2.
 
-v1 = ones(n*t, 1)/(ht^2);
-v1((t-1)*n) = 2/(ht^2);
-v2 = -2*ones(t*n, 1)/(ht^2);
-v3 = ones(t*n, 1)/(ht^2);
-v3(n+1) = 2/(ht^2);
+v1 = [ones(n*(t-2), 1); 2*ones(n, 1); zeros(n, 1)] / ht^2;
+v2 = -2*ones(t*n, 1) / ht^2;
+v3 = [zeros(n, 1); 2*ones(n, 1); ones(n*(t-2), 1)] / ht^2;
 L = spdiags([v1, v2, v3], [-n, 0, n], t*n, t*n);
 
 end

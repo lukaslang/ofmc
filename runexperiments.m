@@ -53,14 +53,14 @@ f = double(f(7:end, 1:140));
 h = 1/n;
 ht = 1/t;
 
-% Set streamline scaling factor.
+% Set streamline scaling factor (determined experimentally).
 hs = 5;
 
 % Scale image to [0, 1].
 f = (f - min(f(:))) / max(f(:) - min(f(:)));
 
 % Filter image.
-f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
+%f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
 %% Mass conservation with source/sink term.
 
@@ -105,6 +105,15 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+figure(4);
+imagesc(cmsresidual(f, v, k, h, ht));
+axis image;
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
 %% Mass conservation.
 
 % Create linear system for mass conservation.
@@ -117,7 +126,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 % Recover flow.
 v = reshape(x, n, t)';
 
-figure(4);
+figure(5);
 imagesc(f);
 axis image;
 colorbar;
@@ -128,7 +137,7 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(5);
+figure(6);
 imagesc(v);
 axis image;
 colorbar;
@@ -138,6 +147,15 @@ ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(7);
+imagesc(cmresidual(f, v, h, ht));
+axis image;
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 %% Convective regularisation.
 
@@ -173,7 +191,7 @@ for j=1:niter
     % Recover flow.
     v = reshape(x, n, t)';
     
-    figure(6);
+    figure(8);
     imagesc(f);
     axis image;
     colorbar;
@@ -184,7 +202,7 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(7);
+    figure(9);
     imagesc(v);
     axis image;
     colorbar;
@@ -193,7 +211,7 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(8);
+    figure(10);
     imagesc(k);
     axis image;
     colorbar;
@@ -201,5 +219,14 @@ for j=1:niter
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(11);
+    imagesc(cmsresidual(f, v, k, h, ht));
+    axis image;
+    colorbar;
+    title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end

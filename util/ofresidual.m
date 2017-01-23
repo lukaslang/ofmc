@@ -14,12 +14,12 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function r = cmresidual(f, v, h, ht)
-%CMRESIDUAL Computes the residual of mass conservation.
+function r = ofresidual(f, v, h, ht)
+%OFRESIDUAL Computes the residual of optical flow.
 %
-%   r = CMRESIDUAL(f, v, h, ht) takes an image f, a velocity field v, and
-%   scaling parameters h and ht, and returns the residual of the mass 
-%   conservation equation.
+%   r = OFRESIDUAL(f, v, h, ht) takes an image f, a velocity field v, and
+%   scaling parameters h and ht, and returns the residual of the optical
+%   flow equation.
 %
 %   f, v are matrices of size [m, n].
 %   h, ht are scalars.
@@ -27,9 +27,8 @@ function r = cmresidual(f, v, h, ht)
 
 % Compute partial derivatives.
 [fx, ft] = gradient(f, h, ht);
-[vx, ~] = gradient(v, h, ht);
 
 % Compute residual.
-r = ft + fx.*v + f.*vx;
+r = ft + fx.*v;
 
 end

@@ -17,7 +17,7 @@
 function r = cmsresidual(f, v, k, h, ht)
 %CMSRESIDUAL Computes the residual of mass conservation with source term.
 %
-%   v = CMSRESIDUAL(f, v, k, h, ht) takes an image f, a velocity field v, 
+%   r = CMSRESIDUAL(f, v, k, h, ht) takes an image f, a velocity field v, 
 %   a source k, and scaling parameters h and ht, and returns the residual 
 %   of the mass conservation equation with source/sink term.
 %

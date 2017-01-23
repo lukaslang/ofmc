@@ -46,8 +46,8 @@ f = (f - min(f(:))) / max(f(:) - min(f(:)));
 f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
 % Create linear system.
-%[A, B, C, b] = of(f, h, ht);
-[A, B, C, b] = cm(f, h, ht);
+[A, B, C, b] = of(f, h, ht);
+%[A, B, C, b] = cm(f, h, ht);
 
 % Solve system.
 [x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);

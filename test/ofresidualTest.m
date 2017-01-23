@@ -14,22 +14,33 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function r = cmresidual(f, v, h, ht)
-%CMRESIDUAL Computes the residual of mass conservation.
-%
-%   r = CMRESIDUAL(f, v, h, ht) takes an image f, a velocity field v, and
-%   scaling parameters h and ht, and returns the residual of the mass 
-%   conservation equation.
-%
-%   f, v are matrices of size [m, n].
-%   h, ht are scalars.
-%   r is a matrix of size [m, n].
+function tests = ofresidualTest
+    tests = functiontests(localfunctions);
+end
 
-% Compute partial derivatives.
-[fx, ft] = gradient(f, h, ht);
-[vx, ~] = gradient(v, h, ht);
+function setupOnce(testCase)
+    cd('../');
+end
 
-% Compute residual.
-r = ft + fx.*v + f.*vx;
+function teardownOnce(testCase)
+    cd('test');
+end
+
+function resultTest(testCase)
+
+n = 10;
+t = 3;
+
+h = 1/n;
+ht = 1/t;
+
+% Create empty image.
+f = zeros(t, n);
+
+% Create flow.
+v = zeros(t, n);
+
+r = ofresidual(f, v, h, ht);
+verifyEqual(testCase, r, zeros(t, n));
 
 end

@@ -32,23 +32,27 @@ outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.05;
-beta = 0.05;
+alpha = 0.1;
+beta = 0.01;
 % Norm of k.
 gamma = 0.1;
 % Spatial and temporal regularisation of k.
 delta = 0.001;
 eta = 0.001;
 % Convective regularisation of k.
-theta = 0.005;
+theta = 0.01;
 % Data term for f.
-kappa = 3000;
+kappa = 4000;
 % Spatial and temporal regularisation for f.
 lambda = 0.0001;
 mu = 0.0001;
 
+% Set parameters for linear system solver.
+iterSolver = 1000;
+tolSolver = 1e-6;
+
 % Number of iterations for convective regularisation.
-niter = 5;
+niter = 10;
 
 % Read data.
 f = imread(fullfile(path, sprintf('%s.png', name)));
@@ -70,18 +74,17 @@ fdelta = (f - min(f(:))) / max(f(:) - min(f(:)));
 % Filter image.
 %f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
 
-%% Mass conservation with source/sink term.
+%% Optical flow.
 
 % Create linear system.
-[A, B, C, D, E, F, b] = cms(fdelta, h, ht);
+[A, B, C, b] = of(fdelta, h, ht);
 
-% Solve system for mass conservation with source/sink term.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], 1e-3, 2000);
+% Solve system.
+[x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
-v = reshape(x(1:t*n), n, t)';
-k = reshape(x(t*n+1:end), n, t)';
+v = reshape(x, n, t)';
 
 % Visualise flow.
 figure(1);
@@ -89,13 +92,56 @@ imagesc(fdelta);
 axis image;
 colorbar;
 colormap gray;
-streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
-title('Mass conservation with source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
+streamline(v*hs, ones(t, n), 1:2:n, ones(ceil(n/2), 1));
+title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-of-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(2);
+imagesc(v);
+axis image;
+colorbar;
+title('Velocity field for optical flow.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-of-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(3);
+imagesc(ofresidual(fdelta, v, h, ht));
+axis image;
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, sprintf('%s-of-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+%% Mass conservation with source/sink term.
+
+% Create linear system.
+[A, B, C, D, E, F, b] = cms(fdelta, h, ht);
+
+% Solve system for mass conservation with source/sink term.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);
+fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+% Recover flow.
+v = reshape(x(1:t*n), n, t)';
+k = reshape(x(t*n+1:end), n, t)';
+
+% Visualise flow.
+figure(4);
+imagesc(fdelta);
+axis image;
+colorbar;
+colormap gray;
+streamline(v*hs, ones(t, n), 1:2:n, ones(ceil(n/2), 1));
+title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(2);
+figure(5);
 imagesc(v);
 axis image;
 colorbar;
@@ -104,7 +150,7 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(3);
+figure(6);
 imagesc(k);
 axis image;
 colorbar;
@@ -113,7 +159,7 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(4);
+figure(7);
 imagesc(cmsresidual(fdelta, v, k, h, ht));
 axis image;
 colorbar;
@@ -128,24 +174,24 @@ export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-residual.png', name)), '-pn
 [A, B, C, b] = cm(fdelta, h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 2000);
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
 v = reshape(x, n, t)';
 
-figure(5);
+figure(8);
 imagesc(fdelta);
 axis image;
 colorbar;
 colormap gray;
-streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
+streamline(v*hs, ones(t, n), 1:2:n, ones(ceil(n/2), 1));
 title('Mass conservation without source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(6);
+figure(9);
 imagesc(v);
 axis image;
 colorbar;
@@ -156,7 +202,7 @@ set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(7);
+figure(10);
 imagesc(cmresidual(fdelta, v, h, ht));
 axis image;
 colorbar;
@@ -171,7 +217,7 @@ export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-residual.png', name)), '-png
 [A, B, C, D, E, F, b] = cms(fdelta, h, ht);
 
 % Solve system for mass conservation with source/sink term.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], 1e-3, 2000);
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D, b, [], tolSolver, iterSolver);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
@@ -184,7 +230,7 @@ for j=1:niter
     [A, B, b] = cmcrk(f, v, h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A + theta*B, b, [], 1e-3, 1000);
+    [x, ~, relres, iter] = gmres(A + theta*B, b, [], tolSolver, iterSolver);
     fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
     % Recover source.
@@ -194,7 +240,7 @@ for j=1:niter
     [A, B, C, D, b, c] = cmcrf(fdelta, v, k, h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A + kappa*B + lambda*C + mu*D, kappa*b + c, [], 1e-3, 1000);
+    [x, ~, relres, iter] = gmres(A + kappa*B + lambda*C + mu*D, kappa*b + c, [], tolSolver, iterSolver);
     fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
     % Recover flow.
@@ -204,34 +250,34 @@ for j=1:niter
     [A, B, C, D, b, c] = cmcrv(f, k, h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], 1e-3, 1000);
+    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
     fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
     % Recover flow.
     v = reshape(x, n, t)';
     
-    figure(8);
+    figure(11);
     imagesc(fdelta);
     axis image;
     colorbar;
     colormap gray;
-    streamline(v*hs, ones(t, n), 1:n, ones(n, 1));
-    title('MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    streamline(v*hs, ones(t, n), 1:2:n, ones(ceil(n/2), 1));
+    title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(9);
+    figure(12);
     imagesc(f);
     axis image;
     colorbar;
     colormap gray;
-    title('MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    title('Denoised image.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-image-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(10);
+    figure(13);
     imagesc(v);
     axis image;
     colorbar;
@@ -240,7 +286,7 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(11);
+    figure(14);
     imagesc(k);
     axis image;
     colorbar;
@@ -249,7 +295,7 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(12);
+    figure(15);
     imagesc(cmsresidual(f, v, k, h, ht));
     axis image;
     colorbar;

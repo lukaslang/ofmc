@@ -28,16 +28,79 @@ end
 
 function resultTest(testCase)
 
-n = 10;
+n = 4;
+t = 4;
 
 % Create empty image with three time steps and n pixels.
-f = zeros(3, n);
+f = zeros(t, n);
 
 % Compute linear system.
 [A, B, C, b] = cm(f, 1, 1);
-verifyEqual(testCase, size(A), [3*n, 3*n]);
-verifyEqual(testCase, size(B), [3*n, 3*n]);
-verifyEqual(testCase, size(C), [3*n, 3*n]);
-verifyEqual(testCase, size(b), [3*n, 1]);
+verifyEqual(testCase, size(A), [t*n, t*n]);
+verifyEqual(testCase, size(B), [t*n, t*n]);
+verifyEqual(testCase, size(C), [t*n, t*n]);
+verifyEqual(testCase, size(b), [t*n, 1]);
+
+[x, flag] = gmres(A + B + C, b, [], 1e-3, size(A, 1));
+verifyEqual(testCase, flag, 0);
+verifyEqual(testCase, x, zeros(t*n, 1));
+
+end
+
+function travellingGaussianTest(testCase)
+
+% Set regularisation parameters.
+alpha = 0;
+beta = 0;
+
+% Set time and space resolution.
+n = 100;
+t = 20;
+
+% Set scaling parameters.
+h = 1/(n-1);
+ht = 1/(t-1);
+
+% Create travelling heaviside pattern.
+sigma = 0.05;
+x = repmat(0:h:1, t, 1);
+y = repmat((0:ht:1)', 1, n);
+f = normpdf(x, 0.5+y/10, sigma);
+
+% Compute linear system.
+[A, B, C, b] = cm(f, h, ht);
+
+% Solve system.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
+fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+% Recover flow.
+v = reshape(x, n, t)';
+
+figure(1);
+imagesc(0:h:1, 0:ht:1, f);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+[X, Y] = meshgrid(0:h:1, 0:ht:1);
+streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(1, ceil(n/2)));
+title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+figure(2);
+imagesc(0:h:1, 0:ht:1, v);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Velocity field for mass conservation', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+figure(3);
+imagesc(0:h:1, 0:ht:1, ofresidual(f, v, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
 end

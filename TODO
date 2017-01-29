@@ -1,0 +1,12 @@
+OFMC - A Variational Model for the Analysis of Membrane Cuts
+Version 1.0, 2017
+
+Lukas Lang (ll542@damtp.cam.ac.uk)
+University of Cambridge
+Department of Applied Mathematics and Theoretical Physics
+Wilberforce Road, Cambridge CB3 0WA, United Kingdom
+http://www.damtp.cam.ac.uk/
+
+1. Create test examples with analytic solution.
+2. Use higher accuracy of derivatives of data.
+3. Implement warping of image.

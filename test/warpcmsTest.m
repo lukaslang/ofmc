@@ -14,7 +14,7 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function tests = ofTest
+function tests = warpcmsTest
     tests = functiontests(localfunctions);
 end
 
@@ -29,16 +29,22 @@ end
 function resultTest(testCase)
 
 n = 10;
+t = 3;
+h = 1/(n-1);
+ht = 1/(t-1);
 
 % Create empty image with three time steps and n pixels.
-f = zeros(3, n);
+f = zeros(t, n);
 
-% Compute linear system.
-[A, B, C, b] = of(f, 1, 1);
-verifyEqual(testCase, size(A), [3*n, 3*n]);
-verifyEqual(testCase, size(B), [3*n, 3*n]);
-verifyEqual(testCase, size(C), [3*n, 3*n]);
-verifyEqual(testCase, size(b), [3*n, 1]);
+% Create velocity field.
+v = zeros(t, n);
+
+% Create source.
+k = zeros(t, n);
+
+% Warp flow.
+fw = warpcms(f, v, k, h, ht);
+verifyEqual(testCase, size(fw), [t, n]);
 
 end
 
@@ -63,7 +69,7 @@ y = repmat((0:ht:1)', 1, n);
 f = normpdf(x, 0.5+y/10, sigma);
 
 % Compute linear system.
-[A, B, C, b] = of(f, h, ht);
+[A, B, C, b] = cm(f, h, ht);
 
 % Solve system.
 [x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-6, 1000);
@@ -71,6 +77,10 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
 v = reshape(x, n, t)';
+
+% Warp flow.
+fw = warpcms(f, v, zeros(t, n), h, ht);
+fprintf('Max. pointwise warping error is %.2f\n', max(abs(fw(:) - f(:))));
 
 figure(1);
 imagesc(0:h:1, 0:ht:1, f);
@@ -83,18 +93,18 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
 figure(2);
-imagesc(0:h:1, 0:ht:1, v);
+imagesc(0:h:1, 0:ht:1, fw);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
-title('Velocity field for optical flow', 'FontName', 'Helvetica', 'FontSize', 14);
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
 figure(3);
-imagesc(0:h:1, 0:ht:1, ofresidual(f, v, h, ht));
+imagesc(0:h:1, 0:ht:1, f - fw);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
-title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+title('Difference between original and warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 

@@ -64,6 +64,9 @@ f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
 alpha = 0.01;
 beta = 0.001;
 
+% Create output folder. 
+mkdir(fullfile(outputPath, 'of'));
+
 % Create linear system.
 [A, B, C, b] = of(f, h, ht);
 
@@ -85,7 +88,7 @@ streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
 title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-of-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 figure(2);
 imagesc(0:h:1, 0:ht:1, v);
@@ -94,7 +97,7 @@ colorbar;
 title('Velocity field for optical flow.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-of-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 figure(3);
 imagesc(0:h:1, 0:ht:1, ofresidual(f, v, h, ht));
@@ -103,13 +106,26 @@ colorbar;
 title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-of-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(4);
+imagesc(0:h:1, 0:ht:1, warpof(f, v, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 %% Mass conservation.
 
 % Spatial and temporal reguarisation of v.
 alpha = 0.025;
 beta = 0.01;
+
+% Create output folder. 
+mkdir(fullfile(outputPath, 'cm'));
 
 % Create linear system for mass conservation.
 [A, B, C, b] = cm(f, h, ht);
@@ -121,7 +137,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 % Recover flow.
 v = reshape(x, n, t)';
 
-figure(4);
+figure(1);
 imagesc(0:h:1, 0:ht:1, f);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
@@ -131,9 +147,9 @@ streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
 title('Mass conservation without source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(5);
+figure(2);
 imagesc(0:h:1, 0:ht:1, v);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
@@ -142,16 +158,26 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 set(gca, 'FontName', 'Helvetica');
 set(gca, 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(6);
+figure(3);
 imagesc(0:h:1, 0:ht:1, cmresidual(f, v, h, ht));
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cm-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(4);
+imagesc(0:h:1, 0:ht:1, warpcms(f, v, zeros(t, n), h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 %% Mass conservation with source/sink term.
 
@@ -163,6 +189,9 @@ gamma = 0.01;
 % Spatial and temporal regularisation of k.
 delta = 0.001;
 eta = 0.001;
+
+% Create output folder. 
+mkdir(fullfile(outputPath, 'cms'));
 
 % Create linear system.
 [A, B, C, D, E, F, b] = cms(f, h, ht);
@@ -176,7 +205,7 @@ v = reshape(x(1:t*n), n, t)';
 k = reshape(x(t*n+1:end), n, t)';
 
 % Visualise flow.
-figure(7);
+figure(1);
 imagesc(0:h:1, 0:ht:1, f);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
@@ -186,34 +215,45 @@ streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
 title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(8);
+figure(2);
 imagesc(0:h:1, 0:ht:1, v);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Velocity field for mass conservation with source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(9);
+figure(3);
 imagesc(0:h:1, 0:ht:1, k);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Source/sink term.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-source.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-source.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(10);
+figure(4);
 imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
 set(gca, 'DataAspectRatio', [t, n, 1]);
+colormap jet;
 colorbar;
 title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cms-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 %% Mass conservation with convective regularisation.
 
@@ -226,7 +266,10 @@ gamma = 0.001;
 delta = 0;
 eta = 0;
 % Convective regularisation of k.
-theta = 0.01;
+theta = 0.001;
+
+% Create output folder. 
+mkdir(fullfile(outputPath, 'cmcr'));
 
 % Create linear system.
 [A, B, C, D, E, F, b] = cms(f, h, ht);
@@ -239,7 +282,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 v = reshape(x(1:t*n), n, t)';
 k = reshape(x(t*n+1:end), n, t)';
 
-figure(11);
+figure(1);
 imagesc(0:h:1, 0:ht:1, f);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
@@ -249,25 +292,44 @@ streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
 title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(12);
+figure(2);
 imagesc(0:h:1, 0:ht:1, v);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-velocity-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(13);
+figure(3);
 imagesc(0:h:1, 0:ht:1, k);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(4);
+imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 for j=1:niter
 
@@ -291,7 +353,7 @@ for j=1:niter
     % Recover flow.
     v = reshape(x, n, t)';
     
-    figure(14);
+    figure(1);
     imagesc(0:h:1, 0:ht:1, f);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
@@ -301,34 +363,44 @@ for j=1:niter
     title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(15);
+    figure(2);
     imagesc(0:h:1, 0:ht:1, v);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(16);
+    figure(3);
     imagesc(0:h:1, 0:ht:1, k);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(17);
+    figure(4);
     imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmcr-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(5);
+    imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end
 
@@ -343,12 +415,15 @@ gamma = 0.001;
 delta = 0;
 eta = 0;
 % Convective regularisation of k.
-theta = 0.01;
+theta = 0.001;
 % Data term for f.
 kappa = 1000;
 % Spatial and temporal regularisation for f.
 lambda = 0.01;
 mu = 0.01;
+
+% Create output folder. 
+mkdir(fullfile(outputPath, 'cmje'));
 
 % Create linear system.
 [A, B, C, D, E, F, b] = cms(fdelta, h, ht);
@@ -361,7 +436,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 v = reshape(x(1:t*n), n, t)';
 k = reshape(x(t*n+1:end), n, t)';
 
-figure(18);
+figure(1);
 imagesc(0:h:1, 0:ht:1, fdelta);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
@@ -371,34 +446,44 @@ streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
 title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(19);
+figure(2);
 imagesc(0:h:1, 0:ht:1, v);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-velocity-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-velocity-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(20);
+figure(3);
 imagesc(0:h:1, 0:ht:1, k);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-figure(21);
+figure(4);
 imagesc(0:h:1, 0:ht:1, cmsresidual(fdelta, v, k, h, ht));
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, warpcms(fdelta, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 f = fdelta;
 for j=1:niter
@@ -433,7 +518,7 @@ for j=1:niter
     % Recover flow.
     v = reshape(x, n, t)';
     
-    figure(18);
+    figure(1);
     imagesc(0:h:1, 0:ht:1, fdelta);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
@@ -443,36 +528,46 @@ for j=1:niter
     title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(19);
+    figure(2);
     imagesc(0:h:1, 0:ht:1, v);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(20);
+    figure(3);
     imagesc(0:h:1, 0:ht:1, k);
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(21);
+    figure(4);
     imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    figure(22);
+    figure(5);
+    imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(6);
     imagesc(f);
     axis image;
     colorbar;
@@ -480,6 +575,6 @@ for j=1:niter
     title('Denoised image.', 'FontName', 'Helvetica', 'FontSize', 14);
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, sprintf('%s-cmje-image-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-image-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end

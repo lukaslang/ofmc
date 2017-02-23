@@ -35,17 +35,14 @@ mkdir(outputPath);
 iterSolver = 1000;
 tolSolver = 1e-3;
 
-% Number of iterations for convective regularisation.
-niter = 10;
-
 % Read data.
 g = imread(fullfile(path, sprintf('%s.png', name)));
 
 % Remove cut.
-%f = double(g([1:5, 7:end], 1:140));
+f = padarray(double(g([1:5, 7:end], :)), [0, 10]);
 
 % Remove cut and everything before.
-f = double(g(7:end, 1:140));
+%f = padarray(double(g(7:end, :)), [0, 10]);
 [t, n] = size(f);
 
 % Set scaling parameters.
@@ -268,6 +265,9 @@ eta = 0;
 % Convective regularisation of k.
 theta = 0.001;
 
+% Number of iterations.
+niter = 10;
+
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmcr'));
 
@@ -421,6 +421,9 @@ kappa = 1000;
 % Spatial and temporal regularisation for f.
 lambda = 0.01;
 mu = 0.01;
+
+% Number of iterations.
+niter = 10;
 
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmje'));

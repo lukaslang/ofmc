@@ -35,6 +35,10 @@ mkdir(outputPath);
 iterSolver = 1000;
 tolSolver = 1e-3;
 
+% Set parameters for solving transport problem.
+iterSolverTransport = 1000;
+tolSolverTransport = 1e-15;
+
 % Set norm regularisation parameter.
 epsilon = 1e-3;
 
@@ -118,6 +122,40 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for k=2:t
+    % Create linear system for transport.
+    [At, bt] = oftransport(fw(k-1, :)', v(k-1, :)', h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(k, :) = xt';
+end
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
+
 %% Optical flow with regularised TV.
 
 % Spatial and temporal reguarisation of v.
@@ -190,15 +228,48 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, 'ofrtv', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for k=2:t
+        % Create linear system for transport.
+        [At, bt] = oftransport(fw(k-1, :)', v(k-1, :)', h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(k, :) = xt';
+    end
+
     figure(5);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'ofrtv', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
+    figure(6);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'ofrtv', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(7);
     imagesc(0:h:1, 0:ht:1, rnorm(vx, epsilon));
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
     title('Regularised norm of $\partial_x v$.', 'FontName', 'Helvetica', 'FontSize', 14, 'Interpreter', 'latex');
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
-    export_fig(gcf, fullfile(outputPath, 'ofrtv', sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
+    export_fig(gcf, fullfile(outputPath, 'ofrtv', sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');  
 end
 
 %% Mass conservation.
@@ -261,6 +332,40 @@ title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for k=2:t
+    % Create linear system for transport.
+    [At, bt] = cmstransport(fw(k-1, :)', v(k-1, :)', zeros(n, 1), h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(k, :) = xt';
+end
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 %% Mass conservation with regularised TV.
 
@@ -334,7 +439,41 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, 'cmrtv', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for k=2:t
+        % Create linear system for transport.
+        [At, bt] = cmstransport(fw(k-1, :)', v(k-1, :)', zeros(n, 1), h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(k, :) = xt';
+    end
+
     figure(5);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmrtv', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
+    figure(6);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmrtv', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(7);
     imagesc(0:h:1, 0:ht:1, rnorm(vx, epsilon));
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
@@ -420,6 +559,40 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for j=2:t
+    % Create linear system for transport.
+    [At, bt] = cmstransport(fw(j-1, :)', v(j-1, :)', k(j-1, :)', h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(j, :) = xt';
+end
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cms', sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
+
 %% Mass conservation with source/sink term and regularised TV.
 
 % Spatial and temporal reguarisation of v.
@@ -504,7 +677,41 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, 'cmsrtv', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
 
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for l=2:t
+        % Create linear system for transport.
+        [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(l, :) = xt';
+    end
+
+    figure(5);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmsrtv', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
     figure(6);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmsrtv', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(7);
     imagesc(0:h:1, 0:ht:1, rnorm(vx, epsilon));
     set(gca, 'DataAspectRatio', [t, n, 1]);
     colorbar;
@@ -594,6 +801,40 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for l=2:t
+    % Create linear system for transport.
+    [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(l, :) = xt';
+end
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-transport-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(7);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-diff-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
 for j=1:niter
 
     % Create linear system for k.
@@ -664,6 +905,263 @@ for j=1:niter
     xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for l=2:t
+        % Create linear system for transport.
+        [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(l, :) = xt';
+    end
+
+    figure(6);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
+    figure(7);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcr', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    drawnow();
+end
+
+%% Mass conservation with source/sink, convective regularisation, and regularised TV.
+
+% Spatial and temporal reguarisation of v.
+alpha = 0.025;
+beta = 0.01;
+% Norm of k.
+gamma = 0.001;
+% Spatial and temporal regularisation of k.
+delta = 0;
+eta = 0;
+% Convective regularisation of k.
+theta = 0.001;
+
+% Number of outer iterations.
+niter = 10;
+
+% Number of inner iterations.
+niterinner = 10;
+
+% Create output folder. 
+mkdir(fullfile(outputPath, 'cmcrrtv'));
+
+% Create linear system.
+[A, B, C, D, E, F, b] = cms(f, h, ht);
+
+% Solve system for mass conservation with source/sink term.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);
+fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+% Recover flow.
+v = reshape(x(1:t*n), n, t)';
+k = reshape(x(t*n+1:end), n, t)';
+
+figure(1);
+imagesc(0:h:1, 0:ht:1, f);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+[X, Y] = meshgrid(0:h:1, 0:ht:1);
+streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
+title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(2);
+imagesc(0:h:1, 0:ht:1, v);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-velocity-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(3);
+imagesc(0:h:1, 0:ht:1, k);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(4);
+imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(5);
+imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for l=2:t
+    % Create linear system for transport.
+    [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(l, :) = xt';
+end
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-transport-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(7);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-diff-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+for j=1:niter
+
+    % Create linear system for k.
+    [A, B, b] = cmcrk(f, v, h, ht);
+
+    % Solve system.
+    [x, ~, relres, iter] = gmres(A + theta*B, b, [], tolSolver, iterSolver);
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Recover source.
+    k = reshape(x, n, t)';
+    
+    % Create linear system for v.
+    [A, B, C, D, b, c] = cmcrv(f, k, h, ht);
+
+    % Solve system.
+    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Recover flow.
+    v = reshape(x, n, t)';
+    
+    figure(1);
+    imagesc(0:h:1, 0:ht:1, f);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    [X, Y] = meshgrid(0:h:1, 0:ht:1);
+    streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(ceil(n/2), 1));
+    title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(2);
+    imagesc(0:h:1, 0:ht:1, v);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Velocity field for MC with source/sink term and convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(3);
+    imagesc(0:h:1, 0:ht:1, k);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Source/sink term with convective regularisation.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(4);
+    imagesc(0:h:1, 0:ht:1, cmsresidual(f, v, k, h, ht));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(5);
+    imagesc(0:h:1, 0:ht:1, warpcms(f, v, k, h, ht));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for l=2:t
+        % Create linear system for transport.
+        [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(l, :) = xt';
+    end
+
+    figure(6);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
+    figure(7);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmcrrtv', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end
 
@@ -751,6 +1249,40 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+% Compute transport.
+fw = zeros(t, n);
+fw(1, :) = f(1, :);
+for l=2:t
+    % Create linear system for transport.
+    [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+    % Solve system.
+    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+    % Save result.
+    fw(l, :) = xt';
+end
+
+figure(6);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+colormap gray;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-transport-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+figure(7);
+imagesc(0:h:1, 0:ht:1, abs(f - fw));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-diff-000.png', name)), '-png', '-q300', '-a1', '-transparent');
+
 f = fdelta;
 for j=1:niter
 
@@ -833,7 +1365,41 @@ for j=1:niter
     ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
     export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
+    % Compute transport.
+    fw = zeros(t, n);
+    fw(1, :) = f(1, :);
+    for l=2:t
+        % Create linear system for transport.
+        [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
+
+        % Solve system.
+        [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Save result.
+        fw(l, :) = xt';
+    end
+
     figure(6);
+    imagesc(0:h:1, 0:ht:1, fw);
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    colormap gray;
+    title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+
+    figure(7);
+    imagesc(0:h:1, 0:ht:1, abs(f - fw));
+    set(gca, 'DataAspectRatio', [t, n, 1]);
+    colorbar;
+    title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+    export_fig(gcf, fullfile(outputPath, 'cmje', sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    figure(8);
     imagesc(f);
     axis image;
     colorbar;

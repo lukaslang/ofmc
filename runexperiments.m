@@ -39,6 +39,9 @@ tolSolver = 1e-3;
 iterSolverTransport = 1000;
 tolSolverTransport = 1e-15;
 
+% Number of iterations.
+niter = 15;
+
 % Set norm regularisation parameter.
 epsilon = 1e-3;
 
@@ -161,9 +164,6 @@ export_fig(gcf, fullfile(outputPath, 'of', sprintf('%s-diff.png', name)), '-png'
 % Spatial and temporal reguarisation of v.
 alpha = 0.01;
 beta = 0.001;
-
-% Number of iterations.
-niter = 10;
 
 % Create output folder. 
 mkdir(fullfile(outputPath, 'ofrtv'));
@@ -372,9 +372,6 @@ export_fig(gcf, fullfile(outputPath, 'cm', sprintf('%s-diff.png', name)), '-png'
 % Spatial and temporal reguarisation of v.
 alpha = 0.025;
 beta = 0.01;
-
-% Number of iterations.
-niter = 10;
 
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmrtv'));
@@ -735,9 +732,6 @@ eta = 0;
 % Convective regularisation of k.
 theta = 0.001;
 
-% Number of iterations.
-niter = 10;
-
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmcr'));
 
@@ -954,12 +948,6 @@ delta = 0;
 eta = 0;
 % Convective regularisation of k.
 theta = 0.001;
-
-% Number of outer iterations.
-niter = 10;
-
-% Number of inner iterations.
-niterinner = 10;
 
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmcrrtv'));
@@ -1182,9 +1170,6 @@ kappa = 1000;
 % Spatial and temporal regularisation for f.
 lambda = 0.01;
 mu = 0.01;
-
-% Number of iterations.
-niter = 10;
 
 % Create output folder. 
 mkdir(fullfile(outputPath, 'cmje'));

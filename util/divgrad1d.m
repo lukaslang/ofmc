@@ -26,6 +26,9 @@ function L = divgrad1d(d, h)
 %
 %   Note that n > 1 and t >= 1.
 %   Note that d is interpolated between grid points.
+%
+%   See Aubert & Kornprobst: Mathematical Problems in Image Processing,
+%   2006, eqn. (A.73) for details on the discretisation.
 
 [t, n] = size(d);
 

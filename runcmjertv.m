@@ -42,6 +42,12 @@ tolSolverTransport = 1e-15;
 % Number of iterations.
 niter = 15;
 
+% Number of inner iterations.
+niterinner = 15;
+
+% Set norm regularisation parameter.
+epsilon = 1e-3;
+
 % Read data.
 g = im2double(imread(fullfile(path, sprintf('%s.png', name))));
 
@@ -58,7 +64,7 @@ ht = 1/(t-1);
 % Filter image.
 f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
 
-%% Mass conservation with source/sink and convective regularisation.
+%% Joint image, velocity, and source estimation with convective regularisation and regularised TV.
 
 % Spatial and temporal reguarisation of v.
 alpha = 0.025;
@@ -70,13 +76,18 @@ delta = 0;
 eta = 0;
 % Convective regularisation of k.
 theta = 0.001;
+% Data term for f.
+kappa = 1000;
+% Spatial and temporal regularisation for f.
+lambda = 0.01;
+mu = 0.01;
 
-% Create output folder.
-alg = 'cmcr';
+% Create output folder. 
+alg = 'cmjertv';
 mkdir(fullfile(outputPath, alg));
 
 % Create linear system.
-[A, B, C, D, E, F, b] = cms(f, h, ht);
+[A, B, C, D, E, F, b] = cms(fdelta, h, ht);
 
 % Solve system for mass conservation with source/sink term.
 [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);
@@ -86,7 +97,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 v = reshape(x(1:t*n), n, t)';
 k = reshape(x(t*n+1:end), n, t)';
 
-plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', fdelta, v, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 plotdata(2, 'Velocity.', 'default', v, h, ht);
@@ -95,11 +106,11 @@ export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity-000.png', name)),
 plotdata(3, 'Source.', 'default', k, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-source-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-res = cmsresidual(f, v, k, h, ht);
+res = cmsresidual(fdelta, v, k, h, ht);
 plotdata(4, 'Residual.', 'default', res, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-warp = warpcms(f, v, k, h, ht);
+warp = warpcms(fdelta, v, k, h, ht);
 plotdata(5, 'Warped image.', 'gray', warp, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
@@ -121,10 +132,11 @@ end
 plotdata(6, 'Transport.', 'gray', fw, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-diff = abs(f - fw);
+diff = abs(fdelta - fw);
 plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
+f = fdelta;
 for j=1:niter
 
     % Create linear system for k.
@@ -137,17 +149,34 @@ for j=1:niter
     % Recover source.
     k = reshape(x, n, t)';
     
-    % Create linear system for v.
-    [A, B, C, D, b, c] = cmcrv(f, k, h, ht);
+    % Create linear system for f.
+    [A, B, C, D, b, c] = cmcrf(fdelta, v, k, h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
+    [x, ~, relres, iter] = gmres(A + kappa*B + lambda*C + mu*D, kappa*b + c, [], tolSolver, iterSolver);
     fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
-    % Recover flow.
-    v = reshape(x, n, t)';
+    % Recover image.
+    f = reshape(x, n, t)';
     
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+    % Create linear system for v.
+    [A, ~, C, D, b, c] = cmcrv(f, k, h, ht);
+
+    for l=1:niterinner
+    
+        % Create div(grad v / rnorm(v)) matrix.
+        [vx, ~] = gradient(v, h, ht);
+        B = divgrad1d(rnorm(vx, epsilon), h);
+        
+        % Solve system.
+        [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+
+        % Recover flow.
+        v = reshape(x, n, t)';
+    end
+    
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', fdelta, v, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
     plotdata(2, 'Velocity.', 'default', v, h, ht);
@@ -168,8 +197,11 @@ for j=1:niter
     plotdata(6, 'Transport.', 'gray', fw, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
 
-    diff = abs(f - fw);
+    diff = abs(fdelta - fw);
     plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    
+    plotdata(8, 'Denoised image.', 'gray', f, h, ht);
+    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-image-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end

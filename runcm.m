@@ -55,31 +55,25 @@ ht = 1/(t-1);
 % Filter image.
 f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
 
-%% Mass conservation with source/sink term.
+%% Mass conservation.
 
 % Spatial and temporal reguarisation of v.
 alpha = 0.025;
 beta = 0.01;
-% Norm of k.
-gamma = 0.01;
-% Spatial and temporal regularisation of k.
-delta = 0.001;
-eta = 0.001;
 
 % Create output folder. 
-alg = 'cms';
+alg = 'cm';
 mkdir(fullfile(outputPath, alg));
 
-% Create linear system.
-[A, B, C, D, E, F, b] = cms(f, h, ht);
+% Create linear system for mass conservation.
+[A, B, C, b] = cm(f, h, ht);
 
-% Solve system for mass conservation with source/sink term.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);
+% Solve system.
+[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
-v = reshape(x(1:t*n), n, t)';
-k = reshape(x(t*n+1:end), n, t)';
+v = reshape(x, n, t)';
 
 % Visualise flow.
 plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
@@ -88,21 +82,18 @@ export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input.png', name)), '-png'
 plotdata(2, 'Velocity.', 'default', v, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-plotdata(3, 'Source.', 'default', k, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-source.png', name)), '-png', '-q300', '-a1', '-transparent');
-
-res = cmsresidual(f, v, k, h, ht);
-plotdata(4, 'Residual.', 'default', res, h, ht);
+res = cmresidual(f, v, h, ht);
+plotdata(3, 'Residual.', 'default', res, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-warp = warpcms(f, v, k, h, ht);
-plotdata(5, 'Warped image.', 'gray', warp, h, ht);
+warp = warpcms(f, v, zeros(t, n), h, ht);
+plotdata(4, 'Warped image.', 'gray', warp, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-fw = computecmstransport(f, v, k, h, ht, iterSolverTransport, tolSolverTransport);
-plotdata(6, 'Transport.', 'gray', fw, h, ht);
+fw = computecmstransport(f, v, zeros(t, n), h, ht, iterSolverTransport, tolSolverTransport);
+plotdata(5, 'Transport.', 'gray', fw, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 diff = abs(f - fw);
-plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');

@@ -18,9 +18,9 @@ function [A, B, C, D, b, c] = cmcrf(f, v, k, h, ht)
 %CMCRF Creates a linear system for the 1D mass preservation flow problem 
 %with spatio-temporal and convective regularisation.
 %
-%   [A, B, C, D, b, c] = CMCRV(f, k, h, ht) takes matrix f of image 
-%   intensities, a source term, and spatial and temporal scaling parameters
-%   h and ht, and creates a linear system of the form
+%   [A, B, C, D, b, c] = CMCRF(f, v, k, h, ht) takes matrix f of image 
+%   intensities, velocities v, a source term k, and spatial and temporal 
+%   scaling parameters h and ht, and creates a linear system of the form
 %
 %   A + kappa*B + lambda*C + mu*D = kappa*b + c.
 %

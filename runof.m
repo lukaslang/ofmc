@@ -24,59 +24,76 @@ clc;
 name = 'E2PSB1PMT-560-C1';
 path = 'data';
 
-% Set parameters.
-alpha = 0.01;
-beta = 0.05;
+% Create start date and time.
+startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
+
+% Define and create output folder.
+outputPath = fullfile('results', startdate);
+mkdir(outputPath);
+
+% Set parameters for linear system solver.
+iterSolver = 1000;
+tolSolver = 1e-3;
+
+% Set parameters for solving transport problem.
+iterSolverTransport = 1000;
+tolSolverTransport = 1e-15;
 
 % Read data.
-f = imread(fullfile(path, sprintf('%s.png', name)));
+g = im2double(imread(fullfile(path, sprintf('%s.png', name))));
 
-% Remove cut and everything before.
-f = double(f(7:end, 1:140));
-[t, n] = size(f);
+% Remove cut.
+fdelta = g([1:5, 7:end], :);
+
+% Get image size.
+[t, n] = size(fdelta);
 
 % Set scaling parameters.
-h = 1/n;
-ht = 1/t;
-
-% Scale image to [0, 1].
-f = (f - min(f(:))) / max(f(:) - min(f(:)));
+h = 1/(n-1);
+ht = 1/(t-1);
 
 % Filter image.
-f = imfilter(f, fspecial('gaussian', 5, 10), 'replicate');
+f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
+
+%% Optical flow.
+
+% Spatial and temporal reguarisation of v.
+alpha = 0.01;
+beta = 0.001;
+
+% Create output folder.
+alg = 'of';
+mkdir(fullfile(outputPath, alg));
 
 % Create linear system.
 [A, B, C, b] = of(f, h, ht);
-%[A, B, C, b] = cm(f, h, ht);
 
 % Solve system.
-[x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
+[x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
 fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
 % Recover flow.
 v = reshape(x, n, t)';
 
 % Visualise flow.
-figure(1);
-imagesc(f);
-colormap gray;
-axis image;
-colorbar;
-figure(2);
-imagesc(v);
-axis image;
-colorbar;
+plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-for k=1:t
-    figure(3);
-    subplot(2, 1, 1);
-    imagesc(f(k, :));
-    colormap gray;
-    
-    subplot(2, 1, 2);
-    plot(v(k, :));
-    axis([1, n, min(v(:)), max(v(:))]);
-    grid on;
-    
-    pause(0.2);
-end
+plotdata(2, 'Velocity.', 'default', v, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+res = ofresidual(f, v, h, ht);
+plotdata(3, 'Residual.', 'default', res, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+warp = warpof(f, v, h, ht);
+plotdata(4, 'Warped image.', 'gray', warp, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+fw = computeoftransport(f, v, h, ht, iterSolverTransport, tolSolverTransport);
+plotdata(5, 'Transport.', 'gray', fw, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+
+diff = abs(f - fw);
+plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');

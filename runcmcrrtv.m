@@ -42,6 +42,12 @@ tolSolverTransport = 1e-15;
 % Number of iterations.
 niter = 15;
 
+% Number of inner iterations.
+niterinner = 15;
+
+% Set norm regularisation parameter.
+epsilon = 1e-3;
+
 % Read data.
 g = im2double(imread(fullfile(path, sprintf('%s.png', name))));
 
@@ -58,7 +64,7 @@ ht = 1/(t-1);
 % Filter image.
 f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
 
-%% Mass conservation with source/sink and convective regularisation.
+%% Mass conservation with source/sink, convective regularisation, and regularised TV.
 
 % Spatial and temporal reguarisation of v.
 alpha = 0.025;
@@ -71,8 +77,8 @@ eta = 0;
 % Convective regularisation of k.
 theta = 0.001;
 
-% Create output folder.
-alg = 'cmcr';
+% Create output folder. 
+alg = 'cmcrrtv';
 mkdir(fullfile(outputPath, alg));
 
 % Create linear system.
@@ -138,14 +144,21 @@ for j=1:niter
     k = reshape(x, n, t)';
     
     % Create linear system for v.
-    [A, B, C, D, b, c] = cmcrv(f, k, h, ht);
+    [A, ~, C, D, b, c] = cmcrv(f, k, h, ht);
+    
+    for l=1:niterinner
+        
+        % Create div(grad v / rnorm(v)) matrix.
+        [vx, ~] = gradient(v, h, ht);
+        B = divgrad1d(rnorm(vx, epsilon), h);
 
-    % Solve system.
-    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+        % Solve system.
+        [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + theta*D, b + theta*c, [], tolSolver, iterSolver);
+        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 
-    % Recover flow.
-    v = reshape(x, n, t)';
+        % Recover flow.
+        v = reshape(x, n, t)';
+    end
     
     plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');

@@ -54,8 +54,9 @@ g = imread(fullfile(path, sprintf('%s.png', name)));
 % Remove cut.
 %f = padarray(double(g([1:5, 7:end], :)), [0, 10]);
 %f = padarray(double(g), [0, 10]);
-f = double(g);
-f(6, :) = f(5, :);
+ninterp = 5;
+lininterp = (1 - linspace(0, 1, ninterp+2)') * double(g(5, :)) + linspace(0, 1, ninterp+2)' * double(g(7, :));
+f = cat(1, double(g(1:4, :)), lininterp, double(g(8:end, :)));
 
 % Remove cut and everything before.
 %f = padarray(double(g(7:end, :)), [0, 10]);
@@ -63,7 +64,7 @@ f(6, :) = f(5, :);
 
 % Create mask.
 M = ones(t, n);
-M(6, :) = 0;
+M(5+1:5+ninterp, :) = 0;
 m = img2vec(M);
 
 % Set scaling parameters.
@@ -74,7 +75,7 @@ ht = 1/(t-1);
 fdelta = (f - min(f(:))) / max(f(:) - min(f(:)));
 
 % Filter image.
-%f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
+f = imfilter(fdelta, fspecial('gaussian', 5, 3), 'replicate');
 
 %% Joint image, velocity, and source estimation with convective regularisation and regularised TV.
 
@@ -98,7 +99,7 @@ mu = 0.005;
 mkdir(fullfile(outputPath, 'cmjertv'));
 
 % Create linear system.
-[A, B, C, D, E, F, b] = cms(fdelta, h, ht);
+[A, B, C, D, E, F, b] = cms(f, h, ht);
 
 % Solve system for mass conservation with source/sink term.
 [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);

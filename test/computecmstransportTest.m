@@ -34,7 +34,8 @@ h = 1;
 ht = 1;
 
 % Create empty image with t time steps and n pixels.
-f = rand(t, n);
+f = peaks(n);
+f = repmat(f(1, :), t, 1);
 
 % Create velocity field.
 v = zeros(t, n);

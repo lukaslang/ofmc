@@ -44,7 +44,7 @@ fxx = img2vec(fxx);
 fxt = img2vec(fxt);
 
 % Create matrix A.
-A = bsxfun(@times, f.^2, laplacian1d(n, t, h)) + spdiags(fxx.*f, 0, t*n, t*n) + bsxfun(@times, 2*fx.*f, deriv1d(n, t, h));
+A = f.^2 .* laplacian1d(n, t, h) + spdiags(fxx.*f, 0, t*n, t*n) + 2*fx.*f .* deriv1d(n, t, h);
 
 % Create spatial regularisation matrix for v.
 B = laplacian1d(n, t, h);

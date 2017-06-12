@@ -61,13 +61,15 @@ ht = 1/(t-1);
 % Filter image.
 f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
 
+saveplots = false;
+
 %% Optical flow with regularised TV.
 
 % Spatial and temporal reguarisation of v.
 alpha = 0.01;
-beta = 0.001;
+beta = 0.0001;
 
-% Create output folder. 
+% Create output folder.
 alg = 'ofrtv';
 mkdir(fullfile(outputPath, alg));
 
@@ -92,28 +94,23 @@ for j=1:niterinner
 
     % Visualise flow.
     plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
     plotdata(2, 'Velocity.', 'default', v, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
     res = ofresidual(f, v, h, ht);
     plotdata(3, 'Residual.', 'default', res, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    warp = warpof(f, v, h, ht);
-    plotdata(4, 'Warped image.', 'gray', warp, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-    
     fw = computeoftransport(f, v, h, ht, iterSolverTransport, tolSolverTransport);
-    plotdata(5, 'Transport.', 'gray', fw, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
+    plotdata(4, 'Transport.', 'gray', fw, h, ht);
     diff = abs(f - fw);
-    plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-    
+    plotdata(5, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
     rnormvx = rnorm(vx, epsilon);
-    plotdata(7, 'Regularised norm of $\partial_x v$.', 'default', rnormvx, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');  
+    plotdata(6, 'Regularised norm of $\partial_x v$.', 'default', rnormvx, h, ht);
+    drawnow();
+    
+    if(saveplots)
+        export_fig(1, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(2, fullfile(outputPath, alg, sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(3, fullfile(outputPath, alg, sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(4, fullfile(outputPath, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(5, fullfile(outputPath, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(6, fullfile(outputPath, alg, sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    end
 end

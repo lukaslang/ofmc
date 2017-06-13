@@ -46,9 +46,8 @@ for k=2:t
     [A, b] = oftransport(fw(k-1, :)', v(k-1, :)', h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A, b, [], 1e-6, min(1000, size(A, 1)));
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
+    x = A \ b;
+    
     fw(k, :) = x';
 end
 verifyEqual(testCase, fw, repmat(f', t, 1), 'AbsTol', 1e-15);
@@ -79,8 +78,7 @@ f = normpdf(x, 0.5+y/10, sigma);
 [A, B, C, b] = of(f, h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-6, 1000);
-fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+x = (A + alpha*B + beta*C) \ b;
 
 % Recover flow.
 v = reshape(x, n, t)';
@@ -93,9 +91,8 @@ for k=2:t
     [A, b] = oftransport(fw(k-1, :)', v(k-1, :)', h, ht);
 
     % Solve system.
-    [x, ~, relres, iter] = gmres(A, b, [], 1e-15, min(1000, size(A, 1)));
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
+    x = A \ b;
+    
     % Store result.
     fw(k, :) = x';
 end

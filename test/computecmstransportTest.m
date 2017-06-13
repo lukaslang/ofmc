@@ -44,7 +44,7 @@ v = zeros(t, n);
 k = zeros(t, n);
 
 % Compute and chekc transported image.
-fw = computecmstransport(f, v, k, h, ht, 1000, 1e-15);
+fw = computecmstransport(f, v, k, h, ht);
 verifyEqual(testCase, fw, repmat(f(1, :), t, 1), 'AbsTol', 1e-15);
 
 end

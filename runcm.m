@@ -34,17 +34,9 @@ startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
-% Set parameters for linear system solver.
-iterSolver = 1000;
-tolSolver = 1e-3;
-
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
 % Spatial and temporal reguarisation of v.
-alpha = 0.025;
-beta = 0.01;
+alpha = 0.05;
+beta = 0.005;
 
 % Save plots.
 saveplots = false;
@@ -73,20 +65,17 @@ for k=1:length(files)
     ht = 1/(t-1);
 
     % Filter image.
-    f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
+    f = imfilter(fdelta, fspecial('gaussian', 3, 3), 'replicate');
     
     % Create output folder.
     alg = 'cm';
     mkdir(fullfile(outputPath, name, alg));
 
     % Create linear system for mass conservation.
-    [A, B, C, b] = cm(f, h, ht);
+    [A, b] = cm(f, alpha, beta, h, ht);
 
-    % Solve system.
-    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
-    % Recover flow.
+    % Solve system and recover flow.
+    x = A \ b;
     v = reshape(x, n, t)';
 
     % Visualise flow.
@@ -94,7 +83,7 @@ for k=1:length(files)
     plotdata(2, 'Velocity.', 'default', v, h, ht);
     res = cmresidual(f, v, h, ht);
     plotdata(3, 'Residual.', 'default', res, h, ht);
-    fw = computecmstransport(f, v, zeros(t, n), h, ht, iterSolverTransport, tolSolverTransport);
+    fw = computecmstransport(f, v, zeros(t, n), h, ht);
     plotdata(4, 'Transport.', 'gray', fw, h, ht);
     diff = abs(f - fw);
     plotdata(5, 'Absolute difference between image and transported image.', 'default', diff, h, ht);

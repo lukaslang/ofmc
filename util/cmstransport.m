@@ -16,7 +16,8 @@
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 function [A, b] = cmstransport(f, v, k, h, ht)
 %CMSTRANSPORT Creates a linear system for the 1D mass conservation transport
-%with source/sink term using a second-order Crank-Nicolson scheme.
+%with source/sink term using a second-order Crank-Nicolson scheme with
+%homogenous Neumann boundary conditions.
 %
 %   [A, b] = CMSTRANSPORT(f, v, k, h, ht) takes a vector f of image 
 %   intensities, a vector v of velocities, a source vector k, spatial and 

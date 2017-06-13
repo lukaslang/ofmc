@@ -69,11 +69,10 @@ y = repmat((0:ht:1)', 1, n);
 f = normpdf(x, 0.5+y/10, sigma);
 
 % Compute linear system.
-[A, B, C, b] = cm(f, h, ht);
+[A, b] = cm(f, alpha, beta, h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-6, 1000);
-fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+x = A \ b;
 
 % Recover flow.
 v = reshape(x, n, t)';

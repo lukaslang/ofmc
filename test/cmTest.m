@@ -34,15 +34,16 @@ t = 4;
 % Create empty image with three time steps and n pixels.
 f = zeros(t, n);
 
+% Set regularisation parameters.
+alpha = 1;
+beta = 1;
+
 % Compute linear system.
-[A, B, C, b] = cm(f, 1, 1);
+[A, b] = cm(f, alpha, beta, 1, 1);
 verifyEqual(testCase, size(A), [t*n, t*n]);
-verifyEqual(testCase, size(B), [t*n, t*n]);
-verifyEqual(testCase, size(C), [t*n, t*n]);
 verifyEqual(testCase, size(b), [t*n, 1]);
 
-[x, flag] = gmres(A + B + C, b, [], 1e-3, size(A, 1));
-verifyEqual(testCase, flag, 0);
+x = A \ b;
 verifyEqual(testCase, x, zeros(t*n, 1));
 
 end
@@ -50,8 +51,8 @@ end
 function travellingGaussianTest(testCase)
 
 % Set regularisation parameters.
-alpha = 0;
-beta = 0;
+alpha = 1;
+beta = 1;
 
 % Set time and space resolution.
 n = 100;
@@ -61,18 +62,17 @@ t = 20;
 h = 1/(n-1);
 ht = 1/(t-1);
 
-% Create travelling heaviside pattern.
+% Create travelling Gaussian pattern.
 sigma = 0.05;
 x = repmat(0:h:1, t, 1);
 y = repmat((0:ht:1)', 1, n);
 f = normpdf(x, 0.5+y/10, sigma);
 
 % Compute linear system.
-[A, B, C, b] = cm(f, h, ht);
+[A, b] = cm(f, alpha, beta, h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-3, 1000);
-fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+x = A \ b;
 
 % Recover flow.
 v = reshape(x, n, t)';
@@ -100,6 +100,98 @@ imagesc(0:h:1, 0:ht:1, ofresidual(f, v, h, ht));
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
 title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+end
+
+function membraneTest(testCase)
+
+% Set regularisation parameters.
+alpha = 0.1;
+beta = 0.01;
+
+% Set time and space resolution.
+n = 100;
+t = 30;
+
+% Set scaling parameters.
+h = 1/(n-1);
+ht = 1/(t-1);
+
+% Set initial distribution.
+finit = repmat(sin(5*[0:2*pi*h:2*pi]), t, 1);
+
+% Create multiplicator.
+mult = sin(0:2*pi/(t-1):2*pi)';
+
+% Create vector field.
+k = 0.5;
+v = 1 ./ (1 + exp(-2*k*(-n/2:1:n/2-1))) - 0.5;
+vgt = mult .* repmat(v, t, 1);
+
+% Create image.
+f = computecmstransport(finit, vgt, zeros(t, n), h, ht);
+
+% Compute linear system.
+[A, b] = cm(f, alpha, beta, h, ht);
+
+% Solve system.
+x = A \ b;
+
+% Recover flow.
+v = reshape(x, n, t)';
+
+figure(1);
+imagesc(0:h:1, 0:ht:1, f);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+[X, Y] = meshgrid(0:h:1, 0:ht:1);
+%streamline(X, Y, ht*v, ht*ones(t, n), 0:2*h:1, ht*zeros(1, ceil(n/2)));
+streamline(X, Y, ht*v, ht*ones(t, n), 0:h:1, ht*zeros(1, n));
+title('Input image with streamlines superimposed.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+figure(2);
+imagesc(0:h:1, 0:ht:1, v);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Velocity field for mass conservation.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+figure(3);
+imagesc(0:h:1, 0:ht:1, vgt);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Ground truth velocity field.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+figure(4);
+imagesc(0:h:1, 0:ht:1, cmresidual(f, v, h, ht));
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+fw = computecmstransport(f, v, zeros(t, n), h, ht);
+figure(5);
+imagesc(0:h:1, 0:ht:1, fw);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Transport.', 'FontName', 'Helvetica', 'FontSize', 14);
+xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
+ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+diff = abs(f - fw);
+figure(6);
+imagesc(0:h:1, 0:ht:1, diff);
+set(gca, 'DataAspectRatio', [t, n, 1]);
+colorbar;
+title('Absolute difference between image and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 

@@ -14,15 +14,12 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function fw = computeoftransport(f, v, h, ht, iterSolver, tolSolver)
+function fw = computeoftransport(f, v, h, ht)
 %COMPUTEOFTRANSPORT Computes transport of an image along a vector field.
 %
 %   fw = COMPUTEOFTRANSPORT(f, v, h, ht) takes a vector f of image 
 %   intensities, a vector v of velocities, and spatial and temporal scaling
-%   parameters h and ht, the maximum number of solver iterations, the
-%   solver tolerance, and transports the first time instant of f along v.
-%
-%   Note that this function uses GMRES for solving the linear system.
+%   parameters h and ht, and transports the first time instant of f along v.
 %
 %   f and v are matrices of size [t, n].
 %   h, ht are positive scalars.
@@ -43,9 +40,8 @@ for j=2:t
     [At, bt] = oftransport(fw(j-1, :)', v(j-1, :)', h, ht);
 
     % Solve system.
-    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolver, min(iterSolver, size(At, 1)));
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
+    xt = At \ bt;
+    
     % Save result.
     fw(j, :) = xt';
 end

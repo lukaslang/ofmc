@@ -35,10 +35,6 @@ mkdir(outputPath);
 iterSolver = 1000;
 tolSolver = 1e-3;
 
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
 % Number of iterations.
 niter = 15;
 
@@ -99,30 +95,12 @@ res = cmsresidual(f, v, k, h, ht);
 plotdata(4, 'Residual.', 'default', res, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
-warp = warpcms(f, v, k, h, ht);
-plotdata(5, 'Warped image.', 'gray', warp, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp-000.png', name)), '-png', '-q300', '-a1', '-transparent');
-
-% Compute transport.
-fw = zeros(t, n);
-fw(1, :) = f(1, :);
-for l=2:t
-    % Create linear system for transport.
-    [At, bt] = cmstransport(fw(l-1, :)', v(l-1, :)', k(l-1, :)', h, ht);
-
-    % Solve system.
-    [xt, ~, relres, iter] = gmres(At, bt, [], tolSolverTransport, min(iterSolverTransport, size(At, 1)));
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
-    % Save result.
-    fw(l, :) = xt';
-end
-
-plotdata(6, 'Transport.', 'gray', fw, h, ht);
+fw = computecmstransport(f, v, k, h, ht);
+plotdata(5, 'Transport.', 'gray', fw, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 diff = abs(f - fw);
-plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 for j=1:niter
@@ -160,16 +138,12 @@ for j=1:niter
     plotdata(4, 'Residual.', 'default', res, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
-    warp = warpcms(f, v, k, h, ht);
-    plotdata(5, 'Warped image.', 'gray', warp, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-    
-    fw = computecmstransport(f, v, k, h, ht, iterSolverTransport, tolSolverTransport);
-    plotdata(6, 'Transport.', 'gray', fw, h, ht);
+    fw = computecmstransport(f, v, k, h, ht);
+    plotdata(5, 'Transport.', 'gray', fw, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
 
     diff = abs(f - fw);
-    plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+    plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     drawnow();
 end

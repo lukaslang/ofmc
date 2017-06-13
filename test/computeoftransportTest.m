@@ -40,7 +40,7 @@ f = rand(t, n);
 v = zeros(t, n);
 
 % Compute and chekc transported image.
-fw = computeoftransport(f, v, h, ht, 1000, 1e-15);
+fw = computeoftransport(f, v, h, ht);
 verifyEqual(testCase, fw, repmat(f(1, :), t, 1), 'AbsTol', 1e-15);
 
 end

@@ -54,3 +54,19 @@ Lres = full(secondderiv1d(n, t, h, ht));
 verifyEqual(testCase, Lres, L);
 
 end
+
+function constantFunctionTest(testCase)
+
+n = 10;
+t = 5;
+h = 1;
+ht = 2;
+
+f = ones(t, n);
+L = secondderiv1d(n, t, h, ht);
+
+fxt = L*img2vec(f);
+fxt = reshape(fxt, n, t)';
+verifyEqual(testCase, fxt, zeros(t, n));
+
+end

@@ -40,7 +40,9 @@ vx = gradient(v, h);
 
 % Create system matrix.
 A = deriv1d(n, 1, h).*v/2;
-A = spdiags(ones(n, 1)/ht + vx/2, 0, A);
+d = spdiags(A, 0);
+d = d + ones(n, 1)/ht + vx/2;
+A = spdiags(d, 0, A);
 
 % Create right-hand side.
 b = k + f/ht - v.*fx/2 - vx.*f/2;

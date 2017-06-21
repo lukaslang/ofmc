@@ -108,8 +108,8 @@ end
 function membraneTest(testCase)
 
 % Set regularisation parameters.
-alpha = 0.1;
-beta = 0.01;
+alpha = 0.005;
+beta = 0.005;
 
 % Set time and space resolution.
 n = 100;
@@ -120,10 +120,11 @@ h = 1/(n-1);
 ht = 1/(t-1);
 
 % Set initial distribution.
-finit = repmat(sin(5*[0:2*pi*h:2*pi]), t, 1);
+finit = repmat(sin(5*(0:2*pi*h:2*pi)), t, 1);
+finit(:, [1:10, end-10:end]) = 0;
 
 % Create multiplicator.
-mult = sin(0:2*pi/(t-1):2*pi)';
+mult = 0.5*sin(2*(0:2*pi/(t-1):2*pi))';
 
 % Create vector field.
 k = 0.5;
@@ -132,6 +133,15 @@ vgt = mult .* repmat(v, t, 1);
 
 % Create image.
 f = computecmstransport(finit, vgt, zeros(t, n), h, ht);
+
+% Cut boundaries.
+%f = f(:, 11:end-10);
+%vgt = vgt(:, 11:end-10);
+[t, n] = size(f);
+
+% Set scaling parameters.
+h = 1/(n-1);
+ht = 1/(t-1);
 
 % Compute linear system.
 [A, b] = cm(f, alpha, beta, h, ht);
@@ -177,7 +187,12 @@ title('Residual.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
-fw = computecmstransport(f, v, zeros(t, n), h, ht);
+np = 10;
+fp = padarray(f, [0, np], 'replicate');
+vp = padarray(v, [0, np], 'replicate');
+fw = computecmstransport(fp, vp, zeros(t, n+2*np), h, ht);
+fw = fw(:, np+1:end-np);
+
 figure(5);
 imagesc(0:h:1, 0:ht:1, fw);
 set(gca, 'DataAspectRatio', [t, n, 1]);

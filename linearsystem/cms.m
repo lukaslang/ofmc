@@ -14,19 +14,19 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function [A, B, C, D, E, F, b] = cms(f, h, ht)
+function [A, b] = cms(f, alpha, beta, gamma, h, ht)
 %CMS Creates a linear system for the 1D mass preservation flow problem with
 %source terms with spatio-temporal regularisation.
 %
-%   [A, B, C, D, E, F, b] = CMS(f, h, ht) takes matrix f of image intensities, 
-%   and spatial and temporal scaling parameters h and ht, and creates a 
-%   linear system of the form
-%
-%   A + alpha*B + beta*C + gamma*D + delta*E = b.
+%   [A, b] = CMS(f, alpha, beta, gamma, h, ht) takes matrix f of image 
+%   intensities, regularisation parameters alpha, beta, and gamma, spatial 
+%   and temporal scaling parameters h and ht, and creates a linear system 
+%   of the form A(v, k)^T= b.
 %
 %   f is a matrix of size [m, n] where m is the number of time steps and n
 %   the number of pixels.
-%   A, B, C, D, E, F are matrices of size [m*n, m*n].
+%   alpha, beta, gamma > 0 are scalars.
+%   A is a matrix of size [m*n, m*n].
 %   b is a vector of length m*n.
 
 % Get image size.
@@ -45,11 +45,54 @@ fxx = img2vec(fxx);
 fxt = img2vec(fxt);
 
 % Create matrix A.
-A1 = bsxfun(@times, f.^2, laplacian1d(n, t, h)) + spdiags(fxx.*f, 0, t*n, t*n) + bsxfun(@times, 2*fx.*f, deriv1d(n, t, h));
-A2 = bsxfun(@times, -f, deriv1d(n, t, h));
-A3 = bsxfun(@times, f, deriv1d(n, t, h)) + spdiags(fx, 0, t*n, t*n);
+A1 = f.^2 .* laplacian1d(n, t, h) + spdiags(fxx.*f, 0, t*n, t*n) + 2*fx.*f .* deriv1d(n, t, h);
+A2 = -f .* deriv1d(n, t, h);
+A3 = f .* deriv1d(n, t, h) + spdiags(fx, 0, t*n, t*n);
 A4 = spdiags(-ones(t*n, 1), 0, t*n, t*n);
-A = [A1, A2; A3, A4];
+
+% Create right-hand side.
+b1 = -fxt.*f;
+b2 = -ft;
+
+% Incorporate boundary conditions for left boundary for first equation.
+I = 1:n:n*t;
+d = spdiags(A1, 0);
+d(I) = d(I) + 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha);
+A1 = spdiags(d, 0, A1);
+d = spdiags(A2, 0);
+d(I) = d(I) - 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha);
+A2 = spdiags(d, 0, A2);
+b1(I) = b1(I) - 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha);
+
+% Incorporate boundary conditions for right boundary for first equation.
+I = n:n:n*t;
+d = spdiags(A1, 0);
+d(I) = d(I) - 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha);
+A1 = spdiags(d, 0, A1);
+d = spdiags(A2, 0);
+d(I) = d(I) + 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha);
+A2 = spdiags(d, 0, A2);
+b1(I) = b1(I) + 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha);
+
+% Incorporate boundary conditions for left boundary for second equation.
+I = 1:n:n*t;
+d = spdiags(A3, 0);
+d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha);
+A3 = spdiags(d, 0, A3);
+d = spdiags(A4, 0);
+d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha);
+A4 = spdiags(d, 0, A4);
+b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha);
+
+% Incorporate boundary conditions for right boundary for second equation.
+I = n:n:n*t;
+d = spdiags(A3, 0);
+d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha);
+A3 = spdiags(d, 0, A3);
+d = spdiags(A4, 0);
+d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha);
+A4 = spdiags(d, 0, A4);
+b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha);
 
 % Create spatial regularisation matrix for v.
 B = [laplacian1d(n, t, h), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
@@ -60,13 +103,8 @@ C = [templaplacian1d(n, t, ht), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
 % Create regularisation matrix for k.
 D = -spdiags([zeros(t*n, 1); ones(t*n, 1)], 0, 2*t*n, 2*t*n);
 
-% Create spatial regularisation matrix for k.
-E = [sparse(t*n, 2*t*n); sparse(t*n, t*n), laplacian1d(n, t, h)];
-
-% Create temporal regularisation matrix for k.
-F = [sparse(t*n, 2*t*n); sparse(t*n, t*n), templaplacian1d(n, t, h)];
-
-% Create right-hand side.
-b = [-fxt.*f; -ft];
+% Assemble linear system.
+A = [A1, A2; A3, A4] + alpha*B + beta*C + gamma*D;
+b = [b1; b2];
 
 end

@@ -104,7 +104,7 @@ for j=2:t
 end
 
 verifyEqual(testCase, fw, f, 'AbsTol', 1e-1);
-fprintf('Max. pointwise warping error is %.2f\n', max(abs(fw(:) - f(:))));
+fprintf('Max. pointwise error is %.2f\n', max(abs(fw(:) - f(:))));
 
 figure(1);
 imagesc(0:h:1, 0:ht:1, f);
@@ -120,7 +120,7 @@ figure(2);
 imagesc(0:h:1, 0:ht:1, fw);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
-title('Warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+title('Transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
@@ -128,8 +128,42 @@ figure(3);
 imagesc(0:h:1, 0:ht:1, f - fw);
 set(gca, 'DataAspectRatio', [t, n, 1]);
 colorbar;
-title('Difference between original and warped image.', 'FontName', 'Helvetica', 'FontSize', 14);
+title('Difference between original and transported image.', 'FontName', 'Helvetica', 'FontSize', 14);
 xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
+
+end
+
+function membraneTest(testCase)
+
+% Set time and space resolution.
+n = 100;
+t = 100;
+
+% Set scaling parameters.
+h = 1/(n-1);
+ht = 1/(t-1);
+
+% Set initial distribution.
+sigma = 2;
+finit = repmat(exp(-(((1:n) - n/2).^2)/(2*sigma^2)/sqrt(2*pi*sigma^2)), t, 1);
+
+% Create vector field.
+v = ones(t, n);
+
+% Create source/sink.
+k = 0.01*repmat(sin((0:2*pi*h:2*pi)'), 1, n);
+k = zeros(t, n);
+
+% Create image.
+f = computecmstransport(finit, v, k, h, ht);
+
+figure(1);
+plot(f(1, :));
+
+for p=1:t
+    plot(f(p, :));
+    pause(0.1);
+end
 
 end

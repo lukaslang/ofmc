@@ -42,18 +42,18 @@ beta = 0.005;
 saveplots = false;
 
 % Run through all files.
-for k=1:length(files)
+for q=1:length(files)
 
     % Read data.
-    [~, name, ~] = fileparts(files(k).name);
-    g = double(imread(fullfile(path, files(k).name)));
+    [~, name, ~] = fileparts(files(q).name);
+    g = double(imread(fullfile(path, files(q).name)));
 
     % Scale data to interval [0, 1].
     g = (g - min(g(:))) / max(g(:) - min(g(:)));
     
     % Remove cut.
-    fdelta = g([1:cuts(k)-1, cuts(k)+1:end], :);
-
+    fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
+    
     % Pad data.
     %fdelta = padarray(fdelta, [0, 10]);
     

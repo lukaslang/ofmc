@@ -38,10 +38,6 @@ mkdir(outputPath);
 iterSolver = 1000;
 tolSolver = 1e-3;
 
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
 % Number of inner iterations.
 niterinner = 5;
 
@@ -109,7 +105,7 @@ for k=1:length(files)
         plotdata(2, 'Velocity.', 'default', v, h, ht);
         res = cmresidual(f, v, h, ht);
         plotdata(3, 'Residual.', 'default', res, h, ht);
-        fw = computecmstransport(f, v, zeros(t, n), h, ht, iterSolverTransport, tolSolverTransport);
+        fw = computecmstransport(f, v, zeros(t, n), h, ht);
         plotdata(5, 'Transport.', 'gray', fw, h, ht);
         diff = abs(f - fw);
         plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);

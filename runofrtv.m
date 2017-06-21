@@ -35,10 +35,6 @@ mkdir(outputPath);
 iterSolver = 1000;
 tolSolver = 1e-3;
 
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
 % Number of inner iterations.
 niterinner = 15;
 
@@ -97,7 +93,7 @@ for j=1:niterinner
     plotdata(2, 'Velocity.', 'default', v, h, ht);
     res = ofresidual(f, v, h, ht);
     plotdata(3, 'Residual.', 'default', res, h, ht);
-    fw = computeoftransport(f, v, h, ht, iterSolverTransport, tolSolverTransport);
+    fw = computeoftransport(f, v, h, ht);
     plotdata(4, 'Transport.', 'gray', fw, h, ht);
     diff = abs(f - fw);
     plotdata(5, 'Absolute difference between image and transported image.', 'default', diff, h, ht);

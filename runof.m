@@ -20,9 +20,12 @@ clear;
 close all;
 clc;
 
-% Define data.
-name = 'E2PSB1PMT-560-C1';
+% Define datasets.
 path = 'data';
+files = [dir(fullfile(path, '*.png')); dir(fullfile(path, '*.tif'))];
+
+% Define time instant of laser cut.
+cuts = repmat(6, 1, length(files));
 
 % Create start date and time.
 startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
@@ -31,69 +34,66 @@ startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
-% Set parameters for linear system solver.
-iterSolver = 1000;
-tolSolver = 1e-3;
-
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
-% Read data.
-g = im2double(imread(fullfile(path, sprintf('%s.png', name))));
-
-% Remove cut.
-fdelta = g([1:5, 7:end], :);
-
-% Get image size.
-[t, n] = size(fdelta);
-
-% Set scaling parameters.
-h = 1/(n-1);
-ht = 1/(t-1);
-
-% Filter image.
-f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
-
-%% Optical flow.
-
 % Spatial and temporal reguarisation of v.
-alpha = 0.01;
-beta = 0.001;
+alpha = 0.05;
+beta = 0.005;
 
-% Create output folder.
-alg = 'of';
-mkdir(fullfile(outputPath, alg));
+% Save plots.
+saveplots = false;
 
-% Create linear system.
-[A, B, C, b] = of(f, h, ht);
+% Run through all files.
+for q=1:length(files)
 
-% Solve system.
-[x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
-fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+    % Read data.
+    [~, name, ~] = fileparts(files(q).name);
+    g = double(imread(fullfile(path, files(q).name)));
 
-% Recover flow.
-v = reshape(x, n, t)';
+    % Scale data to interval [0, 1].
+    g = (g - min(g(:))) / max(g(:) - min(g(:)));
+    
+    % Remove cut.
+    fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
-% Visualise flow.
-plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Pad data.
+    %fdelta = padarray(fdelta, [0, 10]);
+    
+    % Get image size.
+    [t, n] = size(fdelta);
 
-plotdata(2, 'Velocity.', 'default', v, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Set scaling parameters.
+    h = 1/(n-1);
+    ht = 1/(t-1);
 
-res = ofresidual(f, v, h, ht);
-plotdata(3, 'Residual.', 'default', res, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Filter image.
+    f = imfilter(fdelta, fspecial('gaussian', 3, 3), 'replicate');
+    
+    % Create output folder.
+    alg = 'of';
+    mkdir(fullfile(outputPath, name, alg));
 
-warp = warpof(f, v, h, ht);
-plotdata(4, 'Warped image.', 'gray', warp, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Create linear system.
+    [A, B, C, b] = of(f, h, ht);
 
-fw = computeoftransport(f, v, h, ht, iterSolverTransport, tolSolverTransport);
-plotdata(5, 'Transport.', 'gray', fw, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Solve system and recover flow.
+    x = (A + alpha*B + beta*C) \ b;
+    v = reshape(x, n, t)';
 
-diff = abs(f - fw);
-plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
-export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
+    % Visualise flow.
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+    plotdata(2, 'Velocity.', 'default', v, h, ht);
+    res = ofresidual(f, v, h, ht);
+    plotdata(3, 'Residual.', 'default', res, h, ht);
+    fw = computeoftransport(f, v, h, ht);
+    plotdata(4, 'Transport.', 'gray', fw, h, ht);
+    diff = abs(f - fw);
+    plotdata(5, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+    drawnow();
+    
+    if(saveplots)
+        export_fig(1, fullfile(outputPath, name, alg, sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(2, fullfile(outputPath, name, alg, sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(3, fullfile(outputPath, name, alg, sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(4, fullfile(outputPath, name, alg, sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(5, fullfile(outputPath, name, alg, sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
+    end
+end

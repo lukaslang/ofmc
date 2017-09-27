@@ -34,7 +34,7 @@ n = 10;
 f = rand(3, n);
 
 % Compute linear system.
-[A, b] = cms(f, 1, 1, 1, 1, 1);
+[A, b] = cms(f, 1, 1, 1, 1, 1, 1);
 verifyEqual(testCase, size(A), [2*3*n, 2*3*n]);
 verifyEqual(testCase, size(b), [2*3*n, 1]);
 
@@ -43,9 +43,10 @@ end
 function membraneTest(testCase)
 
 % Set regularisation parameters.
-alpha = 0.005;
-beta = 0.005;
-gamma = 0.1;
+alpha0 = 0.005;
+alpha1 = 0.005;
+beta0 = 0.1;
+beta1 = 0.1;
 
 % Set time and space resolution.
 n = 100;
@@ -85,7 +86,7 @@ h = 1/(n-1);
 ht = 1/(t-1);
 
 % Compute linear system.
-[A, b] = cms(f, alpha, beta, gamma, h, ht);
+[A, b] = cms(f, alpha0, alpha1, beta0, beta1, h, ht);
 
 % Solve system.
 x = A \ b;

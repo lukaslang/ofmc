@@ -14,12 +14,12 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function plotstreamlines(fh, ftitle, cmap, f, v, h, ht)
+function plotstreamlines(fh, ftitle, cmap, f, v, h, ht, ar)
 %PLOTSTREAMLINES Creates a plot of data with streamlines superimposed.
 %
-%   PLOTSTREAMLINES(fh, ftitle, f, v, h, ht) takes a figure handle fn, a
-%   figure title ftitle, a colormap cmap, matrices f and v, and scaling 
-%   parameters h and ht, and creates a plot.
+%   PLOTSTREAMLINES(fh, ftitle, f, v, h, ht, ar) takes a figure handle fn,
+%   a figure title ftitle, a colormap cmap, matrices f and v, and scaling 
+%   parameters h and ht, and an aspect ratio ar, and creates a plot.
 %
 %   fh is a figure handle.
 %   ftitle is a string.
@@ -27,6 +27,7 @@ function plotstreamlines(fh, ftitle, cmap, f, v, h, ht)
 %   f and v are matrices of size [m, n] where m is the number of time steps
 %   and n the number of pixels.
 %   fh is a figure handle.
+%   ar is a vector [t, n].
 
 % Get matrix size.
 [t, n] = size(f);
@@ -34,7 +35,7 @@ function plotstreamlines(fh, ftitle, cmap, f, v, h, ht)
 % Create figure.
 figure(fh);
 imagesc(0:h:1, 0:ht:1, f);
-set(gca, 'DataAspectRatio', [t, n, 1]);
+set(gca, 'DataAspectRatio', [ar, 1]);
 colorbar;
 colormap(cmap);
 [X, Y] = meshgrid(0:h:1, 0:ht:1);

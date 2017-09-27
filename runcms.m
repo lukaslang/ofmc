@@ -34,10 +34,13 @@ startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
-% Spatial and temporal reguarisation of v.
-alpha = 0.05;
-beta = 0.005;
-gamma = 1;
+% Spatial and temporal regularisation of v.
+alpha0 = 0.05;
+alpha1 = 0.005;
+
+% Spatial and temporal regularisation of k.
+beta0 = 0.01;
+beta1 = 0.01;
 
 % Save plots.
 saveplots = false;
@@ -56,7 +59,7 @@ for q=1:length(files)
     fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
     % Pad data.
-    %fdelta = padarray(fdelta, [0, 10]);
+    fdelta = padarray(fdelta, [0, 5]);
     
     % Get image size.
     [t, n] = size(fdelta);
@@ -64,18 +67,16 @@ for q=1:length(files)
     % Set scaling parameters.
     h = 1/(n-1);
     ht = 1/(t-1);
-    h = 1;
-    ht = 1;
 
     % Filter image.
-    f = imfilter(fdelta, fspecial('gaussian', 3, 3), 'replicate');
+    f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
     
     % Create output folder.
     alg = 'cms';
     mkdir(fullfile(outputPath, name, alg));
 
-    % Create linear system for mass conservation.
-    [A, b] = cms(f, alpha, beta, gamma, h, ht);
+    % Create linear system for mass conservation with source.
+    [A, b] = cms(f, alpha0, alpha1, beta0, beta1, h, ht);
 
     % Solve system and recover flow.
     x = A \ b;
@@ -85,7 +86,7 @@ for q=1:length(files)
     k = reshape(x(t*n+1:end), n, t)';
 
     % Visualise flow.
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
     plotdata(2, 'Velocity.', 'default', v, h, ht);
     plotdata(3, 'Source.', 'default', k, h, ht);
     res = cmsresidual(f, v, k, h, ht);

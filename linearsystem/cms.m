@@ -14,18 +14,18 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function [A, b] = cms(f, alpha, beta, gamma, h, ht)
+function [A, b] = cms(f, alpha0, alpha1, beta0, beta1, h, ht)
 %CMS Creates a linear system for the 1D mass preservation flow problem with
 %source terms with spatio-temporal regularisation.
 %
-%   [A, b] = CMS(f, alpha, beta, gamma, h, ht) takes matrix f of image 
-%   intensities, regularisation parameters alpha, beta, and gamma, spatial 
+%   [A, b] = CMS(f, alpha0, alpha1, beta0, beta1, h, ht) takes matrix f of
+%   image intensities, regularisation parameters alpha and beta, spatial 
 %   and temporal scaling parameters h and ht, and creates a linear system 
-%   of the form A(v, k)^T= b.
+%   of the form A*(v, k)^T= b.
 %
 %   f is a matrix of size [m, n] where m is the number of time steps and n
 %   the number of pixels.
-%   alpha, beta, gamma > 0 are scalars.
+%   alpha0, alpha1, beta0, beta1 > 0 are scalars.
 %   A is a matrix of size [m*n, m*n].
 %   b is a vector of length m*n.
 
@@ -57,42 +57,42 @@ b2 = -ft;
 % Incorporate boundary conditions for left boundary for first equation.
 I = 1:n:n*t;
 d = spdiags(A1, 0);
-d(I) = d(I) + 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha);
+d(I) = d(I) + 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha0);
 A1 = spdiags(d, 0, A1);
 d = spdiags(A2, 0);
-d(I) = d(I) - 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) - 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha0);
 A2 = spdiags(d, 0, A2);
-b1(I) = b1(I) - 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha);
+b1(I) = b1(I) - 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha0);
 
 % Incorporate boundary conditions for right boundary for first equation.
 I = n:n:n*t;
 d = spdiags(A1, 0);
-d(I) = d(I) - 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha);
+d(I) = d(I) - 2*f(I).*fx(I)/h - 2*(f(I).*fx(I)).^2 ./ (f(I).^2 + alpha0);
 A1 = spdiags(d, 0, A1);
 d = spdiags(A2, 0);
-d(I) = d(I) + 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) + 2*f(I)/h + 2*(fx(I).*f(I).^2)./(f(I).^2 + alpha0);
 A2 = spdiags(d, 0, A2);
-b1(I) = b1(I) + 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha);
+b1(I) = b1(I) + 2*f(I).*ft(I)/h + (2*fx(I).*ft(I).*f(I).^2) ./ (f(I).^2 + alpha0);
 
 % Incorporate boundary conditions for left boundary for second equation.
 I = 1:n:n*t;
 d = spdiags(A3, 0);
-d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha0);
 A3 = spdiags(d, 0, A3);
 d = spdiags(A4, 0);
-d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha0);
 A4 = spdiags(d, 0, A4);
-b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha);
+b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha0);
 
 % Incorporate boundary conditions for right boundary for second equation.
 I = n:n:n*t;
 d = spdiags(A3, 0);
-d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) - (fx(I).*f(I).^2)./(f(I).^2 + alpha0);
 A3 = spdiags(d, 0, A3);
 d = spdiags(A4, 0);
-d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha);
+d(I) = d(I) + (f(I).^2)./(f(I).^2 + alpha0);
 A4 = spdiags(d, 0, A4);
-b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha);
+b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha0);
 
 % Create spatial regularisation matrix for v.
 B = [laplacian1d(n, t, h), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
@@ -100,11 +100,15 @@ B = [laplacian1d(n, t, h), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
 % Create temporal regularisation matrix for v.
 C = [templaplacian1d(n, t, ht), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
 
-% Create regularisation matrix for k.
-D = -spdiags([zeros(t*n, 1); ones(t*n, 1)], 0, 2*t*n, 2*t*n);
+% Create spatial regularisation matrix for k.
+%D = -spdiags([zeros(t*n, 1); ones(t*n, 1)], 0, 2*t*n, 2*t*n);
+D = [sparse(t*n, 2*t*n); sparse(t*n, t*n), laplacian1d(n, t, h)];
+
+% Create temporal regularisation matrix for k.
+E = [sparse(t*n, 2*t*n); sparse(t*n, t*n), templaplacian1d(n, t, ht)];
 
 % Assemble linear system.
-A = [A1, A2; A3, A4] + alpha*B + beta*C + gamma*D;
+A = [A1, A2; A3, A4] + alpha0*B + alpha1*C + beta0*D + beta1*E;
 b = [b1; b2];
 
 end

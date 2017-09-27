@@ -14,20 +14,25 @@
 %
 %    You should have received a copy of the GNU General Public License
 %    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-function [A, b] = cms(f, alpha0, alpha1, beta0, beta1, h, ht)
-%CMS Creates a linear system for the 1D mass preservation flow problem with
-%source terms with spatio-temporal regularisation.
+function [A, b] = cmsrtv(f, v, alpha0, alpha1, beta0, beta1, h, ht, epsilon)
+%CMSRTV Creates a linear system for the 1D mass preservation flow problem
+%with source terms with spatial epsilon-TV regularisation and temporal
+%regularisation.
 %
-%   [A, b] = CMS(f, alpha0, alpha1, beta0, beta1, h, ht) takes matrix f of
-%   image intensities, regularisation parameters alpha and beta, spatial 
-%   and temporal scaling parameters h and ht, and creates a linear system 
-%   of the form A*(v, k)^T= b.
+%   [A, b] = CMSRTV(f, v, alpha0, alpha1, beta0, beta1, h, ht, epsilon) 
+%   takes matrix f of image intensities, a velocity field v, regularisation
+%   parameters alpha0, alpha1, beta0, and beta1, spatial and temporal 
+%   scaling parameters h and ht, and a positive scalar epsilon for 
+%   regularised norm computation, and creates a linear system of the 
+%   form A*(v, k)^T= b.
 %
-%   f is a matrix of size [m, n] where m is the number of time steps and n
-%   the number of pixels.
+%   f and v are matrices of size [m, n] where m is the number of time steps
+%   and n the number of pixels.
 %   alpha0, alpha1, beta0, beta1 > 0 are scalars.
-%   A is a matrix of size [m*n, m*n].
-%   b is a vector of length m*n.
+%   h, ht, and epsilon > 0 are scalars.
+%   A is a matrix of size [2*m*n, 2*m*n].
+%   b is a vector of length 2*m*n.
+%   epsilon > 0 is a scalar.
 
 % Get image size.
 [t, n] = size(f);
@@ -36,6 +41,13 @@ function [A, b] = cms(f, alpha0, alpha1, beta0, beta1, h, ht)
 [fx, ft] = gradient(f, h, ht);
 [fxx, ~] = gradient(fx, h, ht);
 [fxt, ~] = gradient(ft, h, ht);
+[vx, ~] = gradient(v, h, ht);
+
+% Compute regularised norm of vx.
+nvx = rnorm(vx, epsilon);
+
+% Compute div-grad matrix.
+B = divgrad1d(nvx, h);
 
 % Transpose data.
 f = img2vec(f);
@@ -95,7 +107,7 @@ A4 = spdiags(d, 0, A4);
 b2(I) = b2(I) + (ft(I).*f(I).^2)./(f(I).^2 + alpha0);
 
 % Create spatial regularisation matrix for v.
-B = [laplacian1d(n, t, h), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
+B = [B, sparse(t*n, t*n); sparse(t*n, 2*t*n)];
 
 % Create temporal regularisation matrix for v.
 C = [templaplacian1d(n, t, ht), sparse(t*n, t*n); sparse(t*n, 2*t*n)];

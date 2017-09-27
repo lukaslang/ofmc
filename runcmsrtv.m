@@ -20,9 +20,12 @@ clear;
 close all;
 clc;
 
-% Define data.
-name = 'E2PSB1PMT-560-C1';
+% Define datasets.
 path = 'data';
+files = [dir(fullfile(path, '*.png')); dir(fullfile(path, '*.tif'))];
+
+% Define time instant of laser cut.
+cuts = repmat(6, 1, length(files));
 
 % Create start date and time.
 startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
@@ -31,99 +34,88 @@ startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
-% Set parameters for linear system solver.
-iterSolver = 1000;
-tolSolver = 1e-3;
-
-% Set parameters for solving transport problem.
-iterSolverTransport = 1000;
-tolSolverTransport = 1e-15;
-
 % Number of inner iterations.
 niterinner = 15;
 
 % Set norm regularisation parameter.
-epsilon = 1e-3;
-
-% Read data.
-g = im2double(imread(fullfile(path, sprintf('%s.png', name))));
-
-% Remove cut.
-fdelta = g([1:5, 7:end], :);
-
-% Get image size.
-[t, n] = size(fdelta);
-
-% Set scaling parameters.
-h = 1/(n-1);
-ht = 1/(t-1);
-
-% Filter image.
-f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
-
-%% Mass conservation with source/sink term and regularised TV.
+epsilon = 1e-5;
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.025;
-beta = 0.01;
-% Norm of k.
-gamma = 0.01;
-% Spatial and temporal regularisation of k.
-delta = 0.001;
-eta = 0.001;
+alpha0 = 0.01;
+alpha1 = 0.001;
+beta0 = 0.01;
+beta1 = 0.01;
 
-% Create output folder.
-alg = 'cmsrtv';
-mkdir(fullfile(outputPath, alg));
+% Save plots.
+saveplots = false;
 
-% Create initial guess.
-v = zeros(t, n);
+% Run through all files.
+for q=1:length(files)
 
-% Create linear system for mass conservation with source/sink term.
-[A, ~, C, D, E, F, b] = cms(f, h, ht);
+    % Read data.
+    [~, name, ~] = fileparts(files(q).name);
+    g = double(imread(fullfile(path, files(q).name)));
 
-for j=1:niterinner
-
-    % Create div(grad v / rnorm(v)) matrix.
-    [vx, ~] = gradient(v, h, ht);
-    B = [divgrad1d(rnorm(vx, epsilon), h), sparse(t*n, t*n); sparse(t*n, 2*t*n)];
-
-    % Solve system for mass conservation with source/sink term.
-    [x, ~, relres, iter] = gmres(A + alpha*B + beta*C + gamma*D + delta*E + eta*F, b, [], tolSolver, iterSolver);
-    fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
-
-    % Recover flow.
-    v = reshape(x(1:t*n), n, t)';
-    k = reshape(x(t*n+1:end), n, t)';
-
-    % Visualise flow.
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    plotdata(2, 'Velocity.', 'default', v, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    plotdata(3, 'Source.', 'default', k, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-source-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    res = cmsresidual(f, v, k, h, ht);
-    plotdata(4, 'Residual.', 'default', res, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    warp = warpcms(f, v, k, h, ht);
-    plotdata(5, 'Warped image.', 'gray', warp, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-warp-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    fw = computecmstransport(f, v, k, h, ht, iterSolverTransport, tolSolverTransport);
-    plotdata(6, 'Transport.', 'gray', fw, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
-
-    diff = abs(f - fw);
-    plotdata(7, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    % Scale data to interval [0, 1].
+    g = (g - min(g(:))) / max(g(:) - min(g(:)));
     
-    rnormvx = rnorm(vx, epsilon);
-    plotdata(8, 'Regularised norm of $\partial_x v$.', 'default', rnormvx, h, ht);
-    export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+    % Remove cut.
+    fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
+    % Pad data.
+    fdelta = padarray(fdelta, [0, 5]);
+
+    % Get image size.
+    [t, n] = size(fdelta);
+
+    % Set scaling parameters.
+    h = 1/(n-1);
+    ht = 1/(t-1);
+
+    % Filter image.
+    f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'symmetric');
+    
+    % Create output folder.
+    alg = 'cmsrtv';
+    mkdir(fullfile(outputPath, name, alg));
+
+    % Create initial guess.
+    v = zeros(t, n);
+
+    for j=1:niterinner
+
+        % Create linear system for mass conservation.
+        [A, b] = cmsrtv(f, v, alpha0, alpha1, beta0, beta1, h, ht, epsilon);
+        
+        % Solve system.
+        x = A \ b;
+
+        % Recover flow.
+        v = reshape(x(1:t*n), n, t)';
+        k = reshape(x(t*n+1:end), n, t)';
+
+        % Visualise flow.
+        plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
+        plotdata(2, 'Velocity.', 'default', v, h, ht);
+        plotdata(3, 'Source.', 'default', k, h, ht);
+        res = cmsresidual(f, v, k, h, ht);
+        plotdata(4, 'Residual.', 'default', res, h, ht);
+        fw = computecmstransport(f, v, k, h, ht);
+        plotdata(5, 'Transport.', 'gray', fw, h, ht);
+        diff = abs(f - fw);
+        plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+        [vx, ~] = gradient(v, h, ht);
+        rnormvx = rnorm(vx, epsilon);
+        plotdata(7, 'Regularised norm of \partial_x v.', 'default', rnormvx, h, ht);
+        drawnow();
+
+        if(saveplots)
+            export_fig(1, fullfile(outputPath, name, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+            export_fig(2, fullfile(outputPath, name, alg, sprintf('%s-velocity-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+            export_fig(3, fullfile(outputPath, name, alg, sprintf('%s-residual-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+            export_fig(4, fullfile(outputPath, name, alg, sprintf('%s-transport-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+            export_fig(5, fullfile(outputPath, name, alg, sprintf('%s-diff-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+            export_fig(6, fullfile(outputPath, name, alg, sprintf('%s-rnorm-vx-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
+        end
+    end
 end

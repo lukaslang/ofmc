@@ -34,19 +34,15 @@ startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
-% Set parameters for linear system solver.
-iterSolver = 1000;
-tolSolver = 1e-3;
-
 % Number of inner iterations.
-niterinner = 5;
+niterinner = 10;
 
 % Set norm regularisation parameter.
-epsilon = 1e-3;
+epsilon = 1e-5;
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.025;
-beta = 0.005;
+alpha0 = 0.05;
+alpha1 = 0.005;
 
 % Save plots.
 saveplots = false;
@@ -65,7 +61,7 @@ for k=1:length(files)
     fdelta = g([1:cuts(k)-1, cuts(k)+1:end], :);
 
     % Pad data.
-    fdelta = padarray(fdelta, [0, 10]);
+    fdelta = padarray(fdelta, [0, 5]);
 
     % Get image size.
     [t, n] = size(fdelta);
@@ -84,24 +80,19 @@ for k=1:length(files)
     % Create initial guess.
     v = zeros(t, n);
 
-    % Create linear system for mass conservation.
-    [A, ~, C, b] = cm(f, h, ht);
-
     for j=1:niterinner
 
-        % Create div(grad v / rnorm(v)) matrix.
-        [vx, ~] = gradient(v, h, ht);
-        B = divgrad1d(rnorm(vx, epsilon), h);
-
+        % Create linear system for mass conservation.
+        [A, b] = cmrtv(f, v, alpha0, alpha1, h, ht, epsilon);
+        
         % Solve system.
-        [x, flag, relres, iter] = gmres(A + alpha*B + beta*C, b, [], tolSolver, iterSolver);
-        fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+        x = A \ b;
 
         % Recover flow.
         v = reshape(x, n, t)';
 
         % Visualise flow.
-        plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+        plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
         plotdata(2, 'Velocity.', 'default', v, h, ht);
         res = cmresidual(f, v, h, ht);
         plotdata(3, 'Residual.', 'default', res, h, ht);
@@ -109,8 +100,9 @@ for k=1:length(files)
         plotdata(5, 'Transport.', 'gray', fw, h, ht);
         diff = abs(f - fw);
         plotdata(6, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
+        [vx, ~] = gradient(v, h, ht);
         rnormvx = rnorm(vx, epsilon);
-        plotdata(7, 'Regularised norm of $\partial_x v$.', 'default', rnormvx, h, ht);
+        plotdata(7, 'Regularised norm of \partial_x v.', 'default', rnormvx, h, ht);
         drawnow();
         
         if(saveplots)

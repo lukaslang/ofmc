@@ -35,8 +35,8 @@ outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.05;
-beta = 0.005;
+alpha0 = 0.05;
+alpha1 = 0.005;
 
 % Save plots.
 saveplots = false;
@@ -72,7 +72,7 @@ for q=1:length(files)
     mkdir(fullfile(outputPath, name, alg));
 
     % Create linear system for mass conservation.
-    [A, b] = cm(f, alpha, beta, h, ht);
+    [A, b] = cm(f, alpha0, alpha1, h, ht);
 
     % Solve system and recover flow.
     x = A \ b;

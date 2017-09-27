@@ -35,8 +35,8 @@ outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.05;
-beta = 0.005;
+alpha0 = 0.05;
+alpha1 = 0.005;
 
 % Save plots.
 saveplots = false;
@@ -55,7 +55,7 @@ for q=1:length(files)
     fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
     % Pad data.
-    %fdelta = padarray(fdelta, [0, 10]);
+    fdelta = padarray(fdelta, [0, 5]);
     
     % Get image size.
     [t, n] = size(fdelta);
@@ -75,11 +75,11 @@ for q=1:length(files)
     [A, B, C, b] = of(f, h, ht);
 
     % Solve system and recover flow.
-    x = (A + alpha*B + beta*C) \ b;
+    x = (A + alpha0*B + alpha1*C) \ b;
     v = reshape(x, n, t)';
 
     % Visualise flow.
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
     plotdata(2, 'Velocity.', 'default', v, h, ht);
     res = ofresidual(f, v, h, ht);
     plotdata(3, 'Residual.', 'default', res, h, ht);

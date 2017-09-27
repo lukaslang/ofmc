@@ -35,14 +35,14 @@ outputPath = fullfile('results', startdate);
 mkdir(outputPath);
 
 % Spatial and temporal reguarisation of v.
-alpha = 0.05;
-beta = 0.005;
+alpha0 = 0.01;
+alpha1 = 0.001;
 
 % Number of inner iterations.
 niterinner = 15;
 
 % Set norm regularisation parameter.
-epsilon = 1e-3;
+epsilon = 1e-5;
 
 % Save plots.
 saveplots = false;
@@ -61,7 +61,10 @@ for q=1:length(files)
     fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
     % Pad data.
-    %fdelta = padarray(fdelta, [0, 10]);
+    fdelta = padarray(fdelta, [0, 5]);
+    
+    % Resize data.
+    fdelta = imresize(fdelta, 0.5);
     
     % Get image size.
     [t, n] = size(fdelta);
@@ -90,13 +93,13 @@ for q=1:length(files)
         B = divgrad1d(rnorm(vx, epsilon), h);
 
         % Solve system.
-        x = (A + alpha*B + beta*C) \ b;
+        x = (A + alpha0*B + alpha1*C) \ b;
 
         % Recover flow.
         v = reshape(x, n, t)';
 
         % Visualise flow.
-        plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+        plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
         plotdata(2, 'Velocity.', 'default', v, h, ht);
         res = ofresidual(f, v, h, ht);
         plotdata(3, 'Residual.', 'default', res, h, ht);
@@ -105,7 +108,7 @@ for q=1:length(files)
         diff = abs(f - fw);
         plotdata(5, 'Absolute difference between image and transported image.', 'default', diff, h, ht);
         rnormvx = rnorm(vx, epsilon);
-        plotdata(6, 'Regularised norm of $\partial_x v$.', 'default', rnormvx, h, ht);
+        plotdata(6, 'Regularised norm of \partial_x v.', 'default', rnormvx, h, ht);
         drawnow();
 
         if(saveplots)

@@ -55,7 +55,7 @@ for q=1:length(files)
     fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
     
     % Pad data.
-    %fdelta = padarray(fdelta, [0, 10]);
+    fdelta = padarray(fdelta, [0, 5]);
     
     % Get image size.
     [t, n] = size(fdelta);
@@ -65,7 +65,7 @@ for q=1:length(files)
     ht = 1/(t-1);
 
     % Filter image.
-    f = imfilter(fdelta, fspecial('gaussian', 3, 3), 'replicate');
+    f = imfilter(fdelta, fspecial('gaussian', 5, 5), 'replicate');
     
     % Create output folder.
     alg = 'cm';
@@ -79,7 +79,7 @@ for q=1:length(files)
     v = reshape(x, n, t)';
 
     % Visualise flow.
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
     plotdata(2, 'Velocity.', 'default', v, h, ht);
     res = cmresidual(f, v, h, ht);
     plotdata(3, 'Residual.', 'default', res, h, ht);

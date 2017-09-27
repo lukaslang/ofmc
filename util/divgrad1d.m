@@ -30,15 +30,21 @@ function L = divgrad1d(d, h)
 %   See Aubert & Kornprobst: Mathematical Problems in Image Processing,
 %   2006, eqn. (A.73) for details on the discretisation.
 
+% Set interpolation/extrapolation method.
+method = 'linear';
+
 [t, n] = size(d);
+
+% Create grid.
+X = ndgrid(0:h:1);
 
 L = cell(t, 1);
 for k=1:t
     % Interpolate between grid points.
-    F = griddedInterpolant(1./d(k, :));
-    v1 = [F(2-1/2:1:n-1-1/2), F(n-1/2) + F(n+1/2), 0]';
-    v2 = (F(1/2:1:n-1/2) + F(1+1/2:1:n+1/2))';
-    v3 = [0, F(1-1/2) + F(1+1/2), F(2+1/2:1:n-1+1/2)]';
+    F = griddedInterpolant(X, 1./d(k, :), method);
+    v1 = [F(h/2:h:1-h-h/2), F(1-h/2) + F(1+h/2), 0]';
+    v2 = (F(-h/2:h:1-h/2) + F(h/2:h:1+h/2))';
+    v3 = [0, F(-h/2) + F(h/2), F(h+h/2:h:1-h/2)]';
 
     L{k} = spdiags([v1/(h^2), -v2/(h^2), v3/(h^2)], [-1, 0, 1], n, n);
 end

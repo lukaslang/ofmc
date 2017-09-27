@@ -66,8 +66,7 @@ f = normpdf(x, 0.5+y/10, sigma);
 [A, B, C, b] = of(f, h, ht);
 
 % Solve system.
-[x, ~, relres, iter] = gmres(A + alpha*B + beta*C, b, [], 1e-6, 1000);
-fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
+x = (A + alpha*B + beta*C) \ b;
 
 % Recover flow.
 v = reshape(x, n, t)';

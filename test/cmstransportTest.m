@@ -133,37 +133,3 @@ xlabel('Space', 'FontName', 'Helvetica', 'FontSize', 14);
 ylabel('Time', 'FontName', 'Helvetica', 'FontSize', 14);
 
 end
-
-function membraneTest(testCase)
-
-% Set time and space resolution.
-n = 100;
-t = 100;
-
-% Set scaling parameters.
-h = 1/(n-1);
-ht = 1/(t-1);
-
-% Set initial distribution.
-sigma = 2;
-finit = repmat(exp(-(((1:n) - n/2).^2)/(2*sigma^2)/sqrt(2*pi*sigma^2)), t, 1);
-
-% Create vector field.
-v = ones(t, n);
-
-% Create source/sink.
-k = 0.01*repmat(sin((0:2*pi*h:2*pi)'), 1, n);
-k = zeros(t, n);
-
-% Create image.
-f = computecmstransport(finit, v, k, h, ht);
-
-figure(1);
-plot(f(1, :));
-
-for p=1:t
-    plot(f(p, :));
-    pause(0.1);
-end
-
-end

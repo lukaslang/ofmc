@@ -59,7 +59,7 @@ for q=1:length(files)
     fdelta = g([1:cuts(q)-1, cuts(q)+1:end], :);
 
     % Pad data.
-    fdelta = padarray(fdelta, [0, 5]);
+    %fdelta = padarray(fdelta, [0, 5]);
     
     % Get image size.
     [t, n] = size(fdelta);
@@ -98,11 +98,11 @@ for q=1:length(files)
     drawnow();
     
     if(saveplots)
-        export_fig(1, fullfile(outputPath, name, alg, sprintf('%s-input.png', name)), '-png', '-q300', '-a1', '-transparent');
-        export_fig(2, fullfile(outputPath, name, alg, sprintf('%s-velocity.png', name)), '-png', '-q300', '-a1', '-transparent');
-        export_fig(3, fullfile(outputPath, name, alg, sprintf('%s-source.png', name)), '-png', '-q300', '-a1', '-transparent');
-        export_fig(4, fullfile(outputPath, name, alg, sprintf('%s-residual.png', name)), '-png', '-q300', '-a1', '-transparent');
-        export_fig(5, fullfile(outputPath, name, alg, sprintf('%s-transport.png', name)), '-png', '-q300', '-a1', '-transparent');
-        export_fig(6, fullfile(outputPath, name, alg, sprintf('%s-diff.png', name)), '-png', '-q300', '-a1', '-transparent');
+        export_fig(1, fullfile(outputPath, name, alg, sprintf('%s-input.png', name)), '-png', '-q600', '-a1', '-transparent');
+        export_fig(2, fullfile(outputPath, name, alg, sprintf('%s-velocity.png', name)), '-png', '-q600', '-a1', '-transparent');
+        export_fig(3, fullfile(outputPath, name, alg, sprintf('%s-source.png', name)), '-png', '-q600', '-a1', '-transparent');
+        export_fig(4, fullfile(outputPath, name, alg, sprintf('%s-residual.png', name)), '-png', '-q600', '-a1', '-transparent');
+        export_fig(5, fullfile(outputPath, name, alg, sprintf('%s-transport.png', name)), '-png', '-q600', '-a1', '-transparent');
+        export_fig(6, fullfile(outputPath, name, alg, sprintf('%s-diff.png', name)), '-png', '-q600', '-a1', '-transparent');
     end
 end

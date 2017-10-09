@@ -104,7 +104,7 @@ fprintf('GMRES iter %i, relres %e\n', iter(1)*iter(2), relres);
 v = reshape(x(1:t*n), n, t)';
 k = reshape(x(t*n+1:end), n, t)';
 
-plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht);
+plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', f, v, h, ht, [t, n]);
 export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-000.png', name)), '-png', '-q300', '-a1', '-transparent');
 
 plotdata(2, 'Velocity.', 'default', v, h, ht);
@@ -183,7 +183,7 @@ for j=1:niter
         v = reshape(x, n, t)';
     end
     
-    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', fdelta, v, h, ht);
+    plotstreamlines(1, 'Input image with streamlines superimposed.', 'gray', fdelta, v, h, ht, [t, n]);
     export_fig(gcf, fullfile(outputPath, alg, sprintf('%s-input-%.3i.png', name, j)), '-png', '-q300', '-a1', '-transparent');
     
     plotdata(2, 'Velocity field for MC with source/sink term and convective regularisation.', 'default', v, h, ht);

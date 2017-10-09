@@ -13,7 +13,7 @@ This is a MATLAB implementation of:
 
 J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb. A Variational Model for the Analysis of Membrane Cuts.
 
-If you use this software in your work you must cite the abovementioned paper in a resulting publication!
+If you use this software in your work please cite the abovementioned paper in a resulting publication.
 
 BibTeX:
 
@@ -39,7 +39,7 @@ For the full license statement see the file COPYING.
 
 3. Requirements
 
-This software was written for and tested with Matlab R2015b.
+This software was written for and tested with Matlab R2016b.
 
 The following libraries are required for parts of this sofware:
 

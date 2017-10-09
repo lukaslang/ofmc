@@ -25,14 +25,13 @@ path = 'data';
 files = [dir(fullfile(path, '*.png')); dir(fullfile(path, '*.tif'))];
 
 % Define time instant of laser cut.
-cuts = repmat(6, 1, length(files));
+cuts = [6, 6, 0, 6, 6, 6, 6, 6, 6];
 
 % Create start date and time.
 startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
 
 % Define and create output folder.
 outputPath = fullfile('results', startdate);
-mkdir(outputPath);
 
 % Spatial and temporal regularisation of v.
 alpha0 = 0.05;
@@ -43,7 +42,10 @@ beta0 = 0.01;
 beta1 = 0.01;
 
 % Save plots.
-saveplots = false;
+saveplots = true;
+
+% Save results.
+saveresults = true;
 
 % Run through all files.
 for q=1:length(files)
@@ -104,5 +106,10 @@ for q=1:length(files)
         export_fig(4, fullfile(outputPath, name, alg, sprintf('%s-residual.png', name)), '-png', '-q600', '-a1', '-transparent');
         export_fig(5, fullfile(outputPath, name, alg, sprintf('%s-transport.png', name)), '-png', '-q600', '-a1', '-transparent');
         export_fig(6, fullfile(outputPath, name, alg, sprintf('%s-diff.png', name)), '-png', '-q600', '-a1', '-transparent');
+    end
+    
+    if(saveresults)
+        resultfile = fullfile(outputPath, name, alg, sprintf('%s-results.mat', name));
+        save(resultfile, 'name', 'g', 'fdelta', 'f', 'v', 'k', 'alpha0', 'alpha1', 'beta0', 'beta1', 'h', 'ht', '-v7.3');
     end
 end

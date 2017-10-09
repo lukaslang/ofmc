@@ -35,16 +35,17 @@ t = 4;
 f = zeros(t, n);
 
 % Set regularisation parameters.
-alpha = 1;
-beta = 1;
-gamma = 1;
+alpha0 = 1;
+alpha1 = 1;
+beta0 = 1;
+beta1 = 1;
 
 % Set scaling parameters.
 h = 1/(n-1);
 ht = 1/(t-1);
 
 % Compute linear system.
-[A, b] = cmsrtv(f, zeros(t, n), alpha, beta, gamma, h, ht, 1e-3);
+[A, b] = cmsrtv(f, zeros(t, n), alpha0, alpha1, beta0, beta1, h, ht, 1e-3);
 verifyEqual(testCase, size(A), [2*t*n, 2*t*n]);
 verifyEqual(testCase, size(b), [2*t*n, 1]);
 
@@ -65,12 +66,13 @@ x = repmat(0:h:1, t, 1);
 f = normpdf(x, 0.5, sigma);
 
 % Set regularisation parameters.
-alpha = 1;
-beta = 1;
-gamma = 1;
+alpha0 = 1;
+alpha1 = 1;
+beta0 = 1;
+beta1 = 1;
 
 % Compute linear system.
-[A, b] = cmsrtv(f, zeros(t, n), alpha, beta, gamma, h, ht, 1e-3);
+[A, b] = cmsrtv(f, zeros(t, n), alpha0, alpha1, beta0, beta1, h, ht, 1e-3);
 verifyEqual(testCase, size(A), [2*t*n, 2*t*n]);
 verifyEqual(testCase, size(b), [2*t*n, 1]);
 

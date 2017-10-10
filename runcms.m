@@ -25,7 +25,7 @@ path = 'data';
 files = [dir(fullfile(path, '*.png')); dir(fullfile(path, '*.tif'))];
 
 % Define time instant of laser cut.
-cuts = [6, 6, 0, 6, 6, 6, 6, 6, 6];
+cuts = [6, 0, 0, 6, 6, 6, 6, 6, 6];
 
 % Create start date and time.
 startdate = datestr(now, 'yyyy-mm-dd-HH-MM-SS');
@@ -110,6 +110,6 @@ for q=1:length(files)
     
     if(saveresults)
         resultfile = fullfile(outputPath, name, alg, sprintf('%s-results.mat', name));
-        save(resultfile, 'name', 'g', 'fdelta', 'f', 'v', 'k', 'alpha0', 'alpha1', 'beta0', 'beta1', 'h', 'ht', '-v7.3');
+        save(resultfile, 'name', 'alg', 'g', 'fdelta', 'f', 'v', 'k', 'alpha0', 'alpha1', 'beta0', 'beta1', 'h', 'ht', '-v7.3');
     end
 end

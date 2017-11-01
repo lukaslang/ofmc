@@ -1,0 +1,80 @@
+OFMC - A Variational Model for the Analysis of Membrane Cuts
+Version 1.0, 2017
+
+Lukas Lang (ll542@damtp.cam.ac.uk)
+University of Cambridge
+Department of Applied Mathematics and Theoretical Physics
+Wilberforce Road, Cambridge CB3 0WA, United Kingdom
+http://www.damtp.cam.ac.uk/
+
+1. Introduction
+
+This is a Python implementation of:
+
+J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb. A Variational Model for the Analysis of Membrane Cuts.
+
+If you use this software in your work please cite the abovementioned paper in a resulting publication.
+
+BibTeX:
+
+@techreport{EtiLanSch17,
+  author     = {J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb},
+  title      = {A Variational Model for the Analysis of Membrane Cuts},
+  institution= {DAMTP, University of Cambridge, United Kingdom},
+  type       = {Preprint},
+  year       = {2017}
+}
+
+2. License & Disclaimer
+
+Copyright 2017 Lukas Lang.
+
+This file is part of OFMC. OFMC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+OFMC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+
+For the full license statement see the file COPYING.
+
+3. Requirements
+
+This software was written for and tested with Python 3.6.
+
+The following libraries are required for parts of this sofware:
+
+FEniCS 2016.2
+FEniCS 2017.1
+
+- scipy
+- matplotlib
+- pillow
+
+Installation MacOS + Anaconda3.
+
+1. Download and install Anaconda from https://anaconda.org/
+2. Create environment and install FEniCS:
+
+>> conda create -n fenicsproject -c conda-forge fenics
+
+3. Activate the environment:
+
+>> source activate fenicsproject
+
+4. Install scipy, matplotlib, and pillow:
+
+>> conda install -c conda-forge scipy
+>> conda install -c conda-forge matplotlib
+>> conda install -c conda-forge pillow
+
+In order to run the scripts install e.g. Spyder:
+
+>> conda install -c conda-forge spyder
+
+Alternatively, use PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
+
+4. Usage
+
+To run the test cases execute
+
+>> python -m unittest discover

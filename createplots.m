@@ -23,6 +23,7 @@ clc;
 % Create start date and time.
 startdate = '2017-10-10-09-21-15';
 name = 'artificialcut_small';
+name = 'E8-PSB1PMT';
 alg = 'cms';
 
 % Define and create output folder.

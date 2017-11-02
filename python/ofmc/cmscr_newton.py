@@ -8,11 +8,11 @@ from scipy import misc
 from scipy import ndimage
 
 # Set regularisation parameter.
-alpha0 = 1e-1
-alpha1 = 1e-3
+alpha0 = 5e-3
+alpha1 = 5e-3
 beta0 = 5e-4
 beta1 = 5e-4
-gamma = 1e-2
+gamma = 1e-3
 
 # Load image.
 name = ['E2PSB1PMT-560-C1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
@@ -57,61 +57,33 @@ fx = f.dx(1);
 ft = f.dx(0);
 
 # Define function space and functions.
-#P = FiniteElement('P', triangle, 1)
-#W = FunctionSpace(mesh, P * P)
+W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)
 
-# Initialise source.
-kprev = Function(V)
-vprev = Function(V)
+w = Function(W)
+v, k = split(w)
+w1, w2 = TestFunctions(W)
 
-for i in range(30):
-    print('Iteration ', i)
-    
-    ## Solve for velocity field.
-    
-    v = TrialFunction(V)
-    w = TestFunction(V)
-    
-    # Define weak formulation.
-    A = - fx*fx*v*w*dx - fx*f*v*w.dx(1)*dx - f*fx*v.dx(1)*w*dx - f*f*v.dx(1)*w.dx(1)*dx - alpha0*v.dx(1)*w.dx(1)*dx - alpha1*v.dx(0)*w.dx(0)*dx - gamma*kprev.dx(1)*kprev.dx(1)*v*w*dx
-    l = ft*fx*w*dx + ft*f*w.dx(1)*dx + kprev*fx*w*dx + kprev*f*w.dx(1)*dx + gamma*kprev.dx(1)*kprev.dx(0)*w*dx
-    
-    # Compute solution.
-    v = Function(V)
-    solve(A == l, v)
-    vprev.assign(v)
-    
-#    plot(vprev)
-#    plt.show()
-    
-    ## Solve for source.
-    
-    k = TrialFunction(V)
-    w = TestFunction(V)
-    
-    # Define weak formulation.
-    A = - k*w*dx - beta0*k.dx(1)*w.dx(1)*dx - beta1*k.dx(0)*w.dx(0)*dx - gamma*k.dx(0)*w.dx(0)*dx - gamma*k.dx(1)*v*w.dx(0)*dx - gamma*k.dx(0)*vprev*w.dx(1)*dx - gamma*k.dx(1)*vprev*vprev*w.dx(1)*dx
-    l = - ft*w*dx - fx*vprev*w*dx - f*vprev.dx(1)*w*dx
-    
-    # Compute solution.
-    k = Function(V)
-    solve(A == l, k)
-    kprev.assign(k)
-    
-#    plot(kprev)
-#    plt.show()
+# Define weak formulation.
+A = - (ft + fx*v + f*v.dx(1) - k)*(fx*w1 + f*w1.dx(1))*dx \
+    - alpha0*v.dx(1)*w1.dx(1)*dx - alpha1*v.dx(0)*w1.dx(0)*dx \
+    - gamma*k.dx(0)*k.dx(1)*w1*dx - gamma*k.dx(1)*k.dx(1)*v*w1*dx \
+    + (ft + fx*v + f*v.dx(1) - k)*w2*dx - beta0*k.dx(1)*w2.dx(1)*dx - beta1*k.dx(0)*w2.dx(0)*dx \
+    - gamma*k.dx(0)*w2.dx(0)*dx - gamma*k.dx(1)*v*w2.dx(0)*dx - gamma*k.dx(0)*v*w2.dx(1)*dx - gamma*k.dx(1)*v*v*w2.dx(1)*dx
+
+# Compute solution.
+solve(A == 0, w)
 
 # Recover solution.
-#v, k = vfun.split(deepcopy=True)
+v, k = w.split(deepcopy=True)
 
 # Create image from solution.
 v2d = vertex_to_dof_map(V)
 vel = np.zeros_like(img)
-values = vprev.vector().array()[v2d]
+values = v.vector().array()[v2d]
 for (i, j, v) in zip(x, y, values): vel[i, j] = v
 
 source = np.zeros_like(img)
-values = kprev.vector().array()[v2d]
+values = k.vector().array()[v2d]
 for (i, j, v) in zip(x, y, values): source[i, j] = v
 
 # Plot image.
@@ -126,7 +98,7 @@ ax.set_title('Velocity')
 maxvel = abs(vel).max()
 # Add colorbar, make sure to specify tick locations to match desired ticklabels
 cbar = fig.colorbar(cax, orientation='horizontal')
-fig.savefig('results/cmscr/{0}-vel.png'.format(name))
+fig.savefig('results/cmscr_newton/{0}-vel.png'.format(name))
 
 # Create grid for streamlines.
 Y, X = np.mgrid[0:m:1, 0:n:1]
@@ -138,7 +110,7 @@ plt.imshow(img, cmap=cm.gray)
 
 strm = ax.streamplot(X, Y, vel*hx, V, density=2, color=vel, linewidth=1, cmap=cm.coolwarm)
 fig.colorbar(strm.lines, orientation='horizontal')
-fig.savefig('results/cmscr/{0}-img.png'.format(name))
+fig.savefig('results/cmscr_newton/{0}-img.png'.format(name))
 
 # Plot source.
 fig, ax = plt.subplots()
@@ -146,4 +118,4 @@ cax = ax.imshow(source, interpolation='nearest', cmap=cm.coolwarm)
 ax.set_title('Source')
 cbar = fig.colorbar(cax, orientation='vertical')
 plt.show()
-fig.savefig('results/cmscr/{0}-source.png'.format(name))
+fig.savefig('results/cmscr_newton/{0}-source.png'.format(name))

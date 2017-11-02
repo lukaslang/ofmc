@@ -8,14 +8,19 @@ from scipy import misc
 from scipy import ndimage
 
 # Set regularisation parameter.
-alpha = Constant(1e-2)
-beta = Constant(1e-2)
+alpha = 1e-2
+beta = 1e-3
 
 # Load image.
-img = misc.imread('../../data/E2PSB1PMT-560-C1.png')
-#img = misc.imread('../../data/epidermalejonction.png')
-#img = misc.imread('../../data/artificialcut_small.png')
-#img = ndimage.filters.gaussian_filter(img, sigma=1, mode='constant')
+name = ['E2PSB1PMT-560-C1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
+ending = ['png', 'tif', 'tif', 'tif', 'tif', 'tif', 'png', 'png']
+
+# Select file.
+idx = 0
+name = name[idx]
+
+# Read image.
+img = misc.imread('../../data/{0}.{1}'.format(name, ending[idx]))
 
 # Remove cut.
 img = np.vstack((img[0:4, :], img[6:, :]))
@@ -79,6 +84,7 @@ ax.set_title('Velocity')
 maxvel = abs(vel).max()
 # Add colorbar, make sure to specify tick locations to match desired ticklabels
 cbar = fig.colorbar(cax, orientation='horizontal')
+fig.savefig('results/cm/{0}-vel.png'.format(name))
 
 # Create grid for streamlines.
 Y, X = np.mgrid[0:m:1, 0:n:1]
@@ -91,3 +97,4 @@ plt.imshow(img, cmap=cm.gray)
 strm = ax.streamplot(X, Y, vel*hx, V, density=3, color=vel, linewidth=1, cmap=cm.coolwarm)
 fig.colorbar(strm.lines, orientation='horizontal')
 plt.show()
+fig.savefig('results/cm/{0}-img.png'.format(name))

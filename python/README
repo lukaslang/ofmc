@@ -43,12 +43,10 @@ This software was written for and tested with Python 3.6.
 
 The following libraries are required for parts of this sofware:
 
-FEniCS 2016.2
-FEniCS 2017.1
-
-- scipy
-- matplotlib
-- pillow
+- FEniCS (2017.1)
+- scipy (0.19.1-py36_blas_openblas_202)
+- matplotlib (2.1.0-py36_1)
+- pillow (4.3.0-py36_1)
 
 Installation MacOS + Anaconda3.
 
@@ -68,6 +66,8 @@ Installation MacOS + Anaconda3.
 >> conda install -c conda-forge pillow
 
 Not yet in use:
+
+- dolfin-adjoint (2017.1.0-py36_0)
 
 >> conda install -c conda-forge dolfin-adjoint
 

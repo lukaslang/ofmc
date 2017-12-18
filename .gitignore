@@ -1,2 +1,4 @@
 results
 oldcode
+python/.cache
+*.pyc

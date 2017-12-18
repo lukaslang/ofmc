@@ -15,11 +15,11 @@ beta1 = 5e-4
 gamma = 1e-3
 
 # Load image.
-name = ['E2PSB1PMT-560-C1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
-ending = ['png', 'tif', 'tif', 'tif', 'tif', 'tif', 'png', 'png']
+name = ['E2PSB1PMT-560-C1', 'e2_PSB4_kymograph1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
+ending = ['png', 'tif', 'tif', 'tif', 'tif', 'tif', 'tif', 'png', 'png']
 
 # Select file.
-idx = 0
+idx = 1
 name = name[idx]
 
 # Read image.
@@ -165,7 +165,7 @@ initial_tracer_mass = assemble(f*dx)
 fsol = np.zeros((mm, nn))
 fsol[0, :] = f0.vector().array().reshape(1, nn)
 
-while(t < T - dt/2):
+while(t < T - dt):
     # Create velocity function.
     v = Function(V_cg)
     v.vector()[:] = -vel[np.int(iter/dumpfreq), :]

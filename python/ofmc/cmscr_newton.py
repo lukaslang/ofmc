@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from dolfin import *
+from dolfin.cpp.mesh import UnitSquareMesh
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
@@ -9,14 +10,14 @@ from scipy import ndimage
 
 # Set regularisation parameter.
 alpha0 = 5e-3
-alpha1 = 5e-3
+alpha1 = 1e-3
 beta0 = 5e-4
 beta1 = 5e-4
 gamma = 1e-3
 
 # Load image.
-name = ['E2PSB1PMT-560-C1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
-ending = ['png', 'tif', 'tif', 'tif', 'tif', 'tif', 'png', 'png']
+name = ['E2PSB1PMT-560-C1', 'e2_PSB4_kymograph1', 'E5PSB1PMT-1', 'E8-PSB1PMT', 'PSB1_E1PMT', 'PSB4PMT', 'PSB5PMT', 'epidermalejonction', 'artificialcut_small']
+ending = ['png', 'tif', 'tif', 'tif', 'tif', 'tif', 'tif', 'png', 'png']
 
 # Select file.
 idx = 0

@@ -8,7 +8,7 @@ from scipy import misc
 from scipy import ndimage
 
 # Create mesh.
-m = 200
+m = 100
 mesh = UnitIntervalMesh(m)
 
 # Defining the function spaces
@@ -18,7 +18,7 @@ V_cg = FunctionSpace(mesh, "CG", 1)
 # Create velocity function.
 #v = Expression('exp(-pow(x[0] - 0.5, 2.0)/(2*sigmasq))/sqrt(2*pi*sigmasq)', sigmasq=0.01, degree=2)
 #v = interpolate(v, V_cg)
-v = project(Constant(0.1), V_cg)
+v = project(Constant(-0.1), V_cg)
 maxvel = np.amax(np.abs((v.vector().array())))
 
 # Source term.
@@ -39,9 +39,9 @@ f = TrialFunction(V_dg)
 phi = TestFunction(V_dg)
 
 # Define time step.
-dt = 0.1*h/abs(maxvel)
+dt = 0.2*h/abs(maxvel)
 
-alpha = 1e-3
+#alpha = 1e-5
 
 # Define weak formulation.
 #A = f.dx(0)*w*dx - f*v*w.dx(1)*dx + jump(f*v)*avg(w)*dS + avg(f*v)*jump(w)*dS + (alpha*jump(f)*jump(w)/avg(h))*dS
@@ -57,14 +57,31 @@ M = assemble(a_mass)
 arhs = -dt*(a_int + a_flux + a_source)
 
 # Define initial condition.
-f0 = Expression('exp(-pow(x[0] - 0.5, 2.0)/(2*sigmasq))/sqrt(2*pi*sigmasq)', sigmasq=0.001, degree=2)
+#f0 = Expression('exp(-pow(x[0] - 0.5, 2.0)/(2*sigmasq))/sqrt(2*pi*sigmasq)', sigmasq=0.001, degree=2)
 #f0 = Expression('sin(5*pi*x[0])', degree=2)
-f0 = interpolate(f0, V_cg)
+#f0 = interpolate(f0, V_cg)
 
 #f0 = Function(V_cg)
 #vec = np.zeros_like(f0.vector().array())
-#vec[40:60] = 10
+#vec[np.int(4*m/10):np.int(6*m/10)] = 10
 #f0.vector()[:] = vec
+
+class MyExpression(Expression):
+    def eval(self, value, x):
+        value[0] = max(0, 0.1 - abs(x[0] - 0.5))
+    def value_shape(self):
+        return ()
+f0 = MyExpression(degree=1)
+f0 = interpolate(f0, V_cg)
+
+class RectangleExpression(Expression):
+    def eval(self, value, x):
+        value[0] = 1 if x[0] >= 0.45 and x[0] <= 0.55 else 0
+    def value_shape(self):
+        return ()
+#f0 = RectangleExpression(degree=1)
+#f0 = interpolate(f0, V_cg)
+
 
 df1 = Function(V_dg)
 f1 = Function(V_dg)
@@ -110,6 +127,9 @@ while(t < (T-dt/2)):
         print('Iteration ', k)
         fproj = interpolate(f, V_cg)
         fsol[np.int(k/dumpfreq), :] = fproj.vector().array().reshape(1, m+1)
+        
+        #plot(f)
+        #plt.show()
 
     t += dt
     k += 1

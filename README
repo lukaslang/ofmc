@@ -9,17 +9,17 @@ http://www.damtp.cam.ac.uk/
 
 1. Introduction
 
-This is a MATLAB implementation of:
+This is a Python implementation of:
 
-J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb. A Variational Model for the Analysis of Membrane Cuts.
+Nilankur Dutta, J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb.?Joint Motion Estimation and Source Identification with an Application to the Analysis of Cell Membranes.
 
 If you use this software in your work please cite the abovementioned paper in a resulting publication.
 
 BibTeX:
 
-@techreport{EtiLanSch17,
-  author     = {J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb},
-  title      = {A Variational Model for the Analysis of Membrane Cuts},
+@techreport{DutEtiLanSch17,
+  author     = {Dutta, N. and \'{E}tienne, J. and Lang, L.~F. and Sch\"{o}nlieb, C.~B.},
+  title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Cell Membranes},
   institution= {DAMTP, University of Cambridge, United Kingdom},
   type       = {Preprint},
   year       = {2017}
@@ -39,17 +39,52 @@ For the full license statement see the file COPYING.
 
 3. Requirements
 
-This software was written for and tested with Matlab R2016b.
+This software was written for and tested with Python 3.6.
 
 The following libraries are required for parts of this sofware:
 
-export_fig
-URL: https://github.com/altmany/export_fig
+- FEniCS (2017.1)
+- scipy (0.19.1-py36_blas_openblas_202)
+- matplotlib (2.1.0-py36_1)
+- pillow (4.3.0-py36_1)
+
+Installation MacOS + Anaconda3.
+
+1. Download and install Anaconda from https://anaconda.org/
+2. Create environment and install FEniCS:
+
+>> conda create -n fenicsproject -c conda-forge fenics
+
+3. Activate the environment:
+
+>> source activate fenicsproject
+
+4. Install scipy, matplotlib, and pillow:
+
+>> conda install -c conda-forge scipy
+>> conda install -c conda-forge matplotlib
+>> conda install -c conda-forge pillow
+
+Not yet in use:
+
+- dolfin-adjoint (2017.1.0-py36_0)
+
+>> conda install -c conda-forge dolfin-adjoint
+
+In order to run the scripts install e.g. Spyder:
+
+>> conda install -c conda-forge spyder
+
+In order to run test cases in Spyder install spyder-unittest:
+
+>> conda install -c conda-forge spyder-unittest
+
+Alternatively, use PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
 
 4. Usage
 
-For easier use we provide a startup script (startup.m), which sets up the Matlab search path. It includes required libraries and adds required subdirectories. Make sure to download the required packages and to set the library paths properly. Then simply run the startup script.
+To run the test cases execute
 
-To run the test cases in Matlab execute
+>> python -m unittest discover
 
->> runtests('test')
+To run test cases in Spyder click Run -> Run unit tests.

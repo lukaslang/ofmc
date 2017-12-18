@@ -1,4 +1,4 @@
-e #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from dolfin import *
 import matplotlib.pyplot as plt

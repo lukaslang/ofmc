@@ -1,6 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from dolfin import *
+#
+# Copyright 2017 Lukas Lang
+#
+# This file is part of OFMC.
+#
+#    OFMC is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    OFMC is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+from dolfin import UnitSquareMesh
+from dolfin import FunctionSpace
+from dolfin import Function
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import numpy as np
@@ -20,7 +39,7 @@ idx = 0
 name = name[idx]
 
 # Read image.
-img = misc.imread('../../data/{0}.{1}'.format(name, ending[idx]))
+img = misc.imread('../data/{0}.{1}'.format(name, ending[idx]))
 
 # Remove cut.
 img = np.vstack((img[0:4, :], img[6:, :]))

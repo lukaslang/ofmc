@@ -35,7 +35,14 @@ OFMC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU General Public License along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 
-For the full license statement see the file COPYING.
+For the full license statement see the file LICENSE.
+
+Moreover, the package includes third-party libraries:
+
+Name: tifffile
+Author: Christoph Gohlke
+URL: http://www.lfd.uci.edu/~gohlke/
+See ofmc/external/tifffile.py for the license.
 
 3. Requirements
 
@@ -50,16 +57,16 @@ The following libraries are required for parts of this sofware:
 
 Installation MacOS + Anaconda3.
 
-1. Download and install Anaconda from https://anaconda.org/
-2. Create environment and install FEniCS:
+a. Download and install Anaconda from https://anaconda.org/
+b. Create environment and install FEniCS:
 
 >> conda create -n fenicsproject -c conda-forge fenics
 
-3. Activate the environment:
+c. Activate the environment:
 
 >> source activate fenicsproject
 
-4. Install scipy, matplotlib, and pillow:
+d. Install scipy, matplotlib, and pillow:
 
 >> conda install -c conda-forge scipy
 >> conda install -c conda-forge matplotlib
@@ -71,11 +78,11 @@ Not yet in use:
 
 >> conda install -c conda-forge dolfin-adjoint
 
-In order to run the scripts install e.g. Spyder:
+e. In order to run the scripts install e.g. Spyder:
 
 >> conda install -c conda-forge spyder
 
-In order to run test cases in Spyder install spyder-unittest:
+f. In order to run test cases in Spyder install spyder-unittest:
 
 >> conda install -c conda-forge spyder-unittest
 
@@ -85,6 +92,7 @@ Alternatively, use PyCharm and create a run environment by selecting anaconda3/e
 
 To run the test cases execute
 
+>> source activate fenicsproject
 >> python -m unittest discover
 
 To run test cases in Spyder click Run -> Run unit tests.

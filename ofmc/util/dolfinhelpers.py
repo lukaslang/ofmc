@@ -19,27 +19,27 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 from dolfin import UnitSquareMesh
 from dolfin import FunctionSpace
-from dolfin import Function
 from dolfin import dof_to_vertex_map
 from dolfin import vertex_to_dof_map
 import numpy as np
 
 
-def img2fun(img: np.array) -> Function:
-    """Takes a 2D array and returns a piecewise linear interpolation.
+def img2funvec(img: np.array) -> np.array:
+    """Takes a 2D array and returns an array suited to assign to piecewise
+    linear approximation on a triangle grid.
 
     Each pixel corresponds to one vertex of a triangle mesh.
 
     Args:
-        img (array): The input array.
+        img (np.array): The input array.
 
     Returns:
-        Function: A dolfin function.
+        np.array: A vector.
 
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m-1, n-1)
+    mesh = UnitSquareMesh(m, n)
     x = mesh.coordinates().reshape((-1, 2))
 
     # Evaluate function at vertices.
@@ -47,24 +47,23 @@ def img2fun(img: np.array) -> Function:
     x, y = np.array(x[:, 0]/hx, dtype=int), np.array(x[:, 1]/hy, dtype=int)
     fv = img[x, y]
 
-    # Create function space and function.
+    # Create function space.
     V = FunctionSpace(mesh, 'CG', 1)
-    f = Function(V)
 
     # Map pixel values to vertices.
     d2v = dof_to_vertex_map(V)
-    f.vector()[:] = fv[d2v]
-    return f
+    return fv[d2v]
 
 
-def fun2img(f: Function, m: int, n: int) -> np.array:
-    """Takes piecewise linear interpolation function and returns an array.
+def funvec2img(v: np.array, m: int, n: int) -> np.array:
+    """Takes values of piecewise linear interpolation of a function at the
+    vertices and returns a 2-dimensional array.
 
     Each degree of freedom corresponds to one pixel in the array of
     size (m, n).
 
     Args:
-        f (Function): The piecewise linear function.
+        v (np.array): Values at vertices of triangle mesh.
         m (int): The number of rows.
         n (int): The number of columns.
 
@@ -76,7 +75,7 @@ def fun2img(f: Function, m: int, n: int) -> np.array:
     img = np.zeros((m, n))
 
     # Create mesh and function space.
-    mesh = UnitSquareMesh(m-1, n-1)
+    mesh = UnitSquareMesh(m, n)
     x = mesh.coordinates().reshape((-1, 2))
 
     # Evaluate function at vertices.
@@ -88,7 +87,7 @@ def fun2img(f: Function, m: int, n: int) -> np.array:
 
     # Create image from function.
     v2d = vertex_to_dof_map(V)
-    values = f.vector().array()[v2d]
+    values = v[v2d]
     for (i, j, v) in zip(x, y, values):
         img[i, j] = v
     return img

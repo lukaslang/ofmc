@@ -58,18 +58,17 @@ def of1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     f.vector()[:] = dh.img2funvec(img)
 
     # Define derivatives of data.
-    fx = f.dx(1)
     ft = f.dx(0)
-    fxft = ft*fx
-    fxfx = fx*fx
+    fx = f.dx(1)
 
     # Define weak formulation.
-    A = fxfx*v*w*dx + alpha0*v.dx(1)*w.dx(1)*dx + alpha1*v.dx(0)*w.dx(0)*dx
-    b = -fxft*w*dx
+    A = fx*fx*v*w*dx + alpha0*v.dx(1)*w.dx(1)*dx + alpha1*v.dx(0)*w.dx(0)*dx
+    b = -fx*ft*w*dx
 
     # Compute solution.
     v = Function(V)
     solve(A == b, v)
 
+    # Convert back to array.
     vel = dh.funvec2img(v.vector().array(), m, n)
     return vel

@@ -32,5 +32,6 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
 
+
 if __name__ == '__main__':
     unittest.main()

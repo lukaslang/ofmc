@@ -23,7 +23,9 @@ import numpy as np
 from scipy import misc
 from read_roi import read_roi_zip
 from matplotlib import cm
+from matplotlib.collections import LineCollection
 import matplotlib.pyplot as plt
+import ofmc.util.roihelpers as rh
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -80,4 +82,31 @@ for gen in genotypes:
 
         # Save figure.
         fig.savefig(os.path.join(resultpath, '{0}-roi.png'.format(dat)))
+        plt.close(fig)
+
+        # Fit splines.
+        spl = rh.roi2splines(roi)
+
+        # Plot image.
+        fig = plt.figure()
+        plt.imshow(img, cmap=cm.gray)
+
+        # Plot splines.
+        for v in roi:
+            y = roi[v]['y']
+            # Compute derivative of spline.
+            derivspl = spl[v].derivative()
+
+            points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments, cmap=cm.coolwarm,
+                                norm=plt.Normalize(-2, 2))
+            lc.set_array(derivspl(y))
+            lc.set_linewidth(2)
+            plt.gca().add_collection(lc)
+        plt.show()
+
+        # Save figure.
+        fig.savefig(os.path.join(resultpath, '{0}-spline.png'.format(dat)))
         plt.close(fig)

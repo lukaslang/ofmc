@@ -26,7 +26,7 @@ from scipy import ndimage
 from matplotlib import cm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from ofmc.model.cms import cms1d
+from ofmc.model.cmscr import cmscr1d
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -36,10 +36,11 @@ datapath = ('/Users/lukaslang/'
 resultpath = 'results'
 
 # Set regularisation parameter.
-alpha0 = 1e-2
+alpha0 = 5e-3
 alpha1 = 1e-3
-beta0 = 1e-4
-beta1 = 1e-4
+alpha2 = 5e-4
+alpha3 = 5e-4
+beta = 1e-3
 
 
 def loadimage(filename: str) -> np.array:
@@ -153,7 +154,8 @@ for gen in genotypes:
         # Compute velocities.
         # vel = of1d(img, alpha0, alpha1)
         # vel = cm1d(img, alpha0, alpha1)
-        vel, k = cms1d(img, alpha0, alpha1, beta0, beta1)
+        # vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)
+        vel, k = cmscr1d(img, alpha0, alpha1, alpha2, alpha3, beta)
 
         # Plot and save figures.
         saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)

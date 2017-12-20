@@ -23,10 +23,10 @@ import warnings
 import numpy as np
 from scipy import misc
 from scipy import ndimage
-import matplotlib as mpl
 from matplotlib import cm
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-import ofmc.model.of as of
+from ofmc.model.cm import cm1d
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -123,7 +123,8 @@ for gen in genotypes:
         img = loadimage(kymos[0])
 
         # Compute velocities.
-        vel = of.of1d(img, alpha, beta)
+        # vel = of1d(img, alpha, beta)
+        vel = cm1d(img, alpha, beta)
 
         # Plot and save figures.
         saveresults(os.path.join(os.path.join(resultpath, gen), dat),

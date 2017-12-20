@@ -19,18 +19,20 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 import numpy as np
-from ofmc.model.cm import cm1d
+from ofmc.model.cms import cms1d
 
 
 class TestOf(unittest.TestCase):
 
-    def test_cm1d(self):
+    def test_cms1d(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = cm1d(img, 1, 1)
+        v, k = cms1d(img, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, img.shape)
+        np.testing.assert_allclose(k, np.zeros_like(k))
 
 
 if __name__ == '__main__':

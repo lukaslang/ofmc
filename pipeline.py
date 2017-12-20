@@ -26,7 +26,7 @@ from scipy import ndimage
 from matplotlib import cm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from ofmc.model.cm import cm1d
+from ofmc.model.cms import cms1d
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -36,8 +36,10 @@ datapath = ('/Users/lukaslang/'
 resultpath = 'results'
 
 # Set regularisation parameter.
-alpha = 1e-2
-beta = 1e-3
+alpha0 = 1e-2
+alpha1 = 1e-3
+beta0 = 1e-4
+beta1 = 1e-4
 
 
 def loadimage(filename: str) -> np.array:
@@ -56,13 +58,39 @@ def loadimage(filename: str) -> np.array:
     return img
 
 
-def saveresults(path: str, name: str, vel: np.array):
+def saveimage(path: str, name: str, img: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
     # Plot image.
-    # plt.figure(figsize=(10, 10))
-    # plt.imshow(img, cmap=cm.gray)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cax = ax.imshow(img, cmap=cm.gray)
+    ax.set_title('Density')
+    fig.colorbar(cax, orientation='horizontal')
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}.png'.format(name)))
+    plt.close(fig)
+
+
+def savesource(path: str, name: str, img: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Plot image.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cax = ax.imshow(img, cmap=cm.coolwarm)
+    ax.set_title('Source')
+    fig.colorbar(cax, orientation='horizontal')
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}-source.png'.format(name)))
+    plt.close(fig)
+
+
+def savevelocity(path: str, name: str, vel: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     maxvel = abs(vel).max()
     normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
@@ -74,7 +102,7 @@ def saveresults(path: str, name: str, vel: np.array):
     fig.colorbar(cax, orientation='horizontal')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}-vel.png'.format(name)))
+    fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)))
     plt.close(fig)
 
     m, n = vel.shape
@@ -123,9 +151,13 @@ for gen in genotypes:
         img = loadimage(kymos[0])
 
         # Compute velocities.
-        # vel = of1d(img, alpha, beta)
-        vel = cm1d(img, alpha, beta)
+        # vel = of1d(img, alpha0, alpha1)
+        # vel = cm1d(img, alpha0, alpha1)
+        vel, k = cms1d(img, alpha0, alpha1, beta0, beta1)
 
         # Plot and save figures.
-        saveresults(os.path.join(os.path.join(resultpath, gen), dat),
-                    name, vel)
+        saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)
+        savevelocity(os.path.join(os.path.join(resultpath, gen), dat),
+                     name, vel)
+        savesource(os.path.join(os.path.join(resultpath, gen), dat),
+                   name, k)

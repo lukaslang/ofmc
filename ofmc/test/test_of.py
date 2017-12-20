@@ -19,7 +19,7 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 import numpy as np
-import ofmc.model.of as of
+from ofmc.model.of import of1d
 
 
 class TestOf(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestOf(unittest.TestCase):
     def test_of1d(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = of.of1d(img, alpha0=1, alpha1=1)
+        v = of1d(img, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

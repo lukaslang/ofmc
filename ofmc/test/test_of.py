@@ -32,6 +32,14 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
 
+    def test_of1d_random(self):
+        # Create random non-moving image.
+        img = np.matlib.repmat(np.random.rand(1, 25), 10, 1)
+        v = of1d(img, 1, 1)
+
+        np.testing.assert_allclose(v.shape, img.shape)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
 
 if __name__ == '__main__':
     unittest.main()

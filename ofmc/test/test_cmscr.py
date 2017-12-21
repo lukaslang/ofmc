@@ -36,7 +36,7 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(k.shape, img.shape)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
-    def test_cms1d_random(self):
+    def test_cmscr1d_random(self):
         # Create random non-moving image.
         img = np.matlib.repmat(np.random.rand(1, 25), 10, 1)
         v, k = cmscr1d(img, 1, 1, 1, 1, 1)
@@ -46,7 +46,7 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(k.shape, img.shape)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
-    def test_cmscr1d_newton(self):
+    def test_cmscr1dnewton(self):
         # Create zero image.
         img = np.zeros((10, 25))
         v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
@@ -56,7 +56,7 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(k.shape, img.shape)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
-    def test_cms1d_newton_random(self):
+    def test_cmscr1dnewton_random(self):
         # Create random non-moving image.
         img = np.matlib.repmat(np.random.rand(1, 25), 10, 1)
         v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
@@ -66,7 +66,7 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(k.shape, img.shape)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
-    def test_cms1d_newton_data(self):
+    def test_cmscr1dnewton_data(self):
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
         img = misc.imread(name)

@@ -17,16 +17,17 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import os
 import glob
-import warnings
-import numpy as np
-from scipy import misc
-from scipy import ndimage
-from matplotlib import cm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import os
+import warnings
+from matplotlib import cm
 from ofmc.model.cmscr import cmscr1d
+from scipy import misc
+from scipy import ndimage
+
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'

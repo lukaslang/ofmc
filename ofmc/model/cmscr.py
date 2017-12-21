@@ -17,17 +17,17 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import numpy as np
+from dolfin import assemble
 from dolfin import dx
+from dolfin import Function
+from dolfin import FunctionSpace
 from dolfin import solve
 from dolfin import split
-from dolfin import assemble
-from dolfin import Function
-from dolfin import TrialFunctions
 from dolfin import TestFunctions
-from dolfin import FunctionSpace
-from dolfin import VectorFunctionSpace
+from dolfin import TrialFunctions
 from dolfin import UnitSquareMesh
+from dolfin import VectorFunctionSpace
+import numpy as np
 import ofmc.util.dolfinhelpers as dh
 
 

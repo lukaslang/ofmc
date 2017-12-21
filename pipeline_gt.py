@@ -78,7 +78,6 @@ for gen in genotypes:
 
         for v in roi:
             plt.plot(roi[v]['x'], roi[v]['y'], 'C3', lw=2)
-        plt.show()
 
         # Save figure.
         fig.savefig(os.path.join(resultpath, '{0}-roi.png'.format(dat)))
@@ -105,7 +104,6 @@ for gen in genotypes:
             lc.set_array(derivspl(y))
             lc.set_linewidth(2)
             plt.gca().add_collection(lc)
-        plt.show()
 
         # Save figure.
         fig.savefig(os.path.join(resultpath, '{0}-spline.png'.format(dat)))

@@ -156,6 +156,7 @@ for gen in genotypes:
         # vel = cm1d(img, alpha0, alpha1)
         # vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)
         vel, k = cmscr1d(img, alpha0, alpha1, alpha2, alpha3, beta)
+        # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
 
         # Plot and save figures.
         saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)

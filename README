@@ -39,7 +39,7 @@ For the full license statement see the file LICENSE.
 
 Moreover, the package includes third-party libraries:
 
-Name: tifffile
+Name: tifffile.py
 Author: Christoph Gohlke
 URL: http://www.lfd.uci.edu/~gohlke/
 See ofmc/external/tifffile.py for the license.

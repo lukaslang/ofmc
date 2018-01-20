@@ -31,7 +31,7 @@ from ofmc.model.of import of2dmcs
 from scipy import ndimage
 
 # Set path with data.
-datapath = ('/Users/lukaslang/'
+datapath = ('/home/ll542/store/'
             'Dropbox (Cambridge University)/Drosophila/Data from Guy')
 
 # Set path where results are saved.

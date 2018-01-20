@@ -163,7 +163,7 @@ def of2dmcs(img1: np.array, img2: np.array, alpha0: float, alpha1: float,
 
     # Compute solution.
     v = Function(W)
-    solve(A == b, v)
+    solve(A == b, v, [], solver_parameters={"linear_solver": "cg"})
 
     # Split solution into functions.
     v1, v2, k = v.split(deepcopy=True)

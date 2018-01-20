@@ -21,6 +21,8 @@
 # This file computes two-channel optical flow with a source for the second
 # channel.
 import glob
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os

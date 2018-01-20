@@ -90,7 +90,7 @@ def savesource(path: str, name: str, img: np.array):
     plt.close(fig)
 
 
-def savevelocity(path: str, name: str, vel: np.array):
+def savevelocity(path: str, name: str, img: np.array vel: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -162,6 +162,6 @@ for gen in genotypes:
         # Plot and save figures.
         saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)
         savevelocity(os.path.join(os.path.join(resultpath, gen), dat),
-                     name, vel)
+                     name, img, vel)
         savesource(os.path.join(os.path.join(resultpath, gen), dat),
                    name, k)

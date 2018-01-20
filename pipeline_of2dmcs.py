@@ -51,8 +51,8 @@ def loadimage(filename: str) -> np.array:
     img = tiff.imread(filename)
 
     # Crop images.
-    # img = img[0:3, 80:-100, 80:-100]
-    img = img[0:13, 150:200, 150:200]
+    img = img[0:10, 80:-100, 80:-100]
+    # img = img[0:13, 150:200, 150:200]
 
     # Filter each frame.
     for k in range(img.shape[0]):

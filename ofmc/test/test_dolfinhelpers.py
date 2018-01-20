@@ -13,6 +13,12 @@ class TestDolfinhelpers(unittest.TestCase):
         v = dh.img2funvec(img)
         np.testing.assert_allclose(dh.funvec2img(v, m, n), img)
 
+    def test_imgseq2fun_fun2imgseq(self):
+        m, n, o = 7, 13, 10
+        img = np.random.rand(m, n, o)
+        v = dh.imgseq2funvec(img)
+        np.testing.assert_allclose(dh.funvec2imgseq(v, m, n, o), img)
+
 
 if __name__ == '__main__':
     unittest.main()

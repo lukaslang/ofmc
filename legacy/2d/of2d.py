@@ -7,7 +7,7 @@ import numpy as np
 from scipy import misc
 from scipy import ndimage
 
-import tifffile as tiff
+import ofmc.external.tifffile as tiff
 
 # Set regularisation parameter.
 alpha = 1e-2
@@ -18,15 +18,15 @@ name = ['epidermalejonction2d', 'CadherinFrames', 'MyosinFrames']
 ending = ['tif', 'tif', 'tif']
 
 # Select file.
-idx = 2
+idx = 1
 name = name[idx]
 
 # Read image.
 #img = tiff.imread('../../../data/{0}.{1}'.format(name, ending[idx]))
-img = tiff.imread('../../../data/3LU/{0}.{1}'.format(name, ending[idx]))
+img = tiff.imread('data/3LU/{0}.{1}'.format(name, ending[idx]))
 
 # Select first frames.
-img = img[5:9, 200:400, 200:400]
+img = img[0:3, 100:200, 100:200]
 
 # Filter image.
 for k in range(img.shape[0]):

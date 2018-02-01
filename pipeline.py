@@ -49,7 +49,7 @@ def loadimage(filename: str) -> np.array:
     img = misc.imread(filename)
 
     # Remove cut.
-    img = np.vstack((img[0:4, :], img[6:, :]))
+    img = np.vstack((img[0:5, :], img[4, :], img[6:, :]))
 
     # Filter image.
     img = ndimage.gaussian_filter(img, sigma=1)
@@ -90,7 +90,7 @@ def savesource(path: str, name: str, img: np.array):
     plt.close(fig)
 
 
-def savevelocity(path: str, name: str, img: np.array vel: np.array):
+def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -111,7 +111,7 @@ def savevelocity(path: str, name: str, img: np.array vel: np.array):
     hx, hy = 1./(m-1), 1./(n-1)
 
     # Create grid for streamlines.
-    Y, X = np.mgrid[0:m:1, 0:n:1]
+    Y, X = np.mgrid[0:m, 0:n]
     V = np.ones_like(X)*hy
 
     # Plot streamlines.

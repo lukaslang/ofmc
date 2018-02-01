@@ -4,3 +4,4 @@ python/.cache
 *.pyc
 .cache
 results-old
+ipython.html

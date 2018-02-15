@@ -41,8 +41,8 @@ if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
 # Set regularisation parameter.
-alpha0 = 1e-1
-alpha1 = 1e-1
+alpha0 = 5e-3
+alpha1 = 1e-3
 alpha2 = 5e-4
 alpha3 = 5e-4
 beta = 1e-3
@@ -145,7 +145,10 @@ for gen in genotypes:
         gridpoints = np.hstack([gridx.reshape(m*n, 1), gridy.reshape(m*n, 1)])
 
         # Plot image.
-        fig = plt.figure()
+        #fig = plt.figure()
+        # plt.imshow(imgp, cmap=cm.gray)
+
+        fig, ax = plt.subplots(figsize=(10, 5))
         plt.imshow(imgp, cmap=cm.gray)
 
         maxvel = abs(vel).max()
@@ -177,6 +180,19 @@ for gen in genotypes:
             lc.set_array(veval)
             lc.set_linewidth(2)
             plt.gca().add_collection(lc)
+
+
+        m, n = vel.shape
+        hx, hy = 1./(m-1), 1./(n-1)
+    
+        # Create grid for streamlines.
+        Y, X = np.mgrid[0:m, 0:n]
+        V = np.ones_like(X)*hy
+    
+        # Plot streamlines.
+        strm = ax.streamplot(X, Y, vel*hx, V, density=2,
+                             color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+
 
         # Save figure.
         fig.savefig(os.path.join(resultpath, '{0}-velocity.png'.format(dat)))

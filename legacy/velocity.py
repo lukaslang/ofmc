@@ -16,16 +16,18 @@ V_cg = FunctionSpace(mesh, "CG", 1)
 
 a0 = 0.05
 v0 = 1
-tau0 = 1.0
+tau0 = 1.5
 tau1 = 0.2
 
 
 def vel0(t):
     return v0 * np.exp(- t / tau0)
 
+def at(t):
+    return a0 + vel0(t) * t
+
 def vel(t, x):
-    at = a0 + vel0(t) * t
-    return vel0(t) * np.exp(- np.abs(x - at) / tau1) if x >= at else vel0(t) * x / at
+    return vel0(t) * np.exp(- np.abs(x - at(t)) / tau1) if x >= at(t) else vel0(t) * x / at(t)
 
 T = 4
 n = 100
@@ -50,9 +52,11 @@ for i in range(n):
     
     v[i, :] = np.concatenate((-f0_values[0:-1], np.flip(f0_values, axis=0)), axis=0)
     
-#    plt.plot(v[i, :])
-#    plt.show()
-#    print(t)
+    #plt.plot(v[i, :])
+    #plt.show()
+    #axes = plt.gca()
+    #axes.set_ylim([-1, 1])
+    #print("t={0}, at(t)={1}".format(t, at(t)))
 
 #v = np.flip(v, axis=1)
 

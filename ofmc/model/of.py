@@ -17,19 +17,19 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import numpy as np
 from dolfin import dx
+from dolfin import dof_to_vertex_map
 from dolfin import solve
 from dolfin import Function
-from dolfin import TrialFunction
-from dolfin import TrialFunctions
+from dolfin import FunctionSpace
 from dolfin import TestFunction
 from dolfin import TestFunctions
-from dolfin import FunctionSpace
-from dolfin import UnitSquareMesh
+from dolfin import TrialFunction
+from dolfin import TrialFunctions
 from dolfin import UnitCubeMesh
+from dolfin import UnitSquareMesh
 from dolfin import VectorFunctionSpace
-from dolfin import dof_to_vertex_map
+import numpy as np
 import ofmc.util.dolfinhelpers as dh
 
 
@@ -63,8 +63,14 @@ def of1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     f.vector()[:] = dh.img2funvec(img)
 
     # Define derivatives of data.
-    ft = f.dx(0)
-    fx = f.dx(1)
+    ft = Function(V)
+    ftv = np.diff(img, axis=0) * (m - 1)
+    ftv = np.concatenate((ftv, ftv[-1, :].reshape(1, n)), axis=0)
+    ft.vector()[:] = dh.img2funvec(ftv)
+
+    fx = Function(V)
+    fxv = np.gradient(img, 1 / (n - 1), axis=1)
+    fx.vector()[:] = dh.img2funvec(fxv)
 
     # Define weak formulation.
     A = fx*fx*v*w*dx + alpha0*v.dx(1)*w.dx(1)*dx + alpha1*v.dx(0)*w.dx(0)*dx

@@ -58,8 +58,14 @@ def cm1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     f.vector()[:] = dh.img2funvec(img)
 
     # Define derivatives of data.
-    ft = f.dx(0)
-    fx = f.dx(1)
+    ft = Function(V)
+    ftv = np.diff(img, axis=0) * (m - 1)
+    ftv = np.concatenate((ftv, ftv[-1, :].reshape(1, n)), axis=0)
+    ft.vector()[:] = dh.img2funvec(ftv)
+
+    fx = Function(V)
+    fxv = np.gradient(img, 1 / (n - 1), axis=1)
+    fx.vector()[:] = dh.img2funvec(fxv)
 
     # Define weak formulation.
     A = - (fx*v + f*v.dx(1)) * (fx*w + f*w.dx(1))*dx \

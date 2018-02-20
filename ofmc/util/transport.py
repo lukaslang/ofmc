@@ -37,15 +37,16 @@ from dolfin import UnitIntervalMesh
 import numpy as np
 
 
-def transport1d(vel: np.array, finit: np.array) -> np.array:
+def transport1d(vel: np.array, source: np.array, finit: np.array) -> np.array:
     """Computes the 1D transport via continuity equation.
 
-    Takes an array v of velocities and initial data f0, and computes a solution
-    to the continuity equation via discontinuous galerkin method with
-    third order Runge-Kutta method.
+    Takes an array v of velocities, a source array, and initial data f0, and
+    computes a solution to the continuity equation via discontinuous galerkin
+    method with third order Runge-Kutta method.
 
     Args:
         vel (np.array): A 2D velocity field of size (m, n)
+        source (np.array): A 2D source of size (m, n)
         finit (np.array): A vector of length n with initial data.
 
     Returns:
@@ -107,6 +108,11 @@ def transport1d(vel: np.array, finit: np.array) -> np.array:
         v.vector()[:] = -vel[d - 1, :]
         v = project(v, V)
 
+        # Create source function.
+        src = Function(W)
+        src.vector()[:] = -source[d - 1, :]
+        src = project(src, V)
+
         # Define non-negative dot product with normal.
         vv = as_vector((v, ))
         vn = 0.5 * (dot(vv, fn) + abs(dot(vv, fn)))
@@ -115,14 +121,13 @@ def transport1d(vel: np.array, finit: np.array) -> np.array:
         a_mass = f*w*dx
         a_int = -w.dx(0)*f*v*dx
         a_flux = jump(w)*(vn('+')*f('+') - vn('-')*f('-'))*dS + w*vn*f*ds
-        # a_source = - k*w*dx
+        a_source = src*w*dx
 
         # Assemble mass matrix.
         M = assemble(a_mass)
 
         # Define right-hand side.
-        # rhs = -dt*(a_int + a_flux + a_source)
-        rhs = -dt*(a_int + a_flux)
+        rhs = -dt*(a_int + a_flux + a_source)
 
         L = assemble(action(rhs, f0))
         solve(M, df1.vector(), L)

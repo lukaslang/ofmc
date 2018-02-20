@@ -110,17 +110,8 @@ name = 'artificial'
 # Define temporal and spacial number of cells.
 m, n = 40, 200
 
-# Define parameters of artificial velocity field.
-c0 = 0.05
-v0 = 0.5
-tau0 = 0.5
-tau1 = 0.5
-
 # Create artificial velocity.
-v = velocity(m, n, c0, v0, tau0, tau1)
-
-# Convert to array.
-v = funvec2img(v.vector().array(), m, n)
+v = 0.1 * np.ones((m, n))
 
 # Define mesh.
 mesh = UnitIntervalMesh(n - 1)
@@ -145,19 +136,23 @@ f0 = interpolate(f0, V)
 # Compute transport
 f = transport1d(v, np.zeros_like(v), f0.vector().array())
 
+# Compute transport with f as source.
+src = 0.5 * f[:-1]
+f = transport1d(v, src, f0.vector().array())
+
 # Normalise to [0, 1].
 f = np.array(f, dtype=float)
 f = (f - f.min()) / (f.max() - f.min())
 
 # Add some noise.
-f = f + 0.05 * np.random.randn(m + 1, n)
+# f = f + 0.01 * np.random.randn(m + 1, n)
 
 # Set regularisation parameters.
-alpha0 = 1e-1
+alpha0 = 5e-1
 alpha1 = 1e-1
-alpha2 = 1e-2
-alpha3 = 1e-2
-beta = 1e1
+alpha2 = 1e-3
+alpha3 = 1e-3
+beta = 5e-1
 
 # Compute velocities.
 # vel = of1d(f, alpha0, alpha1)
@@ -167,8 +162,8 @@ vel, k = cmscr1d(f, alpha0, alpha1, alpha2, alpha3, beta)
 # vel, k = cmscr1dnewton(f, alpha0, alpha1, alpha2, alpha3, beta)
 
 # Plot and save figures.
-saveimage(os.path.join(resultpath, 'artificial'), name, f)
-savevelocity(os.path.join(resultpath, 'artificial'), name, f, vel)
-savesource(os.path.join(resultpath, 'artificial'), name, k)
+saveimage(os.path.join(resultpath, 'artificial-source'), name, f)
+savevelocity(os.path.join(resultpath, 'artificial-source'), name, f, vel)
+savesource(os.path.join(resultpath, 'artificial-source'), name, k)
 
 # Compute differences.

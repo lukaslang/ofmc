@@ -38,7 +38,7 @@ resultpath = 'results'
 
 # Set regularisation parameter.
 alpha0 = 5e-3
-alpha1 = 1e-3
+alpha1 = 1e-2
 alpha2 = 5e-4
 alpha3 = 5e-4
 beta = 1e-3
@@ -108,7 +108,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     plt.close(fig)
 
     m, n = vel.shape
-    hx, hy = 1./(m-1), 1./(n-1)
+    hx, hy = 1.0/(m-1), 1.0/(n-1)
 
     # Create grid for streamlines.
     Y, X = np.mgrid[0:m, 0:n]
@@ -122,6 +122,32 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     fig.colorbar(strm.lines, orientation='horizontal')
 
     fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)))
+    plt.close(fig)
+
+    # Save velocity profile after cut.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plt.plot(vel[5])
+    ax.set_title('Velocity profile right after the cut')
+
+    fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
+    plt.close(fig)
+
+
+def savestrainrate(path: str, name: str, sr: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    maxsr = abs(sr).max()
+    normi = mpl.colors.Normalize(vmin=-maxsr, vmax=maxsr)
+
+    # Plot velocity.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cax = ax.imshow(sr, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    ax.set_title('Strain rate')
+    fig.colorbar(cax, orientation='horizontal')
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}-strainrate.png'.format(name)))
     plt.close(fig)
 
 
@@ -165,3 +191,10 @@ for gen in genotypes:
                      name, img, vel)
         savesource(os.path.join(os.path.join(resultpath, gen), dat),
                    name, k)
+
+        # Compute and save strain rate.
+        m, n = img.shape
+        hy = 1.0 / (n - 1)
+        sr = np.gradient(vel, hy, axis=1)
+        savestrainrate(os.path.join(os.path.join(resultpath, gen), dat),
+                       name, sr)

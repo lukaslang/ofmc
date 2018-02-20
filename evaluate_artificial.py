@@ -100,6 +100,32 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)))
     plt.close(fig)
 
+    # Save velocity profile after cut.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plt.plot(vel[5])
+    ax.set_title('Velocity profile right after the cut')
+
+    fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
+    plt.close(fig)
+
+
+def savestrainrate(path: str, name: str, sr: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    maxsr = abs(sr).max()
+    normi = mpl.colors.Normalize(vmin=-maxsr, vmax=maxsr)
+
+    # Plot velocity.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cax = ax.imshow(sr, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    ax.set_title('Strain rate')
+    fig.colorbar(cax, orientation='horizontal')
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}-strainrate.png'.format(name)))
+    plt.close(fig)
+
 
 # Set path where results are saved.
 resultpath = 'results'
@@ -150,7 +176,7 @@ f = np.array(f, dtype=float)
 f = (f - f.min()) / (f.max() - f.min())
 
 # Add some noise.
-f = f + 0.05 * np.random.randn(m + 1, n)
+# f = f + 0.05 * np.random.randn(m + 1, n)
 
 # Set regularisation parameters.
 alpha0 = 1e-1
@@ -169,6 +195,13 @@ vel, k = cmscr1d(f, alpha0, alpha1, alpha2, alpha3, beta)
 # Plot and save figures.
 saveimage(os.path.join(resultpath, 'artificial'), name, f)
 savevelocity(os.path.join(resultpath, 'artificial'), name, f, vel)
+savevelocity(os.path.join(resultpath, 'artificial'), 'artificial-gt', f, v)
 savesource(os.path.join(resultpath, 'artificial'), name, k)
 
 # Compute differences.
+
+# Compute and save strain rate.
+m, n = f.shape
+hy = 1.0 / (n - 1)
+sr = np.gradient(vel, hy, axis=1)
+savestrainrate(os.path.join(resultpath, 'artificial'), name, sr)

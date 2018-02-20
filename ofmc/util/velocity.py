@@ -23,6 +23,7 @@ from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import UnitIntervalMesh
 from dolfin import UnitSquareMesh
+from scipy.integrate import ode
 import numpy as np
 
 
@@ -122,3 +123,81 @@ def velocity(m: int, n: int, c0: float, v0: float, tau0: float,
     v = velocity(degree=1)
     v = interpolate(v, V)
     return v
+
+
+def characteristic(m: int, n: int, c0: float, v0: float, tau0: float,
+                   tau1: float, y0: float) -> np.array:
+    """Computes a characteristic for a parametrised velocity field.
+
+    Takes number of mesh cells t in time, number of mesh cells n in space, and
+    velocity parameters, an initial position y0, and returns a vector of
+    positions.
+
+    Args:
+        m (int): The number of cells in time.
+        n (int): The number of cells in space.
+        c0 (float): The characteristic start at 0.5 - c0 and 0.5 + c0.
+        v0 (float): Initial velocity of the characteristic.
+        tau0 (float): Decay parameter of the velocity of the characteristic.
+        tau1 (float): Decay of velocity outside the characteristic.
+        y0 (float): Initial position of the characteristic.
+
+    Returns:
+        np.array: An array of shape (m + 1, 1).
+        
+    """
+    def f(t, y):
+        return vel(t, y - 0.5, c0, v0, tau0, tau1)
+
+    # Set initial parameter.
+    t0 = 0
+
+    # Create integrator.
+    r = ode(f).set_integrator('dopri5')
+    r.set_initial_value(y0, t0)
+
+    # Set parameters.
+    T = 1
+    dt = 1 / (m - 1)
+
+    # Create solution array.
+    y = np.zeros((m + 1, 1))
+    y[0] = y0
+
+    k = 1
+    while r.successful() and r.t < T:
+        r.integrate(r.t + dt)
+        y[k] = r.y
+        k += 1
+
+    return y
+
+
+def characteristics(m: int, n: int, c0: float, v0: float, tau0: float,
+                    tau1: float, y0: np.array) -> np.array:
+    """Computes a characteristic for a parametrised velocity field.
+
+    Takes number of mesh cells t in time, number of mesh cells n in space, and
+    velocity parameters, initial positions y0, and returns a vector of
+    positions.
+
+    Args:
+        m (int): The number of cells in time.
+        n (int): The number of cells in space.
+        c0 (float): The characteristic start at 0.5 - c0 and 0.5 + c0.
+        v0 (float): Initial velocity of the characteristic.
+        tau0 (float): Decay parameter of the velocity of the characteristic.
+        tau1 (float): Decay of velocity outside the characteristic.
+        y0 (np.array): An array of initial positions of shape (k, 1).
+
+    Returns:
+        np.array: An array of shape (m + 1, k).
+
+    """
+    p = y0.shape[0]
+    c = np.zeros((m + 1, p))
+
+    for k in range(p):
+        c[:, k] = characteristic(m, n, c0, v0, tau0, tau1, y0[k]).flatten()
+
+    return c

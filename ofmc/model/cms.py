@@ -54,7 +54,7 @@ def cms1d(img: np.array, alpha0: float, alpha1: float,
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m, n)
+    mesh = UnitSquareMesh(m-1, n-1)
 
     # Define function space and functions.
     P = FiniteElement('P', triangle, 1)

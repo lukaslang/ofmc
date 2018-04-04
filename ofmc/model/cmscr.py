@@ -57,7 +57,7 @@ def cmscr1d(img: np.array, alpha0: float, alpha1: float,
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m, n)
+    mesh = UnitSquareMesh(m-1, n-1)
 
     # Define function space and functions.
     W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)
@@ -121,7 +121,7 @@ def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m, n)
+    mesh = UnitSquareMesh(m-1, n-1)
 
     # Define function space and functions.
     W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)

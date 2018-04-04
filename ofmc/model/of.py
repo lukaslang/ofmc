@@ -51,7 +51,7 @@ def of1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m, n)
+    mesh = UnitSquareMesh(m-1, n-1)
 
     # Define function space and functions.
     V = FunctionSpace(mesh, 'CG', 1)
@@ -111,7 +111,7 @@ def of2dmcs(img1: np.array, img2: np.array, alpha0: float, alpha1: float,
     """
     # Create mesh.
     [t, m, n] = img1.shape
-    mesh = UnitCubeMesh(t-1, m, n)
+    mesh = UnitCubeMesh(t-2, m-1, n-1)
 
     # Define function space and functions.
     V = FunctionSpace(mesh, 'CG', 1)

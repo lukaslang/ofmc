@@ -67,7 +67,7 @@ def velocityslice(t: float, n: int, c0: float, v0: float, tau0: float,
 
     """
     # Create mesh.
-    mesh = UnitIntervalMesh(n)
+    mesh = UnitIntervalMesh(n-1)
 
     # Define function space.
     V = FunctionSpace(mesh, 'CG', 1)
@@ -106,7 +106,7 @@ def velocity(m: int, n: int, c0: float, v0: float, tau0: float,
 
     """
     # Create mesh.
-    mesh = UnitSquareMesh(m, n)
+    mesh = UnitSquareMesh(m-1, n-1)
 
     # Define function space.
     V = FunctionSpace(mesh, 'CG', 1)
@@ -144,7 +144,7 @@ def characteristic(m: int, n: int, c0: float, v0: float, tau0: float,
 
     Returns:
         np.array: An array of shape (m + 1, 1).
-        
+
     """
     def f(t, y):
         return vel(t, y - 0.5, c0, v0, tau0, tau1)

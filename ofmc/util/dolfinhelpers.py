@@ -40,12 +40,13 @@ def img2funvec(img: np.array) -> np.array:
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m, n)
-    x = mesh.coordinates().reshape((-1, 2))
+    mesh = UnitSquareMesh(m-1, n-1)
+    xm = mesh.coordinates().reshape((-1, 2))
 
     # Evaluate function at vertices.
     hx, hy = 1./(m-1), 1./(n-1)
-    x, y = np.array(x[:, 0]/hx, dtype=int), np.array(x[:, 1]/hy, dtype=int)
+    x = np.array(np.round(xm[:, 0]/hx), dtype=int)
+    y = np.array(np.round(xm[:, 1]/hy), dtype=int)
     fv = img[x, y]
 
     # Create function space.
@@ -76,12 +77,13 @@ def funvec2img(v: np.array, m: int, n: int) -> np.array:
     img = np.zeros((m, n))
 
     # Create mesh and function space.
-    mesh = UnitSquareMesh(m, n)
-    x = mesh.coordinates().reshape((-1, 2))
+    mesh = UnitSquareMesh(m-1, n-1)
+    xm = mesh.coordinates().reshape((-1, 2))
 
     # Evaluate function at vertices.
     hx, hy = 1./(m-1), 1./(n-1)
-    x, y = np.array(x[:, 0]/hx, dtype=int), np.array(x[:, 1]/hy, dtype=int)
+    x = np.array(np.round(xm[:, 0]/hx), dtype=int)
+    y = np.array(np.round(xm[:, 1]/hy), dtype=int)
 
     # Create function space and function.
     V = FunctionSpace(mesh, 'CG', 1)
@@ -109,14 +111,14 @@ def imgseq2funvec(img: np.array) -> np.array:
     """
     # Create mesh.
     [m, n, o] = img.shape
-    mesh = UnitCubeMesh(m, n, o)
+    mesh = UnitCubeMesh(m-1, n-1, o-1)
     mc = mesh.coordinates().reshape((-1, 3))
 
     # Evaluate function at vertices.
     hx, hy, hz = 1./(m-1), 1./(n-1), 1./(o-1)
-    x = np.array(mc[:, 0]/hx, dtype=int)
-    y = np.array(mc[:, 1]/hy, dtype=int)
-    z = np.array(mc[:, 2]/hz, dtype=int)
+    x = np.array(np.round(mc[:, 0]/hx), dtype=int)
+    y = np.array(np.round(mc[:, 1]/hy), dtype=int)
+    z = np.array(np.round(mc[:, 2]/hz), dtype=int)
     fv = img[x, y, z]
 
     # Create function space.
@@ -147,14 +149,14 @@ def funvec2imgseq(v: np.array, m: int, n: int, o: int) -> np.array:
     img = np.zeros((m, n, o))
 
     # Create mesh and function space.
-    mesh = UnitCubeMesh(m, n, o)
+    mesh = UnitCubeMesh(m-1, n-1, o-1)
     mc = mesh.coordinates().reshape((-1, 3))
 
     # Evaluate function at vertices.
     hx, hy, hz = 1./(m-1), 1./(n-1), 1./(o-1)
-    x = np.array(mc[:, 0]/hx, dtype=int)
-    y = np.array(mc[:, 1]/hy, dtype=int)
-    z = np.array(mc[:, 2]/hz, dtype=int)
+    x = np.array(np.round(mc[:, 0]/hx), dtype=int)
+    y = np.array(np.round(mc[:, 1]/hy), dtype=int)
+    z = np.array(np.round(mc[:, 2]/hz), dtype=int)
 
     # Create function space and function.
     V = FunctionSpace(mesh, 'CG', 1)

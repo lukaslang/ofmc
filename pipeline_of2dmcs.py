@@ -33,8 +33,10 @@ from ofmc.model.of import of2dmcs
 from scipy import ndimage
 
 # Set path with data.
-datapath = ('/home/ll542/store/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Guy')
+# datapath = ('/home/ll542/store/'
+#            'Dropbox (Cambridge University)/Drosophila/Data from Guy/3LU')
+datapath = ('/Users/lukaslang/'
+            'Dropbox (Cambridge University)/Drosophila/Data from Guy/')
 
 # Set path where results are saved.
 resultpath = 'results/of2dmcs'
@@ -51,7 +53,8 @@ def loadimage(filename: str) -> np.array:
     img = tiff.imread(filename)
 
     # Crop images.
-    img = img[0:30, 80:-100, 80:-100]
+    # img = img[0:30, 80:-100, 80:-100]
+    img = img[0:3, 100:200, 100:200]
 
     # Filter each frame.
     for k in range(img.shape[0]):

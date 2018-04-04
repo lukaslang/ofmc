@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import unittest
 from dolfin import Expression
 from dolfin import FunctionSpace
 from dolfin import interpolate
-from dolfin import plot
 from dolfin import UnitIntervalMesh
 from matplotlib import cm
-from ofmc.model.cmscr import cmscr1d
-from ofmc.model.cm import cm1d
-from ofmc.model.of import of1d
 from ofmc.util.transport import transport1d
-from ofmc.util.velocity import velocity
-from ofmc.util.dolfinhelpers import funvec2img
 
 
 # Define parameters.
@@ -155,8 +148,9 @@ class TestTransport(unittest.TestCase):
         # Compute transport
         f = transport1d(v, np.zeros_like(v), f0.vector().array())
 
-        fig = plt.figure()
-        plt.imshow(f, cmap=cm.coolwarm)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        cax = ax.imshow(f, cmap=cm.coolwarm)
+        fig.colorbar(cax, orientation='vertical')
         plt.show()
         plt.close(fig)
 

@@ -18,6 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import glob
+import imageio
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +26,6 @@ import os
 import warnings
 from matplotlib import cm
 from ofmc.model.cmscr import cmscr1d
-from scipy import misc
 from scipy import ndimage
 
 
@@ -35,6 +35,8 @@ datapath = ('/Users/lukaslang/'
 
 # Set path where results are saved.
 resultpath = 'results'
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
 
 # Set regularisation parameter.
 alpha0 = 5e-3
@@ -46,7 +48,7 @@ beta = 1e-3
 
 def loadimage(filename: str) -> np.array:
     # Read image.
-    img = misc.imread(filename)
+    img = imageio.imread(filename)
 
     # Remove cut.
     img = np.vstack((img[0:5, :], img[4, :], img[6:, :]))

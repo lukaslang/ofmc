@@ -27,7 +27,7 @@ class TestDolfinhelpers(unittest.TestCase):
         V = FunctionSpace(mesh, 'CG', 1)
         f = project(Constant(1.0), V)
 
-        v = dh.funvec2img(f.vector().array(), m, n)
+        v = dh.funvec2img(f.vector().get_local(), m, n)
         np.testing.assert_allclose(v, np.ones((m, n)))
 
     def test_imgseq2fun_fun2imgseq(self):

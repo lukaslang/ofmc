@@ -146,7 +146,7 @@ tau1 = 0.5
 v = velocity(m, n, c0, v0, tau0, tau1)
 
 # Convert to array.
-v = funvec2img(v.vector().array(), m, n)
+v = funvec2img(v.vector().get_local(), m, n)
 
 # Define mesh.
 mesh = UnitIntervalMesh(n - 1)
@@ -169,7 +169,7 @@ f0 = DoubleHat(degree=1)
 f0 = interpolate(f0, V)
 
 # Compute transport
-f = transport1d(v, np.zeros_like(v), f0.vector().array())
+f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
 
 # Normalise to [0, 1].
 f = np.array(f, dtype=float)

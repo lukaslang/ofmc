@@ -19,8 +19,8 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import glob
+import imageio
 import numpy as np
-from scipy import misc
 from scipy import ndimage
 from scipy import interpolate
 from read_roi import read_roi_zip
@@ -49,7 +49,7 @@ beta = 1e-3
 
 
 def loadimage(filename: str) -> np.array:
-    return misc.imread(filename)
+    return imageio.imread(filename)
 
 
 def prepareimage(img: np.array) -> np.array:
@@ -145,7 +145,7 @@ for gen in genotypes:
         gridpoints = np.hstack([gridx.reshape(m*n, 1), gridy.reshape(m*n, 1)])
 
         # Plot image.
-        #fig = plt.figure()
+        # fig = plt.figure()
         # plt.imshow(imgp, cmap=cm.gray)
 
         fig, ax = plt.subplots(figsize=(10, 5))
@@ -181,18 +181,17 @@ for gen in genotypes:
             lc.set_linewidth(2)
             plt.gca().add_collection(lc)
 
-
         m, n = vel.shape
         hx, hy = 1./(m-1), 1./(n-1)
-    
+
         # Create grid for streamlines.
         Y, X = np.mgrid[0:m, 0:n]
         V = np.ones_like(X)*hy
-    
+
         # Plot streamlines.
         strm = ax.streamplot(X, Y, vel*hx, V, density=2,
-                             color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
-
+                             color=vel, linewidth=1, norm=normi,
+                             cmap=cm.coolwarm)
 
         # Save figure.
         fig.savefig(os.path.join(resultpath, '{0}-velocity.png'.format(dat)))

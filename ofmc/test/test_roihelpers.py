@@ -19,7 +19,7 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 import numpy as np
-from scipy import misc
+import imageio
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.collections import LineCollection
@@ -60,7 +60,7 @@ class TestRoihelpers(unittest.TestCase):
 
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
-        img = misc.imread(name)
+        img = imageio.imread(name)
 
         # Plot image.
         plt.imshow(img, cmap=cm.gray)
@@ -78,7 +78,7 @@ class TestRoihelpers(unittest.TestCase):
 
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
-        img = misc.imread(name)
+        img = imageio.imread(name)
 
         # Plot image.
         plt.imshow(img, cmap=cm.gray)
@@ -99,7 +99,7 @@ class TestRoihelpers(unittest.TestCase):
 
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
-        img = misc.imread(name)
+        img = imageio.imread(name)
 
         # Plot image.
         plt.imshow(img, cmap=cm.gray)

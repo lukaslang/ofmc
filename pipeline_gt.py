@@ -17,10 +17,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import os
 import glob
+import imageio
+import os
 import numpy as np
-from scipy import misc
 from read_roi import read_roi_zip
 from matplotlib import cm
 from matplotlib.collections import LineCollection
@@ -33,10 +33,12 @@ datapath = ('/Users/lukaslang/'
 
 # Set path where results are saved.
 resultpath = 'results'
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
 
 
 def loadimage(filename: str) -> np.array:
-    return misc.imread(filename)
+    return imageio.imread(filename)
 
 
 print('Processing {0}'.format(datapath))

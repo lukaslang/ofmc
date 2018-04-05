@@ -134,11 +134,11 @@ f0 = DoubleHat(degree=1)
 f0 = interpolate(f0, V)
 
 # Compute transport
-f = transport1d(v, np.zeros_like(v), f0.vector().array())
+f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
 
 # Compute transport with f as source.
 src = 0.5 * f[:-1]
-f = transport1d(v, src, f0.vector().array())
+f = transport1d(v, src, f0.vector().get_local())
 
 # Normalise to [0, 1].
 f = np.array(f, dtype=float)

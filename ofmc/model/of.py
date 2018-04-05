@@ -81,7 +81,7 @@ def of1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     solve(A == b, v)
 
     # Convert back to array.
-    vel = dh.funvec2img(v.vector().array(), m, n)
+    vel = dh.funvec2img(v.vector().get_local(), m, n)
     return vel
 
 
@@ -175,7 +175,7 @@ def of2dmcs(img1: np.array, img2: np.array, alpha0: float, alpha1: float,
     v1, v2, k = v.split(deepcopy=True)
 
     # Convert back to arrays.
-    v1 = dh.funvec2imgseq(v1.vector().array(), t-1, m, n)
-    v2 = dh.funvec2imgseq(v2.vector().array(), t-1, m, n)
-    k = dh.funvec2imgseq(k.vector().array(), t-1, m, n)
+    v1 = dh.funvec2imgseq(v1.vector().get_local(), t-1, m, n)
+    v2 = dh.funvec2imgseq(v2.vector().get_local(), t-1, m, n)
+    k = dh.funvec2imgseq(k.vector().get_local(), t-1, m, n)
     return (np.stack((v1, v2), axis=3), k)

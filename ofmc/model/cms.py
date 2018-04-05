@@ -92,6 +92,6 @@ def cms1d(img: np.array, alpha0: float, alpha1: float,
     v, k = v.split(deepcopy=True)
 
     # Convert back to array.
-    vel = dh.funvec2img(v.vector().array(), m, n)
-    k = dh.funvec2img(k.vector().array(), m, n)
+    vel = dh.funvec2img(v.vector().get_local(), m, n)
+    k = dh.funvec2img(k.vector().get_local(), m, n)
     return vel, k

@@ -25,6 +25,7 @@ from matplotlib import cm
 # from ofmc.model.cm import cm1d
 # from ofmc.model.cms import cms1d
 from ofmc.model.cmscr import cmscr1d
+from ofmc.model.cmscr import cmscr1dnewton
 
 # Set path where results are saved.
 resultpath = os.path.join('results', 'analytic_example')
@@ -32,11 +33,11 @@ if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
 # Set regularisation parameter.
-alpha0 = 1e-1
+alpha0 = 1e1
 alpha1 = 1e-1
 alpha2 = 1e-3
 alpha3 = 1e-3
-beta = 1e-3
+beta = 1e-6
 
 
 def saveimage(path: str, name: str, img: np.array):
@@ -73,12 +74,13 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    maxvel = abs(vel).max()
-    normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
+    #maxvel = abs(vel).max()
+    #normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    cax = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    #cax = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    cax = ax.imshow(vel, interpolation='nearest', cmap=cm.coolwarm)
     ax.set_title('Velocity')
     fig.colorbar(cax, orientation='horizontal')
 
@@ -97,7 +99,8 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
     strm = ax.streamplot(X, Y, vel*hx, V, density=2,
-                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+#                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+                         color=vel, linewidth=1, cmap=cm.coolwarm)
     fig.colorbar(strm.lines, orientation='horizontal')
 
     fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)))
@@ -106,7 +109,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Save velocity profile after cut.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.plot(vel[0])
-    ax.set_title('Velocity profile right after the cut')
+    ax.set_title('Velocity profile at time zero')
 
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
     plt.close(fig)
@@ -134,6 +137,7 @@ def createimage(m: int, n: int) -> np.array:
 
     def f(t, x):
         return np.exp(-t/tau)*np.cos((x - v*t)/ell)
+        #return np.cos((x - v*t)/ell)
 
     x, t = np.meshgrid(np.linspace(0, n, n), np.linspace(0, m, m))
 
@@ -146,20 +150,14 @@ def createimage(m: int, n: int) -> np.array:
 name = 'analytic_example'
 
 # Create artificial image.
-img = createimage(50, 100)
-
-fig, ax = plt.subplots(figsize=(10, 5))
-cax = ax.imshow(img, cmap=cm.coolwarm)
-ax.set_title('Concentration')
-fig.colorbar(cax, orientation='horizontal')
-plt.show()
+img = createimage(5, 100)
 
 # Compute velocities.
 # vel = of1d(img, alpha0, alpha1)
 # vel = cm1d(img, alpha0, alpha1)
 # vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)
 vel, k = cmscr1d(img, alpha0, alpha1, alpha2, alpha3, beta)
-# vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
+#vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
 
 # Plot and save figures.
 saveimage(resultpath, name, img)

@@ -100,7 +100,7 @@ def transport1d(vel: np.array, source: np.array, finit: np.array) -> np.array:
 
     # Create solution array.
     fsol = np.zeros((m + 1, n))
-    fsol[0, :] = project(f0, W).vector().array()
+    fsol[0, :] = project(f0, W).vector().get_local()
 
     while(d <= m):
         # Create velocity function.
@@ -149,7 +149,7 @@ def transport1d(vel: np.array, source: np.array, finit: np.array) -> np.array:
 
         if(k % dumpfreq == 0 and k > 0):
             print('Iteration {0}, dump {1}'.format(k, d))
-            fsol[d, :] = project(f0, W).vector().array()
+            fsol[d, :] = project(f0, W).vector().get_local()
             d += 1
 
         t += dt

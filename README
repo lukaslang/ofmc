@@ -50,8 +50,8 @@ This software was written for and tested with Python 3.6.
 
 The following libraries are required for parts of this sofware:
 
-- FEniCS (2017.1)
-- scipy (0.19.1-py36_blas_openblas_202)
+- FEniCS (2017.2.0-np113py36_3)
+- scipy (1.0.1-py36_blas_openblas_200)
 - matplotlib (2.1.0-py36_1)
 - pillow (4.3.0-py36_1)
 - read-roi (1.3.2-py36_0)
@@ -76,11 +76,11 @@ d. Install scipy, matplotlib, pillow, and read-roi:
 
 Not yet in use:
 
-- dolfin-adjoint (2017.1.0-py36_0)
+- dolfin-adjoint (2017.2.0-py36_0)
 
 >> conda install -c conda-forge dolfin-adjoint
 
-e. In order to run the scripts install e.g. Spyder:
+e. In order to run/edit the scripts in an IDE install e.g. Spyder:
 
 >> conda install -c conda-forge spyder
 

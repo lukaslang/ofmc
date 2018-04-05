@@ -29,6 +29,23 @@ import ofmc.util.roihelpers as rh
 
 class TestRoihelpers(unittest.TestCase):
 
+    def test_removeduplicates(self):
+        x = np.array([-1, 1, 3, 3, 5, 7])
+        x, y = rh.removeduplicates(x, x)
+        np.testing.assert_array_equal(x, np.array([-1, 1, 3, 5, 7]))
+        np.testing.assert_array_equal(y, np.array([-1, 1, 3, 5, 7]))
+
+        z = np.array([-1, 1, 3, 5, 7])
+        x, y = rh.removeduplicates(z, z)
+        np.testing.assert_array_equal(x, z)
+        np.testing.assert_array_equal(y, z)
+
+        x = np.array([-1, 1, 3, 3, 5, 7])
+        y = np.array([7, 3, 2, 8, 2, 1])
+        a, b = rh.removeduplicates(x, y)
+        np.testing.assert_array_equal(a, np.array([-1, 1, 3, 5, 7]))
+        np.testing.assert_array_equal(b, np.array([7, 3, 2, 2, 1]))
+
     def test_roi2splines(self):
         # Load test zip.
         roi = read_roi_zip('ofmc/test/data/Manual_ROIs.zip')

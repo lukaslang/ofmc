@@ -28,7 +28,7 @@ class TestVelocity(unittest.TestCase):
         plt.figure()
         for t in rng:
             v = vel.velocityslice(t, n, c0, v0, tau0, tau1)
-            plot(v, range_min=-v0, range_max=v0)
+            plot(v)
 
         plt.show()
         plt.close()
@@ -46,7 +46,7 @@ class TestVelocity(unittest.TestCase):
         plt.close()
 
         # Convert to matrix.
-        v = dh.funvec2img(v.vector().array(), m, n)
+        v = dh.funvec2img(v.vector().get_local(), m, n)
 
         plt.figure()
         plt.imshow(v, cmap=cm.coolwarm)
@@ -70,7 +70,7 @@ class TestVelocity(unittest.TestCase):
         v = vel.velocity(m, n, c0, v0, tau0, tau1)
 
         # Convert to matrix.
-        v = dh.funvec2img(v.vector().array(), m, n)
+        v = dh.funvec2img(v.vector().get_local(), m, n)
 
         # Plot velocity.
         fig = plt.figure()
@@ -108,7 +108,7 @@ class TestVelocity(unittest.TestCase):
         v = vel.velocity(m, n, c0, v0, tau0, tau1)
 
         # Convert to matrix.
-        v = dh.funvec2img(v.vector().array(), m, n)
+        v = dh.funvec2img(v.vector().get_local(), m, n)
 
         # Plot velocity.
         fig = plt.figure()

@@ -96,8 +96,8 @@ def cmscr1d(img: np.array, alpha0: float, alpha1: float,
     v, k = w.split(deepcopy=True)
 
     # Convert back to array.
-    vel = dh.funvec2img(v.vector().array(), m, n)
-    k = dh.funvec2img(k.vector().array(), m, n)
+    vel = dh.funvec2img(v.vector().get_local(), m, n)
+    k = dh.funvec2img(k.vector().get_local(), m, n)
     return vel, k
 
 
@@ -202,6 +202,6 @@ def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
     v, k = w.split(deepcopy=True)
 
     # Convert back to array.
-    vel = dh.funvec2img(v.vector().array(), m, n)
-    k = dh.funvec2img(k.vector().array(), m, n)
+    vel = dh.funvec2img(v.vector().get_local(), m, n)
+    k = dh.funvec2img(k.vector().get_local(), m, n)
     return vel, k

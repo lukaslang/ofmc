@@ -80,9 +80,9 @@ class TestTransport(unittest.TestCase):
         f0 = interpolate(f0, V)
 
         # Compute transport
-        f = transport1d(v, np.zeros_like(v), f0.vector().array())
+        f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
 
-        finit = f0.vector().array().reshape(1, n)
+        finit = f0.vector().get_local().reshape(1, n)
         np.testing.assert_equal(f.shape, (m + 1, n))
         np.testing.assert_allclose(f, np.tile(finit, (m + 1, 1)), atol=1e-3)
 
@@ -99,7 +99,7 @@ class TestTransport(unittest.TestCase):
         f0 = interpolate(f0, V)
 
         # Compute transport
-        f = transport1d(v, np.zeros_like(v), f0.vector().array())
+        f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
         np.testing.assert_equal(f.shape, (m + 1, n))
 
         fig = plt.figure()
@@ -120,11 +120,11 @@ class TestTransport(unittest.TestCase):
         f0 = interpolate(f0, V)
 
         # Compute transport
-        f = transport1d(v, np.zeros_like(v), f0.vector().array())
+        f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
         np.testing.assert_equal(f.shape, (m + 1, n))
 
         # Compute transport with f as source.
-        f = transport1d(v, f[:-1], f0.vector().array())
+        f = transport1d(v, f[:-1], f0.vector().get_local())
 
         fig, ax = plt.subplots(figsize=(10, 5))
         cax = ax.imshow(f, cmap=cm.coolwarm)
@@ -146,7 +146,7 @@ class TestTransport(unittest.TestCase):
         f0 = interpolate(f0, V)
 
         # Compute transport
-        f = transport1d(v, np.zeros_like(v), f0.vector().array())
+        f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
 
         fig, ax = plt.subplots(figsize=(10, 5))
         cax = ax.imshow(f, cmap=cm.coolwarm)
@@ -170,7 +170,7 @@ class TestTransport(unittest.TestCase):
         f0 = interpolate(f0, V)
 
         # Compute transport
-        f = transport1d(v, np.zeros_like(v), f0.vector().array())
+        f = transport1d(v, np.zeros_like(v), f0.vector().get_local())
 
         fig, ax = plt.subplots(figsize=(10, 5))
         cax = ax.imshow(f, cmap=cm.coolwarm)
@@ -192,7 +192,7 @@ class TestTransport(unittest.TestCase):
 
         f0 = Rectangle(degree=1)
         f0 = interpolate(f0, V)
-        f0 = f0.vector().array()
+        f0 = f0.vector().get_local()
 
         # Compute transport
         f = transport1d(v, np.zeros_like(v), f0)
@@ -218,7 +218,7 @@ class TestTransport(unittest.TestCase):
 
         f0 = Rectangle(degree=1)
         f0 = interpolate(f0, V)
-        f0 = f0.vector().array()
+        f0 = f0.vector().get_local()
 
         # Create source.
         src = np.tile(f0, (m, 1))

@@ -77,5 +77,5 @@ def cm1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     solve(A == b, v)
 
     # Convert back to array.
-    vel = dh.funvec2img(v.vector().array(), m, n)
+    vel = dh.funvec2img(v.vector().get_local(), m, n)
     return vel

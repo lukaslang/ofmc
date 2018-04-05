@@ -17,6 +17,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import numpy as np
 from scipy.interpolate import UnivariateSpline
 
 
@@ -40,5 +41,31 @@ def roi2splines(roi: dict) -> dict:
     """
     spl = dict()
     for v in roi:
-        spl[v] = UnivariateSpline(roi[v]['y'], roi[v]['x'], k=3)
+        x, y = removeduplicates(np.asarray(roi[v]['y']),
+                                np.asarray(roi[v]['x']))
+        spl[v] = UnivariateSpline(x, y, k=3)
     return spl
+
+
+def removeduplicates(x: np.array, y: np.array) -> (np.array, np.array):
+    """Takes to arrays of ints and removes entries that appear as duplicates in
+    the first array.
+
+    Args:
+        x (np.array): The first array.
+        y (np.array): The second array.
+
+    Returns:
+        np.array: Cleaned first array.
+        np.array: Cleaned second array.
+    """
+    seen = set()
+    ind = []
+    for k in range(x.size):
+        if x[k] not in seen:
+            seen.add(x[k])
+            ind.append(k)
+
+    xr = x[ind]
+    yr = y[ind]
+    return xr, yr

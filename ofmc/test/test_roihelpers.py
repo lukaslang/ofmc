@@ -20,11 +20,13 @@
 import unittest
 import numpy as np
 import imageio
-import matplotlib.pyplot as plt
+from read_roi import read_roi_zip
 from matplotlib import cm
 from matplotlib.collections import LineCollection
-from read_roi import read_roi_zip
 import ofmc.util.roihelpers as rh
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 
 class TestRoiHelpers(unittest.TestCase):

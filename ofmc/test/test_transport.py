@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import matplotlib.pyplot as plt
 import numpy as np
 import unittest
 from dolfin import Expression
@@ -9,7 +8,9 @@ from dolfin import interpolate
 from dolfin import UnitIntervalMesh
 from matplotlib import cm
 from ofmc.util.transport import transport1d
-
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 # Define parameters.
 c0 = 0.1

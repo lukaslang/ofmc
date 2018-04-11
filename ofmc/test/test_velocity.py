@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import unittest
-import matplotlib.pyplot as plt
 import numpy as np
 import ofmc.util.dolfinhelpers as dh
 import ofmc.util.velocity as vel
 from dolfin import plot
 from matplotlib import cm
 from matplotlib.collections import LineCollection
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 # Define parameters.
 c0 = 0.1

@@ -9,7 +9,7 @@ from dolfin import project
 from dolfin import UnitSquareMesh
 
 
-class TestDolfinhelpers(unittest.TestCase):
+class TestDolfinHelpers(unittest.TestCase):
 
     def test_img2fun_fun2img(self):
         m, n = 7, 13
@@ -17,11 +17,11 @@ class TestDolfinhelpers(unittest.TestCase):
         v = dh.img2funvec(img)
         np.testing.assert_allclose(dh.funvec2img(v, m, n), img)
 
-    def test_fun2img(self):
+    def test_funvec2img(self):
         m, n = 30, 100
 
         # Define mesh.
-        mesh = UnitSquareMesh(m, n)
+        mesh = UnitSquareMesh(m - 1, n - 1)
 
         # Define function spaces
         V = FunctionSpace(mesh, 'CG', 1)
@@ -30,7 +30,14 @@ class TestDolfinhelpers(unittest.TestCase):
         v = dh.funvec2img(f.vector().get_local(), m, n)
         np.testing.assert_allclose(v, np.ones((m, n)))
 
-    def test_imgseq2fun_fun2imgseq(self):
+    def test_img2funvec(self):
+        m, n = 3, 4
+        img = np.ones((m, n))
+
+        v = dh.img2funvec(img)
+        np.testing.assert_allclose(v, np.ones(m*n))
+
+    def test_imgseq2funvec_funvec2imgseq(self):
         m, n, o = 7, 13, 10
         img = np.random.rand(m, n, o)
         v = dh.imgseq2funvec(img)

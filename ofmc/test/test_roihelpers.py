@@ -27,7 +27,7 @@ from read_roi import read_roi_zip
 import ofmc.util.roihelpers as rh
 
 
-class TestRoihelpers(unittest.TestCase):
+class TestRoiHelpers(unittest.TestCase):
 
     def test_removeduplicates(self):
         x = np.array([-1, 1, 3, 3, 5, 7])

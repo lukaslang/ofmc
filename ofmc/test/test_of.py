@@ -17,27 +17,64 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+from dolfin import Constant
+from dolfin import Function
+from dolfin import UnitSquareMesh
+from ofmc.model.of import of1d_exp
+from ofmc.model.of import of1d_img
+from ofmc.model.of import of1d_weak_solution
+from ofmc.model.of import of2dmcs
 import unittest
 import numpy as np
-from numpy import matlib
-from ofmc.model.of import of1d
-from ofmc.model.of import of2dmcs
+import ofmc.util.dolfinhelpers as dh
 
 
 class TestOf(unittest.TestCase):
 
-    def test_of1d(self):
+    def test_of1d_weak_solution_default_bc(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Define mesh and function space.
+        mesh = UnitSquareMesh(m - 1, n - 1)
+        V = dh.create_function_space(mesh, 'default')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v = v.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m*n)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_of1d_exp_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Compute velocity.
+        v = of1d_exp(m, n, f, fd, fd, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_of1d_img_default_fd(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = of1d(img, 1, 1)
+        v = of1d_img(img, 1, 1, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
 
-    def test_of1d_random(self):
-        # Create random non-moving image.
-        img = matlib.repmat(np.random.rand(1, 25), 10, 1)
-        v = of1d(img, 1, 1)
+    def test_of1d_img_default_mesh(self):
+        # Create zero image.
+        img = np.zeros((10, 25))
+        v = of1d_img(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -46,17 +83,6 @@ class TestOf(unittest.TestCase):
         # Create zero images.
         img1 = np.zeros((5, 10, 25))
         img2 = np.zeros((5, 10, 25))
-        v, k = of2dmcs(img1, img2, 1, 1, 1, 1)
-
-        np.testing.assert_allclose(v.shape, (4, 10, 25, 2))
-        np.testing.assert_allclose(k.shape, (4, 10, 25))
-        np.testing.assert_allclose(v, np.zeros_like(v))
-        np.testing.assert_allclose(k, np.zeros_like(k))
-
-    def test_of2dmcs_random(self):
-        # Create random non-moving image.
-        img1 = np.tile(np.random.rand(10, 25), (5, 1, 1))
-        img2 = np.tile(np.random.rand(10, 25), (5, 1, 1))
         v, k = of2dmcs(img1, img2, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, (4, 10, 25, 2))

@@ -17,12 +17,51 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+from dolfin import near
+from dolfin import Mesh
+from dolfin import SubDomain
 from dolfin import UnitSquareMesh
 from dolfin import UnitCubeMesh
 from dolfin import FunctionSpace
 from dolfin import dof_to_vertex_map
 from dolfin import vertex_to_dof_map
 import numpy as np
+
+
+class PeriodicBoundary(SubDomain):
+    """Helper class to define periodic boundary for the second dimension."""
+
+    def inside(self, x, on_boundary):
+        return bool(near(x[1], 0.0))
+
+    def map(self, x, y):
+        y[0] = x[0]
+        y[1] = x[1] - 1.0
+
+
+def create_function_space(mesh: Mesh, boundary: str) -> FunctionSpace:
+    """Creates a function space of piecewise linear functions on a given mesh
+    for a given spatial boundary.
+
+    Args:
+        mesh (Mesh): A mesh.
+        boundary (str): One of {'default', 'periodic'}.
+
+    Returns:
+        V (FunctionSpace): A function space.
+    """
+    # Check for valid arguments.
+    valid = {'default', 'periodic'}
+    if boundary not in valid:
+        raise ValueError("Argument 'boundary' must be one of %r." % valid)
+
+    # Create and return function space.
+    if boundary is 'periodic':
+        V = FunctionSpace(mesh, 'CG', 1,
+                          constrained_domain=PeriodicBoundary())
+    else:
+        V = FunctionSpace(mesh, 'CG', 1)
+    return V
 
 
 def img2funvec(img: np.array) -> np.array:
@@ -32,25 +71,27 @@ def img2funvec(img: np.array) -> np.array:
     Each pixel corresponds to one vertex of a triangle mesh.
 
     Args:
-        img (np.array): The input array.
+        img (np.array): The input array of shape (m, n).
 
     Returns:
-        np.array: A vector.
+        np.array: A vector of shape (m*n,).
 
     """
-    # Create mesh.
-    [m, n] = img.shape
-    mesh = UnitSquareMesh(m-1, n-1)
+    m, n = img.shape
+
+    # Create mesh and function space.
+    mesh = UnitSquareMesh(m - 1, n - 1)
     xm = mesh.coordinates().reshape((-1, 2))
 
-    # Evaluate function at vertices.
-    hx, hy = 1./(m-1), 1./(n-1)
-    x = np.array(np.round(xm[:, 0]/hx), dtype=int)
-    y = np.array(np.round(xm[:, 1]/hy), dtype=int)
-    fv = img[x, y]
-
     # Create function space.
-    V = FunctionSpace(mesh, 'CG', 1)
+    V = create_function_space(mesh, 'default')
+
+    # Evaluate function at vertices.
+    hx, hy = 1 / (m - 1), 1 / (n - 1)
+
+    x = np.array(np.round(xm[:, 0] / hx), dtype=int)
+    y = np.array(np.round(xm[:, 1] / hy), dtype=int)
+    fv = img[x, y]
 
     # Map pixel values to vertices.
     d2v = dof_to_vertex_map(V)
@@ -70,23 +111,23 @@ def funvec2img(v: np.array, m: int, n: int) -> np.array:
         n (int): The number of columns.
 
     Returns:
-        np.array: An array of size (m, n).
+        np.array: An array of shape (m, n).
 
     """
     # Create image.
     img = np.zeros((m, n))
 
     # Create mesh and function space.
-    mesh = UnitSquareMesh(m-1, n-1)
+    mesh = UnitSquareMesh(m - 1, n - 1)
     xm = mesh.coordinates().reshape((-1, 2))
 
-    # Evaluate function at vertices.
-    hx, hy = 1./(m-1), 1./(n-1)
-    x = np.array(np.round(xm[:, 0]/hx), dtype=int)
-    y = np.array(np.round(xm[:, 1]/hy), dtype=int)
+    # Create function space.
+    V = create_function_space(mesh, 'default')
 
-    # Create function space and function.
-    V = FunctionSpace(mesh, 'CG', 1)
+    # Evaluate function at vertices.
+    hx, hy = 1 / (m - 1), 1 / (n - 1)
+    x = np.array(np.round(xm[:, 0] / hx), dtype=int)
+    y = np.array(np.round(xm[:, 1] / hy), dtype=int)
 
     # Create image from function.
     v2d = vertex_to_dof_map(V)

@@ -41,6 +41,7 @@ from dolfin import TrialFunctions
 from dolfin import UnitSquareMesh
 from dolfin import VectorFunctionSpace
 from matplotlib import cm
+from ofmc.model.of import of1d_exp
 import ofmc.util.dolfinhelpers as dh
 
 # Set path where results are saved.
@@ -191,34 +192,6 @@ class PeriodicBoundary(SubDomain):
         def map(self, x, y):
             y[1] = x[1] - 1.0
             y[0] = x[0]
-
-
-def of1d(m: int, n: int) -> np.array:
-    # Create mesh.
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    V = FunctionSpace(mesh, 'CG', 1)
-    v = TrialFunction(V)
-    w = TestFunction(V)
-
-    # Define weak formulation.
-    A = fx*fx*v*w*dx + alpha0*v.dx(1)*w.dx(1)*dx + alpha1*v.dx(0)*w.dx(0)*dx
-    b = -fx*ft*w*dx
-
-    # Compute solution.
-    v = Function(V)
-    solve(A == b, v)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v)
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    return vel
 
 
 def of1dperiodic(m: int, n: int) -> np.array:
@@ -551,11 +524,11 @@ ft = ft(degree=1)
 fx = fx(degree=1)
 
 m, n = 30, 100
-#vel = of1d(m, n)
+vel = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
 #vel = of1dperiodic(m, n)
 #vel = cm1d(m, n)
 #vel = cm1dperiodic(m, n)
-vel, k = cms1d(m, n)
+#vel, k = cms1d(m, n)
 #vel, k = cms1dperiodic(m, n)
 #vel, k = cms1dl2(m, n)
 #vel, k = cms1dl2periodic(m, n)

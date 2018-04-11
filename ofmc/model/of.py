@@ -69,7 +69,7 @@ def of1d(img: np.array, alpha0: float, alpha1: float) -> np.array:
     ft.vector()[:] = dh.img2funvec(ftv)
 
     fx = Function(V)
-    fxv = np.gradient(img, 1 / (n - 1), axis=1)
+    fxv = np.gradient(img, 1.0 / (n - 1), axis=1)
     fx.vector()[:] = dh.img2funvec(fxv)
 
     # Define weak formulation.

@@ -19,6 +19,7 @@
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import unittest
 import numpy as np
+import numpy.matlib as matlib
 from scipy import misc
 from scipy import ndimage
 from ofmc.model.cmscr import cmscr1d, cmscr1dnewton
@@ -38,7 +39,7 @@ class TestOf(unittest.TestCase):
 
     def test_cmscr1d_random(self):
         # Create random non-moving image.
-        img = np.matlib.repmat(np.random.rand(1, 25), 10, 1)
+        img = matlib.repmat(np.random.rand(1, 25), 10, 1)
         v, k = cmscr1d(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
@@ -58,7 +59,7 @@ class TestOf(unittest.TestCase):
 
     def test_cmscr1dnewton_random(self):
         # Create random non-moving image.
-        img = np.matlib.repmat(np.random.rand(1, 25), 10, 1)
+        img = matlib.repmat(np.random.rand(1, 25), 10, 1)
         v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)

@@ -41,8 +41,8 @@ if not os.path.exists(resultpath):
 # Set regularisation parameter.
 alpha0 = 5e-3
 alpha1 = 1e-2
-alpha2 = 5e-4
-alpha3 = 5e-4
+alpha2 = 1e-4
+alpha3 = 1e-4
 beta = 1e-3
 
 
@@ -114,12 +114,12 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     # Create grid for streamlines.
     Y, X = np.mgrid[0:m, 0:n]
-    V = np.ones_like(X)*hy
+    V = np.ones_like(X)
 
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    strm = ax.streamplot(X, Y, vel*hx, V, density=2,
+    strm = ax.streamplot(X, Y, vel*hx/hy, V, density=2,
                          color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
     fig.colorbar(strm.lines, orientation='horizontal')
 

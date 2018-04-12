@@ -29,6 +29,7 @@ from dolfin import TrialFunctions
 from dolfin import TestFunctions
 from dolfin import FunctionSpace
 from dolfin import UnitSquareMesh
+from dolfin import VectorFunctionSpace
 import ofmc.util.dolfinhelpers as dh
 import ofmc.util.numpyhelpers as nh
 
@@ -39,7 +40,7 @@ import ofmc.util.numpyhelpers as nh
 # https://fenicsproject.org/qa/6462/split-mixed-spaces-does-not-preserve-number-degrees-freedom/
 
 
-def cms1d_weak_solution(V: FunctionSpace,
+def cms1d_weak_solution(V: VectorFunctionSpace,
                         f: Function, ft: Function, fx: Function,
                         alpha0: float, alpha1: float,
                         alpha2: float, alpha3: float) -> (Function, Function):
@@ -58,6 +59,7 @@ def cms1d_weak_solution(V: FunctionSpace,
     partial derivatives with respect to time and space, and returns a solution.
 
     Args:
+        V (VectorFunctionSpace): The function space.
         f (Function): A 1D image sequence.
         ft (Function): Partial derivative of f wrt. time.
         fx (Function): Partial derivative of f wrt. space.

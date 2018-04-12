@@ -21,22 +21,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from dolfin import assemble
-from dolfin import DOLFIN_EPS
 from dolfin import dx
 from dolfin import Expression
 from dolfin import interpolate
 from dolfin import near
 from dolfin import plot
 from dolfin import solve
-from dolfin import split
-from dolfin import FiniteElement
-from dolfin import triangle
 from dolfin import Function
 from dolfin import FunctionSpace
 from dolfin import SubDomain
-from dolfin import TestFunction
 from dolfin import TestFunctions
-from dolfin import TrialFunction
 from dolfin import TrialFunctions
 from dolfin import UnitSquareMesh
 from dolfin import VectorFunctionSpace
@@ -47,6 +41,8 @@ from ofmc.model.cm import cm1d_exp
 from ofmc.model.cm import cm1d_exp_pb
 from ofmc.model.cms import cms1d_exp
 from ofmc.model.cms import cms1d_exp_pb
+from ofmc.model.cmscr import cmscr1d_exp
+from ofmc.model.cmscr import cmscr1d_exp_pb
 import ofmc.util.dolfinhelpers as dh
 
 # Set path where results are saved.
@@ -199,145 +195,6 @@ class PeriodicBoundary(SubDomain):
             y[0] = x[0]
 
 
-def cm1d(m: int, n: int) -> np.array:
-    # Create mesh.
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    V = FunctionSpace(mesh, 'CG', 1)
-    v = TrialFunction(V)
-    w = TestFunction(V)
-
-    # Define weak formulation.
-    A = - (fx*v + f*v.dx(1)) * (fx*w + f*w.dx(1))*dx \
-        - alpha0*v.dx(1)*w.dx(1)*dx - alpha1*v.dx(0)*w.dx(0)*dx
-    b = ft*(fx*w + f*w.dx(1))*dx
-
-    # Compute solution.
-    v = Function(V)
-    solve(A == b, v)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1))
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    return vel
-
-
-def cm1dperiodic(m: int, n: int) -> np.array:
-    # Create mesh.
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    V = FunctionSpace(mesh, 'CG', 1,
-                      constrained_domain=PeriodicBoundary())
-    v = TrialFunction(V)
-    w = TestFunction(V)
-
-    # Define weak formulation.
-    A = - (fx*v + f*v.dx(1)) * (fx*w + f*w.dx(1))*dx \
-        - alpha0*v.dx(1)*w.dx(1)*dx - alpha1*v.dx(0)*w.dx(0)*dx
-    b = ft*(fx*w + f*w.dx(1))*dx
-
-    # Compute solution.
-    v = Function(V)
-    solve(A == b, v)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1))
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    vel = dh.funvec2img(v.vector().get_local(), m, n-1)
-    return vel
-
-
-def cms1d(m: int, n: int) -> (np.array, np.array):
-    # Create mesh.
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    # P = FiniteElement('P', triangle, 1)
-    # W = FunctionSpace(mesh, P * P)
-    W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)
-    v, k = TrialFunctions(W)
-    w1, w2 = TestFunctions(W)
-
-    # Define weak formulation.
-    A = - (fx*v + f*v.dx(1) - k) * (fx*w1 + f*w1.dx(1))*dx \
-        - alpha0*v.dx(1)*w1.dx(1)*dx - alpha1*v.dx(0)*w1.dx(0)*dx \
-        + (fx*v + f*v.dx(1) - k)*w2*dx \
-        - alpha2*k.dx(1)*w2.dx(1)*dx - alpha3*k.dx(0)*w2.dx(0)*dx
-    b = ft*(fx*w1 + f*w1.dx(1))*dx - ft*w2*dx
-
-    # Compute solution.
-    v = Function(W)
-    solve(A == b, v)
-
-    # Recover solution.
-    v, k = v.split(deepcopy=True)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1) - k)
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx \
-        + alpha2*k.dx(1)**2*dx + alpha3*k.dx(0)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    k = dh.funvec2img(k.vector().get_local(), m, n)
-    return vel, k
-
-
-def cms1dperiodic(m: int, n: int) -> (np.array, np.array):
-    # Create mesh.
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    # P = FiniteElement('P', triangle, 1)
-    # W = FunctionSpace(mesh, P * P)
-    W = VectorFunctionSpace(mesh, 'CG', 1, dim=2,
-                            constrained_domain=PeriodicBoundary())
-    v, k = TrialFunctions(W)
-    w1, w2 = TestFunctions(W)
-
-    # Define weak formulation.
-    A = - (fx*v + f*v.dx(1) - k) * (fx*w1 + f*w1.dx(1))*dx \
-        - alpha0*v.dx(1)*w1.dx(1)*dx - alpha1*v.dx(0)*w1.dx(0)*dx \
-        + (fx*v + f*v.dx(1) - k)*w2*dx \
-        - alpha2*k.dx(1)*w2.dx(1)*dx - alpha3*k.dx(0)*w2.dx(0)*dx
-    b = ft*(fx*w1 + f*w1.dx(1))*dx - ft*w2*dx
-
-    # Compute solution.
-    v = Function(W)
-    solve(A == b, v)
-
-    # Recover solution.
-    v, k = v.split(deepcopy=True)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1) - k)
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx \
-        + alpha2*k.dx(1)**2*dx + alpha3*k.dx(0)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    # Note that there vel and k should be of shape (m, n-1).
-    # See https://bitbucket.org/fenics-project/dolfin/issues/405
-    # and https://fenicsproject.org/qa/6462/split-mixed-spaces-does-not-preserve-number-degrees-freedom/
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    k = dh.funvec2img(k.vector().get_local(), m, n)
-    return vel, k
-
-
 def cms1dl2(m: int, n: int) -> (np.array, np.array):
     mesh = UnitSquareMesh(m-1, n-1)
 
@@ -406,90 +263,6 @@ def cms1dl2periodic(m: int, n: int) -> (np.array, np.array):
     print('Res={0}, Func={1}\n'.format(assemble(res*dx),
                                        assemble(0.5*func)))
 
-    # Convert back to array.
-    # Note that there vel and k should be of shape (m, n-1).
-    # See https://bitbucket.org/fenics-project/dolfin/issues/405
-    # and https://fenicsproject.org/qa/6462/split-mixed-spaces-does-not-preserve-number-degrees-freedom/
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    k = dh.funvec2img(k.vector().get_local(), m, n)
-    return vel, k
-
-
-def cmscr1d(m: int, n: int) -> (np.array, np.array):
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)
-    w = Function(W)
-    v, k = split(w)
-    w1, w2 = TestFunctions(W)
-
-    # Define weak formulation.
-    A = - (ft + fx*v + f*v.dx(1) - k) * (fx*w1 + f*w1.dx(1))*dx \
-        - alpha0*v.dx(1)*w1.dx(1)*dx - alpha1*v.dx(0)*w1.dx(0)*dx \
-        - beta*k.dx(1)*(k.dx(0) + k.dx(1)*v)*w1*dx \
-        + (ft + fx*v + f*v.dx(1) - k)*w2*dx \
-        - alpha2*k.dx(1)*w2.dx(1)*dx - alpha3*k.dx(0)*w2.dx(0)*dx \
-        - beta*(k.dx(0)*w2.dx(0) + k.dx(1)*v*w2.dx(0)
-                + k.dx(0)*v*w2.dx(1) + k.dx(1)*v*v*w2.dx(1))*dx
-
-    # Compute solution via Newton method.
-    solve(A == 0, w)
-
-    # Recover solution.
-    v, k = w.split(deepcopy=True)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1) - k)
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx \
-        + alpha2*k.dx(1)**2*dx + alpha3*k.dx(0)**2*dx \
-        + beta*(k.dx(0) + k.dx(1)*v)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    vel = dh.funvec2img(v.vector().get_local(), m, n)
-    k = dh.funvec2img(k.vector().get_local(), m, n)
-    return vel, k
-
-
-def cmscr1dperiodic(m: int, n: int) -> (np.array, np.array):
-    mesh = UnitSquareMesh(m-1, n-1)
-
-    # Define function space and functions.
-    W = VectorFunctionSpace(mesh, 'CG', 1, dim=2,
-                            constrained_domain=PeriodicBoundary())
-    w = Function(W)
-    v, k = split(w)
-    w1, w2 = TestFunctions(W)
-
-    # Define weak formulation.
-    A = - (ft + fx*v + f*v.dx(1) - k) * (fx*w1 + f*w1.dx(1))*dx \
-        - alpha0*v.dx(1)*w1.dx(1)*dx - alpha1*v.dx(0)*w1.dx(0)*dx \
-        - beta*k.dx(1)*(k.dx(0) + k.dx(1)*v)*w1*dx \
-        + (ft + fx*v + f*v.dx(1) - k)*w2*dx \
-        - alpha2*k.dx(1)*w2.dx(1)*dx - alpha3*k.dx(0)*w2.dx(0)*dx \
-        - beta*(k.dx(0)*w2.dx(0) + k.dx(1)*v*w2.dx(0)
-                + k.dx(0)*v*w2.dx(1) + k.dx(1)*v*v*w2.dx(1))*dx
-
-    # Compute solution via Newton method.
-    solve(A == 0, w)
-
-    # Recover solution.
-    v, k = w.split(deepcopy=True)
-
-    # Evaluate residual and functional value.
-    res = abs(ft + fx*v + f*v.dx(1) - k)
-    func = res**2*dx + alpha0*v.dx(1)**2*dx + alpha1*v.dx(0)**2*dx \
-        + alpha2*k.dx(1)**2*dx + alpha3*k.dx(0)**2*dx \
-        + beta*(k.dx(0) + k.dx(1)*v)**2*dx
-    print('Res={0}, Func={1}\n'.format(assemble(res*dx),
-                                       assemble(0.5*func)))
-
-    # Convert back to array.
-    # Note that there vel and k should be of shape (m, n-1).
-    # See https://bitbucket.org/fenics-project/dolfin/issues/405
-    # and https://fenicsproject.org/qa/6462/split-mixed-spaces-does-not-preserve-number-degrees-freedom/
     vel = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
     return vel, k
@@ -500,17 +273,16 @@ ft = ft(degree=1)
 fx = fx(degree=1)
 
 m, n = 30, 100
-#vel = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
-#vel = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-#vel = cm1d_exp(m, n, f, ft, fx, alpha0, alpha1)
-#vel = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-#vel, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-vel, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-#vel, k = cms1dperiodic(m, n)
-#vel, k = cms1dl2(m, n)
-#vel, k = cms1dl2periodic(m, n)
-#vel, k = cmscr1d(m, n)
-#vel, k = cmscr1dperiodic(m, n)
+# vel = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
+# vel = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
+# vel = cm1d_exp(m, n, f, ft, fx, alpha0, alpha1)
+# vel = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
+# vel, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+# vel, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+# vel, k = cms1dl2(m, n)
+# vel, k = cms1dl2periodic(m, n)
+# vel, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+vel, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 
 
 # Convert back to array.

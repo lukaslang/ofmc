@@ -43,6 +43,10 @@ from dolfin import VectorFunctionSpace
 from matplotlib import cm
 from ofmc.model.of import of1d_exp
 from ofmc.model.of import of1d_exp_pb
+from ofmc.model.cm import cm1d_exp
+from ofmc.model.cm import cm1d_exp_pb
+from ofmc.model.cms import cms1d_exp
+from ofmc.model.cms import cms1d_exp_pb
 import ofmc.util.dolfinhelpers as dh
 
 # Set path where results are saved.
@@ -497,10 +501,11 @@ fx = fx(degree=1)
 
 m, n = 30, 100
 #vel = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
-vel = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-#vel = cm1d(m, n)
-#vel = cm1dperiodic(m, n)
-#vel, k = cms1d(m, n)
+#vel = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
+#vel = cm1d_exp(m, n, f, ft, fx, alpha0, alpha1)
+#vel = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
+#vel, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+vel, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 #vel, k = cms1dperiodic(m, n)
 #vel, k = cms1dl2(m, n)
 #vel, k = cms1dl2periodic(m, n)

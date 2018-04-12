@@ -25,6 +25,7 @@ from dolfin import SubDomain
 from dolfin import UnitSquareMesh
 from dolfin import UnitCubeMesh
 from dolfin import FunctionSpace
+from dolfin import VectorFunctionSpace
 from dolfin import dof_to_vertex_map
 from dolfin import vertex_to_dof_map
 import numpy as np
@@ -63,6 +64,32 @@ def create_function_space(mesh: Mesh, boundary: str) -> FunctionSpace:
                           constrained_domain=PeriodicBoundary())
     else:
         V = FunctionSpace(mesh, 'CG', 1)
+    return V
+
+
+def create_vector_function_space(mesh: Mesh,
+                                 boundary: str) -> VectorFunctionSpace:
+    """Creates a vector function space of piecewise linear functions on a given
+    mesh for a given spatial boundary.
+
+    Args:
+        mesh (Mesh): A mesh.
+        boundary (str): One of {'default', 'periodic'}.
+
+    Returns:
+        V (VectorFunctionSpace): A function space.
+    """
+    # Check for valid arguments.
+    valid = {'default', 'periodic'}
+    if boundary not in valid:
+        raise ValueError("Argument 'boundary' must be one of %r." % valid)
+
+    # Create and return function space.
+    if boundary is 'periodic':
+        V = VectorFunctionSpace(mesh, 'CG', 1, dim=2,
+                                constrained_domain=PeriodicBoundary())
+    else:
+        V = VectorFunctionSpace(mesh, 'CG', 1, dim=2)
     return V
 
 

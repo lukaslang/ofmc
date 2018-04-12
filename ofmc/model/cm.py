@@ -38,7 +38,7 @@ def cm1d_weak_solution(V: FunctionSpace,
     mass conserving flow functional with spatio-temporal regularisation
     for a 1D image sequence, i.e.
 
-    f_x * (f_t + f_x * v) - (f * (f_t + f_x * v + f * v_x))_x
+    f_x * (f_t + f_x * v + f * v_x) - (f * (f_t + f_x * v + f * v_x))_x
         - alpha0 * v_xx - alpha1 * v_tt = 0
 
     with natural boundary conditions.
@@ -80,7 +80,7 @@ def cm1d_weak_solution(V: FunctionSpace,
 
 def cm1d_exp(m: int, n: int,
              f: Expression, ft: Expression, fx: Expression,
-             alpha0: float, alpha1) -> np.array:
+             alpha0: float, alpha1: float) -> np.array:
     """Computes the L2-H1 mass conserving flow for a 1D image sequence.
 
     Args:
@@ -109,7 +109,7 @@ def cm1d_exp(m: int, n: int,
 
 def cm1d_exp_pb(m: int, n: int,
                 f: Expression, ft: Expression, fx: Expression,
-                alpha0: float, alpha1) -> np.array:
+                alpha0: float, alpha1: float) -> np.array:
     """Computes the L2-H1 mass conserving flow for a 1D image sequence with
     periodic boundary.
 

@@ -28,6 +28,8 @@ from ofmc.model.cm import cm1d_img_pb
 from ofmc.model.cm import cm1dsource
 from ofmc.model.cm import cm1dvelocity
 from ofmc.model.cms import cms1d
+from ofmc.model.cms import cms1d_img
+from ofmc.model.cms import cms1d_img_pb
 from ofmc.model.cms import cms1dpbc
 from ofmc.model.cms import cms1dl2
 from ofmc.model.cmscr import cmscr1d
@@ -175,10 +177,11 @@ vel = v*np.ones_like(img)
 #vel = of1d_img(img, alpha0, alpha1, 'mesh')
 #vel = of1d_img_pb(img, alpha0, alpha1, 'mesh')
 #vel = cm1d_img(img, alpha0, alpha1, 'mesh')
-vel = cm1d_img_pb(img, alpha0, alpha1, 'mesh')
+#vel = cm1d_img_pb(img, alpha0, alpha1, 'mesh')
 # vel = cm1dsource(img, k, alpha0, alpha1)
 # k = cm1dvelocity(img, vel, alpha2, alpha3)
-#vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)
+vel, k = cms1d_img(img, alpha0, alpha1, alpha2, alpha3, 'mesh')
+#vel, k = cms1d_img_pb(img, alpha0, alpha1, alpha2, alpha3, 'mesh')
 #vel, k = cms1dpbc(img, alpha0, alpha1, alpha2, alpha3)
 #vel, k = cms1dl2(img, alpha0, alpha1, alpha2)
 # vel, k = cmscr1d(img, alpha0, alpha1, alpha2, alpha3, beta)

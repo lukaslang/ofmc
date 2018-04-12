@@ -20,6 +20,7 @@
 from dolfin import assemble
 from dolfin import dx
 from dolfin import dof_to_vertex_map
+from dolfin import interpolate
 from dolfin import solve
 from dolfin import Expression
 from dolfin import Function
@@ -73,6 +74,13 @@ def of1d_weak_solution(V: FunctionSpace,
     # Compute and return solution.
     v = Function(V)
     solve(A == b, v)
+
+    # Evaluate and print residual and functional value.
+    res = abs(ft + fx*v)
+    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
+    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
+                                       assemble(func * dx)))
+
     return v
 
 
@@ -86,6 +94,8 @@ def of1d_exp(m: int, n: int,
     regularisation.
 
     Args:
+        m (int): Number of temporal sampling points.
+        n (int): Number of spatial sampling points.
         f (Expression): 1D image sequence.
         ft (Expression): Partial derivative of f wrt. time.
         fx (Expression): Partial derivative of f wrt. space.
@@ -103,14 +113,42 @@ def of1d_exp(m: int, n: int,
     # Compute velocity.
     v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
-    # Evaluate and print residual and functional value.
-    res = abs(ft + fx*v)
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
-
     # Convert to array and return.
     return dh.funvec2img(v.vector().get_local(), m, n)
+
+
+def of1d_exp_pb(m: int, n: int,
+                f: Expression, ft: Expression, fx: Expression,
+                alpha0: float, alpha1) -> np.array:
+    """Computes the L2-H1 optical flow for a 1D image sequence with periodic
+    boundary in space.
+
+    Takes a one-dimensional image sequence and partial derivatives, and returns
+    a minimiser of the Horn-Schunck functional with spatio-temporal
+    regularisation.
+
+    Args:
+        m (int): Number of temporal sampling points.
+        n (int): Number of spatial sampling points.
+        f (Expression): 1D image sequence.
+        ft (Expression): Partial derivative of f wrt. time.
+        fx (Expression): Partial derivative of f wrt. space.
+        alpha0 (float): Spatial regularisation parameter.
+        alpha1 (float): Temporal regularisation parameter.
+
+    Returns:
+        v (np.array): A velocity array of shape (m, n - 1).
+
+    """
+    # Define mesh and function space.
+    mesh = UnitSquareMesh(m - 1, n - 1)
+    V = dh.create_function_space(mesh, 'periodic')
+
+    # Compute velocity.
+    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+
+    # Convert to array and return.
+    return dh.funvec2img(v.vector().get_local(), m, n - 1)
 
 
 def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
@@ -164,6 +202,56 @@ def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
 
     # Convert to array and return.
     return dh.funvec2img(v.vector().get_local(), m, n)
+
+
+def of1d_img_pb(img: np.array, alpha0: float, alpha1: float,
+                deriv='mesh') -> np.array:
+    """Computes the L2-H1 optical flow for a 1D image sequence with periodic
+    boundary in space.
+
+    Takes a one-dimensional image sequence and returns a minimiser of the
+    Horn-Schunck functional with spatio-temporal regularisation.
+
+    Allows to specify how to approximate partial derivatives of f numerically.
+
+    Note that the last column of img is ignored.
+
+    Args:
+        img (np.array): 1D image sequence of shape (m, n), where m is the
+                        number of time steps and n is the number of pixels.
+        alpha0 (float): Spatial regularisation parameter.
+        alpha1 (float): Temporal regularisation parameter.
+        deriv (str): Specifies how to approximate pertial derivatives.
+                     When set to 'mesh' it uses FEniCS built in function.
+
+    Returns:
+        v (np.array): A velocity array of shape (m, n - 1).
+
+    """
+    # Check for valid arguments.
+    valid = {'mesh'}
+    if deriv not in valid:
+        raise ValueError("Argument 'deriv' must be one of %r." % valid)
+
+    # Create mesh.
+    m, n = img.shape
+    mesh = UnitSquareMesh(m - 1, n - 1)
+
+    # Define function space.
+    V = dh.create_function_space(mesh, 'periodic')
+
+    # Convert array to function.
+    f = Function(V)
+    f.vector()[:] = dh.img2funvec_pb(img)
+
+    # Compute partial derivatives.
+    ft, fx = f.dx(0), f.dx(1)
+
+    # Compute velocity.
+    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+
+    # Convert to array and return.
+    return dh.funvec2img_pb(v.vector().get_local(), m, n)
 
 
 def of2dmcs(img1: np.array, img2: np.array, alpha0: float, alpha1: float,

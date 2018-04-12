@@ -21,6 +21,7 @@ from dolfin import Constant
 from dolfin import Function
 from dolfin import UnitSquareMesh
 from ofmc.model.of import of1d_exp
+from ofmc.model.of import of1d_exp_pb
 from ofmc.model.of import of1d_img
 from ofmc.model.of import of1d_weak_solution
 from ofmc.model.of import of2dmcs
@@ -31,7 +32,7 @@ import ofmc.util.dolfinhelpers as dh
 
 class TestOf(unittest.TestCase):
 
-    def test_of1d_weak_solution_default_bc(self):
+    def test_of1d_weak_solution_default(self):
         # Define temporal and spatial sample points.
         m, n = 10, 20
 
@@ -49,6 +50,18 @@ class TestOf(unittest.TestCase):
         np.testing.assert_allclose(v.shape, m*n)
         np.testing.assert_allclose(v, np.zeros_like(v))
 
+        V = dh.create_function_space(mesh, 'periodic')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v = v.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m*(n - 1))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
     def test_of1d_exp_default(self):
         # Define temporal and spatial sample points.
         m, n = 10, 20
@@ -61,6 +74,20 @@ class TestOf(unittest.TestCase):
         v = of1d_exp(m, n, f, fd, fd, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_of1d_exp_pb(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Compute velocity.
+        v = of1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n - 1))
         np.testing.assert_allclose(v, np.zeros_like(v))
 
     def test_of1d_img_default_fd(self):

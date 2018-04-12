@@ -17,6 +17,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+from dolfin import Function
+from dolfin import interpolate
 from dolfin import near
 from dolfin import Mesh
 from dolfin import SubDomain
@@ -74,7 +76,7 @@ def img2funvec(img: np.array) -> np.array:
         img (np.array): The input array of shape (m, n).
 
     Returns:
-        np.array: A vector of shape (m*n,).
+        np.array: A vector of shape (m * n,).
 
     """
     m, n = img.shape
@@ -96,6 +98,34 @@ def img2funvec(img: np.array) -> np.array:
     # Map pixel values to vertices.
     d2v = dof_to_vertex_map(V)
     return fv[d2v]
+
+
+def img2funvec_pb(img: np.array) -> np.array:
+    """Takes a 2D array and returns an array suited to assign to piecewise
+    linear approximation on a triangle grid that is periodic in space.
+
+    Each pixel corresponds to one vertex of a triangle mesh.
+
+    Args:
+        img (np.array): The input array of shape (m, n).
+
+    Returns:
+        np.array: A vector of shape (m * (n - 1),).
+
+    """
+    m, n = img.shape
+
+    # Create mesh and function space.
+    mesh = UnitSquareMesh(m - 1, n - 1)
+
+    # Create function space.
+    V = create_function_space(mesh, 'default')
+    f = Function(V)
+    f.vector()[:] = img2funvec(img)
+
+    W = create_function_space(mesh, 'periodic')
+    g = interpolate(f, W)
+    return g.vector().get_local()
 
 
 def funvec2img(v: np.array, m: int, n: int) -> np.array:
@@ -123,6 +153,45 @@ def funvec2img(v: np.array, m: int, n: int) -> np.array:
 
     # Create function space.
     V = create_function_space(mesh, 'default')
+
+    # Evaluate function at vertices.
+    hx, hy = 1 / (m - 1), 1 / (n - 1)
+    x = np.array(np.round(xm[:, 0] / hx), dtype=int)
+    y = np.array(np.round(xm[:, 1] / hy), dtype=int)
+
+    # Create image from function.
+    v2d = vertex_to_dof_map(V)
+    values = v[v2d]
+    for (i, j, v) in zip(x, y, values):
+        img[i, j] = v
+    return img
+
+
+def funvec2img_pb(v: np.array, m: int, n: int) -> np.array:
+    """Takes values of piecewise linear interpolation of a function at the
+    vertices and returns a 2-dimensional array.
+
+    Each degree of freedom corresponds to one pixel in the array of
+    size (m, n).
+
+    Args:
+        v (np.array): Values at vertices of triangle mesh.
+        m (int): The number of rows.
+        n (int): The number of columns.
+
+    Returns:
+        np.array: An array of shape (m, n).
+
+    """
+    # Create image.
+    img = np.zeros((m, n))
+
+    # Create mesh and function space.
+    mesh = UnitSquareMesh(m - 1, n - 1)
+    xm = mesh.coordinates().reshape((-1, 2))
+
+    # Create function space.
+    V = create_function_space(mesh, 'periodic')
 
     # Evaluate function at vertices.
     hx, hy = 1 / (m - 1), 1 / (n - 1)

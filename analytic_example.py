@@ -23,7 +23,8 @@ import os
 from matplotlib import cm
 from ofmc.model.of import of1d_img
 from ofmc.model.of import of1d_img_pb
-from ofmc.model.cm import cm1d
+from ofmc.model.cm import cm1d_img
+from ofmc.model.cm import cm1d_img_pb
 from ofmc.model.cm import cm1dsource
 from ofmc.model.cm import cm1dvelocity
 from ofmc.model.cms import cms1d
@@ -172,8 +173,9 @@ vel = v*np.ones_like(img)
 
 # Compute velocities.
 #vel = of1d_img(img, alpha0, alpha1, 'mesh')
-vel = of1d_img_pb(img, alpha0, alpha1, 'mesh')
-# vel = cm1d(img, alpha0, alpha1)
+#vel = of1d_img_pb(img, alpha0, alpha1, 'mesh')
+#vel = cm1d_img(img, alpha0, alpha1, 'mesh')
+vel = cm1d_img_pb(img, alpha0, alpha1, 'mesh')
 # vel = cm1dsource(img, k, alpha0, alpha1)
 # k = cm1dvelocity(img, vel, alpha2, alpha3)
 #vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)

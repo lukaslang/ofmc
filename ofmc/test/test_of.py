@@ -23,6 +23,7 @@ from dolfin import UnitSquareMesh
 from ofmc.model.of import of1d_exp
 from ofmc.model.of import of1d_exp_pb
 from ofmc.model.of import of1d_img
+from ofmc.model.of import of1d_img_pb
 from ofmc.model.of import of1d_weak_solution
 from ofmc.model.of import of2dmcs
 import unittest
@@ -102,6 +103,14 @@ class TestOf(unittest.TestCase):
         # Create zero image.
         img = np.zeros((10, 25))
         v = of1d_img(img, 1, 1, 'mesh')
+
+        np.testing.assert_allclose(v.shape, img.shape)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        
+    def test_of1d_img_periodic_mesh(self):
+        # Create zero image.
+        img = np.zeros((10, 25))
+        v = of1d_img_pb(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

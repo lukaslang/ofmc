@@ -20,7 +20,6 @@
 from dolfin import assemble
 from dolfin import dx
 from dolfin import dof_to_vertex_map
-from dolfin import interpolate
 from dolfin import solve
 from dolfin import Expression
 from dolfin import Function
@@ -80,7 +79,6 @@ def of1d_weak_solution(V: FunctionSpace,
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
     print('Res={0}, Func={1}\n'.format(assemble(res * dx),
                                        assemble(func * dx)))
-
     return v
 
 

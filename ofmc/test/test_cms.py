@@ -23,8 +23,14 @@ from dolfin import Constant
 from dolfin import Function
 from dolfin import UnitSquareMesh
 from ofmc.model.cms import cms1d_weak_solution
+from ofmc.model.cms import cms1d_weak_solution_given_source
+from ofmc.model.cms import cms1d_weak_solution_given_velocity
 from ofmc.model.cms import cms1d_exp
 from ofmc.model.cms import cms1d_exp_pb
+from ofmc.model.cms import cms1d_given_source_exp
+from ofmc.model.cms import cms1d_given_source_exp_pb
+from ofmc.model.cms import cms1d_given_velocity_exp
+from ofmc.model.cms import cms1d_given_velocity_exp_pb
 from ofmc.model.cms import cms1d_img
 from ofmc.model.cms import cms1d_img_pb
 from ofmc.model.cms import cms1dl2
@@ -70,6 +76,77 @@ class TestCms(unittest.TestCase):
         np.testing.assert_allclose(k.shape, m * n)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
+    def test_cms1d_weak_solution_given_source_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Define mesh and function space.
+        mesh = UnitSquareMesh(m - 1, n - 1)
+        V = dh.create_function_space(mesh, 'default')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Create source.
+        k = Function(V)
+
+        # Compute velocity.
+        v = cms1d_weak_solution_given_source(V, f, f.dx(0), f.dx(1), k,
+                                             1.0, 1.0)
+        v = v.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m * n)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+        V = dh.create_function_space(mesh, 'periodic')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v = cms1d_weak_solution_given_source(V, f, f.dx(0), f.dx(1), k,
+                                             1.0, 1.0)
+        v = v.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m * (n - 1))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_cms1d_weak_solution_given_velocity_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Define mesh and function space.
+        mesh = UnitSquareMesh(m - 1, n - 1)
+        V = dh.create_function_space(mesh, 'default')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Create velocity.
+        v = Function(V)
+        vx = Function(V)
+
+        # Compute source.
+        k = cms1d_weak_solution_given_velocity(V, f, f.dx(0), f.dx(1), v, vx,
+                                               1.0, 1.0)
+        k = k.vector().get_local()
+
+        np.testing.assert_allclose(k.shape, m * n)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+        V = dh.create_function_space(mesh, 'periodic')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute source.
+        k = cms1d_weak_solution_given_velocity(V, f, f.dx(0), f.dx(1), v, vx,
+                                               1.0, 1.0)
+        k = k.vector().get_local()
+
+        np.testing.assert_allclose(k.shape, m * (n - 1))
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
     def test_cms1d_exp_default(self):
         # Define temporal and spatial sample points.
         m, n = 10, 20
@@ -99,6 +176,76 @@ class TestCms(unittest.TestCase):
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, (m, n))
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cms1d_given_source_exp_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Create source.
+        k = Constant(0.0)
+
+        # Compute velocity.
+        v = cms1d_given_source_exp(m, n, f, fd, fd, k, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_cms1d_given_source_exp_pb(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Create source.
+        k = Constant(0.0)
+
+        # Compute velocity.
+        v = cms1d_given_source_exp_pb(m, n, f, fd, fd, k, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+
+    def test_cms1d_given_velocity_exp_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Create velocity.
+        v = Constant(0.0)
+        vx = Constant(0.0)
+
+        # Compute source.
+        k = cms1d_given_velocity_exp(m, n, f, fd, fd, v, vx, 1.0, 1.0)
+
+        np.testing.assert_allclose(k.shape, (m, n))
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cms1d_given_velocity_exp_pb(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Create velocity.
+        v = Constant(0.0)
+        vx = Constant(0.0)
+
+        # Compute velocity.
+        k = cms1d_given_velocity_exp_pb(m, n, f, fd, fd, v, vx, 1.0, 1.0)
+
         np.testing.assert_allclose(k.shape, (m, n))
         np.testing.assert_allclose(k, np.zeros_like(k))
 

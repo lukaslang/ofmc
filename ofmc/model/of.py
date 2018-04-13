@@ -135,7 +135,7 @@ def of1d_exp_pb(m: int, n: int,
         alpha1 (float): Temporal regularisation parameter.
 
     Returns:
-        v (np.array): A velocity array of shape (m, n - 1).
+        v (np.array): A velocity array of shape (m, n).
 
     """
     # Define mesh and function space.
@@ -146,7 +146,7 @@ def of1d_exp_pb(m: int, n: int,
     v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n - 1)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n)
 
 
 def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
@@ -223,7 +223,7 @@ def of1d_img_pb(img: np.array, alpha0: float, alpha1: float,
                      When set to 'mesh' it uses FEniCS built in function.
 
     Returns:
-        v (np.array): A velocity array of shape (m, n - 1).
+        v (np.array): A velocity array of shape (m, n).
 
     """
     # Check for valid arguments.

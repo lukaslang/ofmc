@@ -20,8 +20,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from dolfin import Constant
 from dolfin import Expression
-from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import UnitSquareMesh
 from matplotlib import cm
@@ -37,6 +37,10 @@ from ofmc.model.cms import cms1d_img
 from ofmc.model.cms import cms1d_img_pb
 from ofmc.model.cms import cms1d_exp
 from ofmc.model.cms import cms1d_exp_pb
+from ofmc.model.cms import cms1d_given_source_exp
+from ofmc.model.cms import cms1d_given_source_exp_pb
+from ofmc.model.cms import cms1d_given_velocity_exp
+from ofmc.model.cms import cms1d_given_velocity_exp_pb
 from ofmc.model.cmscr import cmscr1d_img
 from ofmc.model.cmscr import cmscr1d_img_pb
 from ofmc.model.cmscr import cmscr1d_exp
@@ -208,6 +212,23 @@ class f_decay(Expression):
         return ()
 
 
+class k_decay(Expression):
+    def eval(self, value, x):
+        value[0] = - np.exp(-x[0] / tau) \
+            * np.cos((x[1] - w * x[0]) / lambdap) / tau
+
+    def value_shape(self):
+        return ()
+
+
+class v_decay(Expression):
+    def eval(self, value, x):
+        value[0] = w
+
+    def value_shape(self):
+        return ()
+
+
 class f_decay_x(Expression):
     def eval(self, value, x):
         value[0] = - np.exp(- x[0] / tau) \
@@ -257,7 +278,11 @@ w = 0.1
 lambdap = 1 / (4 * np.pi)
 tau = 1.0
 
+# Create mesh and function spaces.
 m, n = 30, 100
+mesh = UnitSquareMesh(m - 1, n - 1)
+V = dh.create_function_space(mesh, 'default')
+W = dh.create_function_space(mesh, 'periodic')
 
 # Run experiments with non-decaying data.
 f = ConstantData().create(m, n, w, lambdap, tau)
@@ -322,34 +347,35 @@ fx = f_const_x(degree=1)
 datastr = ConstantData().string()
 
 # Interpolate function.
-mesh = UnitSquareMesh(m - 1, n - 1)
-V = FunctionSpace(mesh, 'CG', 1)
 fa = interpolate(f, V)
 fa = dh.funvec2img(fa.vector().get_local(), m, n)
+
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
 saveresults(resultpath, 'analytic_example_const_of1d_exp', fa, v)
 
 v = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'analytic_example_const_of1d_exp_pb', fa, v)
+saveresults(resultpath, 'analytic_example_const_of1d_exp_pb', fa_pb, v)
 
 v = cm1d_exp(m, n, f, ft, fx, alpha0, alpha1)
 saveresults(resultpath, 'analytic_example_const_cm1d_exp', fa, v)
 
 v = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'analytic_example_const_cm1d_exp_pb', fa, v)
+saveresults(resultpath, 'analytic_example_const_cm1d_exp_pb', fa_pb, v)
 
 v, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_const_cms1d_exp', fa, v, k)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-saveresults(resultpath, 'analytic_example_const_cms1d_exp_pb', fa, v, k)
+saveresults(resultpath, 'analytic_example_const_cms1d_exp_pb', fa_pb, v, k)
 
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_const_cmscr1d_exp', fa, v, k)
 
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
-saveresults(resultpath, 'analytic_example_const_cmscr1d_exp_pb', fa, v, k)
+saveresults(resultpath, 'analytic_example_const_cmscr1d_exp_pb', fa_pb, v, k)
 
 # Run experiments with decaying data.
 f = f_decay(degree=2)
@@ -358,37 +384,69 @@ fx = f_decay_x(degree=1)
 datastr = DecayingData().string()
 
 # Interpolate function.
-mesh = UnitSquareMesh(m - 1, n - 1)
-V = FunctionSpace(mesh, 'CG', 1)
 fa = interpolate(f, V)
 fa = dh.funvec2img(fa.vector().get_local(), m, n)
+
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v = of1d_exp(m, n, f, ft, fx, alpha0, alpha1)
 saveresults(resultpath, 'analytic_example_decay_of1d_exp', fa, v)
 
 v = of1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'analytic_example_decay_of1d_exp_pb', fa, v)
+saveresults(resultpath, 'analytic_example_decay_of1d_exp_pb', fa_pb, v)
 
 v = cm1d_exp(m, n, f, ft, fx, alpha0, alpha1)
 saveresults(resultpath, 'analytic_example_decay_cm1d_exp', fa, v)
 
 v = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'analytic_example_decay_cm1d_exp_pb', fa, v)
+saveresults(resultpath, 'analytic_example_decay_cm1d_exp_pb', fa_pb, v)
 
 v, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp', fa, v, k)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb', fa, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb', fa_pb, v, k)
 
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp', fa, v, k)
 
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb', fa, v, k)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb', fa_pb, v, k)
 
+# Run experiments with given source.
+k = k_decay(degree=2)
+ka = interpolate(k, V)
+ka = dh.funvec2img(ka.vector().get_local(), m, n)
 
-# vel = cm1dsource(img, k, alpha0, alpha1)
-# k = cm1dvelocity(img, vel, alpha2, alpha3)
+ka_pb = interpolate(k, W)
+ka_pb = dh.funvec2img_pb(ka_pb.vector().get_local(), m, n)
+
+v = cms1d_given_source_exp(m, n, f, ft, fx, k, alpha0, alpha1)
+saveresults(resultpath,
+            'analytic_example_decay_given_source_cms1d_exp', fa, v, ka)
+
+v = cms1d_given_source_exp_pb(m, n, f, ft, fx, k, alpha0, alpha1)
+saveresults(resultpath, 'analytic_example_decay_given_source_cms1d_exp_pb',
+            fa_pb, v, ka_pb)
+
+# Run experiments with given velocity.
+v = Constant(w)
+va = interpolate(v, V)
+va = dh.funvec2img(va.vector().get_local(), m, n)
+
+va_pb = interpolate(v, W)
+va_pb = dh.funvec2img_pb(va_pb.vector().get_local(), m, n)
+
+k = cms1d_given_velocity_exp(m, n, f, ft, fx, v, Constant(0.0),
+                             alpha2, alpha3)
+saveresults(resultpath,
+            'analytic_example_decay_given_velocity_cms1d_exp', fa, va, k)
+
+k = cms1d_given_velocity_exp_pb(m, n, f, ft, fx, v, Constant(0.0),
+                                alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_given_velocity_cms1d_exp_pb',
+            fa_pb, va_pb, k)
+
 # vel, k = cms1dl2(img, alpha0, alpha1, alpha2)
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)

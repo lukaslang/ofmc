@@ -88,7 +88,7 @@ class TestOf(unittest.TestCase):
         # Compute velocity.
         v = of1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
 
-        np.testing.assert_allclose(v.shape, (m, n - 1))
+        np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
 
     def test_of1d_img_default_fd(self):

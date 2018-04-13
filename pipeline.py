@@ -25,7 +25,7 @@ import numpy as np
 import os
 import warnings
 from matplotlib import cm
-from ofmc.model.cmscr import cmscr1d
+from ofmc.model.cmscr import cmscr1d_img
 from scipy import ndimage
 
 
@@ -184,7 +184,7 @@ for gen in genotypes:
         # vel = of1d(img, alpha0, alpha1)
         # vel = cm1d(img, alpha0, alpha1)
         # vel, k = cms1d(img, alpha0, alpha1, alpha2, alpha3)
-        vel, k = cmscr1d(img, alpha0, alpha1, alpha2, alpha3, beta)
+        vel, k = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3, beta, 'fd')
         # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
 
         # Plot and save figures.

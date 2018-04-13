@@ -29,7 +29,7 @@ from matplotlib.collections import LineCollection
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import ofmc.util.roihelpers as rh
-from ofmc.model.cmscr import cmscr1d
+from ofmc.model.cmscr import cmscr1d_img
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -42,9 +42,9 @@ if not os.path.exists(resultpath):
 
 # Set regularisation parameter.
 alpha0 = 5e-3
-alpha1 = 1e-3
-alpha2 = 5e-4
-alpha3 = 5e-4
+alpha1 = 1e-2
+alpha2 = 1e-4
+alpha3 = 1e-4
 beta = 1e-3
 
 
@@ -137,7 +137,8 @@ for gen in genotypes:
 
         # Compute velocity and source.
         imgp = prepareimage(img)
-        vel, k = cmscr1d(imgp, alpha0, alpha1, alpha2, alpha3, beta)
+        vel, k = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
+                             beta, 'fd')
 
         # Interpolate velocity.
         m, n = vel.shape

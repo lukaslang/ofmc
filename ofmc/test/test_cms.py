@@ -25,15 +25,19 @@ from dolfin import UnitSquareMesh
 from ofmc.model.cms import cms1d_weak_solution
 from ofmc.model.cms import cms1d_weak_solution_given_source
 from ofmc.model.cms import cms1d_weak_solution_given_velocity
+from ofmc.model.cms import cms1dl2_weak_solution
 from ofmc.model.cms import cms1d_exp
 from ofmc.model.cms import cms1d_exp_pb
+from ofmc.model.cms import cms1dl2_exp
+from ofmc.model.cms import cms1dl2_exp_pb
 from ofmc.model.cms import cms1d_given_source_exp
 from ofmc.model.cms import cms1d_given_source_exp_pb
 from ofmc.model.cms import cms1d_given_velocity_exp
 from ofmc.model.cms import cms1d_given_velocity_exp_pb
 from ofmc.model.cms import cms1d_img
 from ofmc.model.cms import cms1d_img_pb
-from ofmc.model.cms import cms1dl2
+from ofmc.model.cms import cms1dl2_img
+from ofmc.model.cms import cms1dl2_img_pb
 import ofmc.util.dolfinhelpers as dh
 
 
@@ -68,6 +72,45 @@ class TestCms(unittest.TestCase):
 
         # Compute velocity.
         v, k = cms1d_weak_solution(W, f, f.dx(0), f.dx(1), 1.0, 1.0, 1.0, 1.0)
+        v = v.vector().get_local()
+        k = k.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m * n)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, m * n)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cms1dl2_weak_solution_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Define mesh and function space.
+        mesh = UnitSquareMesh(m - 1, n - 1)
+        V = dh.create_function_space(mesh, 'default')
+        W = dh.create_vector_function_space(mesh, 'default')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v, k = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
+                                     1.0, 1.0, 1.0)
+        v = v.vector().get_local()
+        k = k.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m * n)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, m * n)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+        V = dh.create_function_space(mesh, 'periodic')
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v, k = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
+                                     1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -179,6 +222,38 @@ class TestCms(unittest.TestCase):
         np.testing.assert_allclose(k.shape, (m, n))
         np.testing.assert_allclose(k, np.zeros_like(k))
 
+    def test_cms1dl2_exp_default(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Compute velocity.
+        v, k = cms1dl2_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, (m, n))
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cms1dl2_exp_pb(self):
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Create constant image sequence.
+        f = Constant(1.0)
+        fd = Constant(0.0)
+
+        # Compute velocity.
+        v, k = cms1dl2_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0)
+
+        np.testing.assert_allclose(v.shape, (m, n))
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, (m, n))
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
     def test_cms1d_given_source_exp_default(self):
         # Define temporal and spatial sample points.
         m, n = 10, 20
@@ -279,10 +354,20 @@ class TestCms(unittest.TestCase):
         np.testing.assert_allclose(k.shape, img.shape)
         np.testing.assert_allclose(k, np.zeros_like(k))
 
-    def test_cms1dl2(self):
+    def test_cms1dl2_img_default_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1dl2(img, 1, 1, 1)
+        v, k = cms1dl2_img(img, 1.0, 1.0, 1.0, 'mesh')
+
+        np.testing.assert_allclose(v.shape, img.shape)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, img.shape)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cms1dl2_img_periodic_mesh(self):
+        # Create zero image.
+        img = np.zeros((10, 25))
+        v, k = cms1dl2_img_pb(img, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

@@ -37,6 +37,10 @@ from ofmc.model.cms import cms1d_img
 from ofmc.model.cms import cms1d_img_pb
 from ofmc.model.cms import cms1d_exp
 from ofmc.model.cms import cms1d_exp_pb
+from ofmc.model.cms import cms1dl2_img
+from ofmc.model.cms import cms1dl2_img_pb
+from ofmc.model.cms import cms1dl2_exp
+from ofmc.model.cms import cms1dl2_exp_pb
 from ofmc.model.cms import cms1d_given_source_exp
 from ofmc.model.cms import cms1d_given_source_exp_pb
 from ofmc.model.cms import cms1d_given_velocity_exp
@@ -306,6 +310,12 @@ saveresults(resultpath, 'analytic_example_const_cms1d_img', f, v, k)
 v, k = cms1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
 saveresults(resultpath, 'analytic_example_const_cms1d_img_pb', f, v, k)
 
+v, k = cms1dl2_img(f, alpha0, alpha1, alpha2, 'mesh')
+saveresults(resultpath, 'analytic_example_const_cms1dl2_img', f, v, k)
+
+v, k = cms1dl2_img_pb(f, alpha0, alpha1, alpha2, 'mesh')
+saveresults(resultpath, 'analytic_example_const_cms1dl2_img_pb', f, v, k)
+
 v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_const_cmscr1d_img', f, v, k)
 
@@ -333,6 +343,12 @@ saveresults(resultpath, 'analytic_example_decay_cms1d_img', f, v, k)
 
 v, k = cms1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1d_img_pb', f, v, k)
+
+v, k = cms1dl2_img(f, alpha0, alpha1, alpha2, 'mesh')
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_img', f, v, k)
+
+v, k = cms1dl2_img_pb(f, alpha0, alpha1, alpha2, 'mesh')
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_img_pb', f, v, k)
 
 v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_img', f, v, k)
@@ -371,6 +387,12 @@ saveresults(resultpath, 'analytic_example_const_cms1d_exp', fa, v, k)
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_const_cms1d_exp_pb', fa_pb, v, k)
 
+v, k = cms1dl2_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2)
+saveresults(resultpath, 'analytic_example_const_cms1dl2_exp', fa, v, k)
+
+v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2)
+saveresults(resultpath, 'analytic_example_const_cms1dl2_exp_pb', fa_pb, v, k)
+
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_const_cmscr1d_exp', fa, v, k)
 
@@ -407,6 +429,12 @@ saveresults(resultpath, 'analytic_example_decay_cms1d_exp', fa, v, k)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb', fa_pb, v, k)
+
+v, k = cms1dl2_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp', fa, v, k)
+
+v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp_pb', fa_pb, v, k)
 
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp', fa, v, k)

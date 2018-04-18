@@ -135,9 +135,13 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     plt.close(fig)
 
 
-def savestrainrate(path: str, name: str, sr: np.array):
+def savestrainrate(path: str, name: str, img: np.array, vel: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
+
+    m, n = img.shape
+    hy = 1.0 / (n - 1)
+    sr = np.gradient(vel, hy, axis=1)
 
     maxsr = abs(sr).max()
     normi = mpl.colors.Normalize(vmin=-maxsr, vmax=maxsr)
@@ -195,8 +199,5 @@ for gen in genotypes:
                    name, k)
 
         # Compute and save strain rate.
-        m, n = img.shape
-        hy = 1.0 / (n - 1)
-        sr = np.gradient(vel, hy, axis=1)
         savestrainrate(os.path.join(os.path.join(resultpath, gen), dat),
-                       name, sr)
+                       name, img, vel)

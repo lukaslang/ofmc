@@ -23,6 +23,7 @@ import imageio
 from read_roi import read_roi_zip
 from matplotlib import cm
 from matplotlib.collections import LineCollection
+from scipy.interpolate import UnivariateSpline
 import ofmc.util.roihelpers as rh
 import matplotlib
 matplotlib.use('agg')
@@ -121,6 +122,34 @@ class TestRoiHelpers(unittest.TestCase):
             lc.set_linewidth(2)
             plt.gca().add_collection(lc)
         plt.show()
+
+    def test_spline_derivative(self):
+
+        # Define image.
+        m, n = 30, 100
+        img = np.zeros((m, n))
+
+        num = 5
+
+        # Create trajectory.
+        x = np.linspace(0, m, num)
+        y = np.linspace(0, 10, num)
+
+        # Fit spline.
+        f = UnivariateSpline(x, y, k=3)
+
+        plt.imshow(img, cmap=cm.gray)
+        points = np.array([f(x), x]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+        lc = LineCollection(segments, cmap=cm.coolwarm,
+                            norm=plt.Normalize(-2, 2))
+        lc.set_linewidth(2)
+        plt.gca().add_collection(lc)
+        plt.show()
+
+        fd = f.derivative()
+        np.testing.assert_allclose(fd(x) * m / n, np.repeat(0.1, num))
 
 
 if __name__ == '__main__':

@@ -476,5 +476,18 @@ k = cms1d_given_velocity_exp_pb(m, n, f, ft, fx, v, Constant(0.0),
 saveresults(resultpath, 'analytic_example_decay_given_velocity_cms1d_exp_pb',
             fa_pb, va_pb, k)
 
-# vel, k = cms1dl2(img, alpha0, alpha1, alpha2)
+# Visualise increasing regularisation parameter of convective regularisation.
+beta = 1e-3
+v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.001',
+            fa_pb, v, k)
+beta = 1e-2
+v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.01',
+            fa_pb, v, k)
+beta = 1e-1
+v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.1',
+            fa_pb, v, k)
+
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)

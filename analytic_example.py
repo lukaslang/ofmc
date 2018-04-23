@@ -121,7 +121,12 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     # Save velocity profile after cut.
     fig, ax = plt.subplots(figsize=(10, 5))
-    plt.plot(vel[0])
+    t = np.linspace(0, m, 4, dtype=int, endpoint=False)
+    t0, = plt.plot(vel[t[0]], label='t={0}'.format(t[0]))
+    t1, = plt.plot(vel[t[1]], label='t={0}'.format(t[1]))
+    t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]))
+    t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]))
+    plt.legend(handles=[t0, t1, t2, t3])
     ax.set_title('Velocity profile at time zero')
 
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
@@ -488,6 +493,43 @@ saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.01',
 beta = 1e-1
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.1',
+            fa_pb, v, k)
+
+# Different mesh sizes.
+m, n = 100, 100
+mesh = UnitSquareMesh(m - 1, n - 1)
+W = dh.create_function_space(mesh, 'periodic')
+
+# Interpolate function.
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_100',
+            fa_pb, v, k)
+
+m, n = 200, 200
+mesh = UnitSquareMesh(m - 1, n - 1)
+W = dh.create_function_space(mesh, 'periodic')
+
+# Interpolate function.
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_200',
+            fa_pb, v, k)
+
+m, n = 400, 400
+mesh = UnitSquareMesh(m - 1, n - 1)
+W = dh.create_function_space(mesh, 'periodic')
+
+# Interpolate function.
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_400',
             fa_pb, v, k)
 
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)

@@ -44,7 +44,7 @@ def saveimage(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.viridis)
+    im = ax.imshow(img, cmap=cm.gray)
     ax.set_title('Concentration')
 
     # Create colourbar.
@@ -55,7 +55,7 @@ def saveimage(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=100, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -65,7 +65,7 @@ def savekymo(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.viridis)
+    im = ax.imshow(img, cmap=cm.gray)
     ax.set_xlabel('Space')
     ax.set_ylabel('Time')
     ax.set_title('Concentration')
@@ -78,11 +78,11 @@ def savekymo(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=100, bbox_inches='tight')
     plt.close(fig)
 
 
-# Pick dataset.
+# Choose dataset.
 gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
 dat = 'E2PSB1'
 
@@ -101,7 +101,7 @@ print("Outputting file '{0}'".format(name))
 img = imageio.imread(kymos[0])
 
 # Plot and save figures.
-saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)
+savekymo(os.path.join(os.path.join(resultpath, gen), dat), name, img)
 
 # Output first frames of image sequence.
 seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))

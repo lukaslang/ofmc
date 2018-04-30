@@ -1,7 +1,7 @@
 OFMC - A Variational Model for the Analysis of Membrane Cuts
 Version 1.0, 2017
 
-Lukas Lang (ll542@damtp.cam.ac.uk)
+Lukas Lang (ll542@cam.ac.uk)
 University of Cambridge
 Department of Applied Mathematics and Theoretical Physics
 Wilberforce Road, Cambridge CB3 0WA, United Kingdom
@@ -11,15 +11,15 @@ http://www.damtp.cam.ac.uk/
 
 This is a Python implementation of:
 
-Nilankur Dutta, J. \'{E}tienne, L.~F. Lang, C.~B. Sch\"{o}nlieb.?Joint Motion Estimation and Source Identification with an Application to the Analysis of Cell Membranes.
+L.~F. Lang, Nilankur Dutta, Elena Scarpa, Bénédicte Sanson, C.~B. Schönlieb, and J. Étienne. Joint Motion Estimation and Source Identification with an Application to the Analysis of Biological Tissue Nanoablation Experiments.
 
 If you use this software in your work please cite the abovementioned paper in a resulting publication.
 
 BibTeX:
 
-@techreport{DutEtiLanSch17,
-  author     = {Dutta, N. and \'{E}tienne, J. and Lang, L.~F. and Sch\"{o}nlieb, C.~B.},
-  title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Cell Membranes},
+@techreport{LanDutScaSanSchoEti17,
+  author     = {Lang, L.~F. and Dutta, N. and Scarpa, E. and Sanson, B. and Sch\"{o}nlieb, C.~B. and \'{E}tienne, J.},
+  title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Biological Tissue Nanoablation Experiments},
   institution= {DAMTP, University of Cambridge, United Kingdom},
   type       = {Preprint},
   year       = {2017}

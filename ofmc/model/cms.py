@@ -77,13 +77,13 @@ def cms1d_weak_solution(V: VectorFunctionSpace,
     w1, w2 = TestFunctions(V)
 
     # Define weak formulation.
-    A = (- (fx * v + f * v.dx(1) - k) * (fx * w1 + f * w1.dx(1))
-         - alpha0 * v.dx(1) * w1.dx(1)
-         - alpha1 * v.dx(0) * w1.dx(0)) * dx \
-        + ((fx * v + f * v.dx(1) - k) * w2
-           - alpha2 * k.dx(1) * w2.dx(1)
-           - alpha3 * k.dx(0) * w2.dx(0)) * dx
-    b = ft * (fx * w1 + f * w1.dx(1) - w2) * dx
+    A = ((fx * v + f * v.dx(1) - k) * (fx * w1 + f * w1.dx(1))
+         + alpha0 * v.dx(1) * w1.dx(1)
+         + alpha1 * v.dx(0) * w1.dx(0)) * dx \
+        + (-(fx * v + f * v.dx(1) - k) * w2
+           + alpha2 * k.dx(1) * w2.dx(1)
+           + alpha3 * k.dx(0) * w2.dx(0)) * dx
+    b = ft * (-fx * w1 - f * w1.dx(1) + w2) * dx
 
     # Compute solution.
     v = Function(V)

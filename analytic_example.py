@@ -127,24 +127,24 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]))
     t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]))
     plt.legend(handles=[t0, t1, t2, t3])
-    ax.set_title('Velocity profile at time zero')
+    ax.set_title('Velocity profile')
 
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
     plt.close(fig)
 
 
-def saveerror(path: str, name: str, img: np.array, k: np.array):
+def saveerror(path: str, name: str, k: np.array, kgt: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    cax = ax.imshow(np.abs(-img - k), cmap=cm.coolwarm)
-    ax.set_title('abs(-c/tau - k)')
+    cax = ax.imshow(np.abs(k - kgt), cmap=cm.coolwarm)
+    ax.set_title('Error in k')
     fig.colorbar(cax, orientation='horizontal')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}-error.png'.format(name)))
+    fig.savefig(os.path.join(path, '{0}-sourceerror.png'.format(name)))
     plt.close(fig)
 
 
@@ -257,7 +257,8 @@ class f_decay_t(Expression):
         return ()
 
 
-def saveresults(resultpath: str, name: str, f: np.array, v: np.array, k=None):
+def saveresults(resultpath: str, name: str, f: np.array, v: np.array, k=None,
+                kgt=None):
     resultpath = os.path.join('results', name)
     if not os.path.exists(resultpath):
         os.makedirs(resultpath)
@@ -267,7 +268,8 @@ def saveresults(resultpath: str, name: str, f: np.array, v: np.array, k=None):
     saveparameters(resultpath)
     if k is not None:
         savesource(resultpath, name, k)
-        # saveerror(resultpath, name, f, k)
+    if kgt is not None:
+        saveerror(resultpath, name, k, kgt)
 
 
 # Set path where results are saved.
@@ -344,22 +346,24 @@ v = cm1d_img_pb(f, alpha0, alpha1, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cm1d_img_pb', f, v)
 
 v, k = cms1d_img(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cms1d_img', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1d_img', f, v, k, -f/tau)
 
 v, k = cms1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cms1d_img_pb', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1d_img_pb', f, v, k, -f/tau)
 
 v, k = cms1dl2_img(f, alpha0, alpha1, alpha2, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cms1dl2_img', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_img', f, v, k, -f/tau)
 
 v, k = cms1dl2_img_pb(f, alpha0, alpha1, alpha2, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cms1dl2_img_pb', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_img_pb',
+            f, v, k, -f/tau)
 
 v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_img', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_img', f, v, k, -f/tau)
 
 v, k = cmscr1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_img_pb', f, v, k)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_img_pb',
+            f, v, k, -f/tau)
 
 # Run experiments with constant data.
 f = f_const(degree=2)
@@ -430,22 +434,27 @@ v = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
 saveresults(resultpath, 'analytic_example_decay_cm1d_exp_pb', fa_pb, v)
 
 v, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-saveresults(resultpath, 'analytic_example_decay_cms1d_exp', fa, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp', fa, v, k, -fa/tau)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb', fa_pb, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb',
+            fa_pb, v, k, -fa_pb/tau)
 
 v, k = cms1dl2_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2)
-saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp', fa, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp',
+            fa, v, k, -fa/tau)
 
 v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2)
-saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp_pb', fa_pb, v, k)
+saveresults(resultpath, 'analytic_example_decay_cms1dl2_exp_pb',
+            fa_pb, v, k, -fa_pb/tau)
 
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp', fa, v, k)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp',
+            fa, v, k, -fa/tau)
 
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb', fa_pb, v, k)
+saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb',
+            fa_pb, v, k, -fa_pb/tau)
 
 # Run experiments with given source.
 k = k_decay(degree=2)
@@ -479,23 +488,79 @@ saveresults(resultpath,
 k = cms1d_given_velocity_exp_pb(m, n, f, ft, fx, v, Constant(0.0),
                                 alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_given_velocity_cms1d_exp_pb',
-            fa_pb, va_pb, k)
+            fa_pb, va_pb, k, -fa_pb/tau)
 
 # Visualise increasing regularisation parameter of convective regularisation.
 beta = 1e-3
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.001',
-            fa_pb, v, k)
+            fa_pb, v, k, -fa_pb/tau)
 beta = 1e-2
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.01',
-            fa_pb, v, k)
+            fa_pb, v, k, -fa_pb/tau)
 beta = 1e-1
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.1',
-            fa_pb, v, k)
+            fa_pb, v, k, -fa_pb/tau)
+
+# Increasing regularistaion parameters.
+alpha0 = 1e-5
+alpha1 = 1e-5
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.00001',
+            fa_pb, v, k, -fa_pb/tau)
+alpha0 = 1e-4
+alpha1 = 1e-4
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.0001',
+            fa_pb, v, k, -fa_pb/tau)
+alpha0 = 1e-3
+alpha1 = 1e-3
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.001',
+            fa_pb, v, k, -fa_pb/tau)
+alpha0 = 1e-2
+alpha1 = 1e-2
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.01',
+            fa_pb, v, k, -fa_pb/tau)
+alpha0 = 1e-1
+alpha1 = 1e-1
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.1',
+            fa_pb, v, k, -fa_pb/tau)
+alpha0 = 1e0
+alpha1 = 1e0
+alpha2 = 1e-6
+alpha3 = 1e-6
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_1.0',
+            fa_pb, v, k, -fa_pb/tau)
 
 # Different mesh sizes.
+m, n = 50, 50
+mesh = UnitSquareMesh(m - 1, n - 1)
+W = dh.create_function_space(mesh, 'periodic')
+
+# Interpolate function.
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_50',
+            fa_pb, v, k, -fa_pb/tau)
+
 m, n = 100, 100
 mesh = UnitSquareMesh(m - 1, n - 1)
 W = dh.create_function_space(mesh, 'periodic')
@@ -506,7 +571,7 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_100',
-            fa_pb, v, k)
+            fa_pb, v, k, -fa_pb/tau)
 
 m, n = 200, 200
 mesh = UnitSquareMesh(m - 1, n - 1)
@@ -518,18 +583,56 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_200',
-            fa_pb, v, k)
-
-m, n = 400, 400
-mesh = UnitSquareMesh(m - 1, n - 1)
-W = dh.create_function_space(mesh, 'periodic')
-
-# Interpolate function.
-fa_pb = interpolate(f, W)
-fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
-
-v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_mesh_400',
-            fa_pb, v, k)
+            fa_pb, v, k, -fa_pb/tau)
 
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
+
+
+#c = 1.0
+#
+#
+#class f_decay(Expression):
+#    def eval(self, value, x):
+#        value[0] = np.cos((x[1] - w * x[0]) / lambdap) - c*x[0]
+#
+#    def value_shape(self):
+#        return ()
+#
+#
+#class f_decay_x(Expression):
+#    def eval(self, value, x):
+#        value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
+#
+#    def value_shape(self):
+#        return ()
+#
+#
+#class f_decay_t(Expression):
+#    def eval(self, value, x):
+#        value[0] = np.sin((x[1] - w * x[0]) / lambdap) \
+#            * w / lambdap - c
+#
+#    def value_shape(self):
+#        return ()
+#
+#
+## Run experiments with decaying data.
+#f = f_decay(degree=2)
+#ft = f_decay_t(degree=1)
+#fx = f_decay_x(degree=1)
+#datastr = DecayingData().string()
+#
+#fa_pb = interpolate(f, W)
+#fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+#
+#m, n = 100, 100
+#mesh = UnitSquareMesh(m - 1, n - 1)
+#W = dh.create_function_space(mesh, 'periodic')
+#
+## Interpolate function.
+#fa_pb = interpolate(f, W)
+#fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+#
+#v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+#saveresults(resultpath, 'analytic_example_linear_decay_cms1d_exp_pb',
+#            fa_pb, v, k)

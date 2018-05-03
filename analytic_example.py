@@ -17,6 +17,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -49,6 +50,7 @@ from ofmc.model.cmscr import cmscr1d_img
 from ofmc.model.cmscr import cmscr1d_img_pb
 from ofmc.model.cmscr import cmscr1d_exp
 from ofmc.model.cmscr import cmscr1d_exp_pb
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import ofmc.util.dolfinhelpers as dh
 
 
@@ -58,12 +60,17 @@ def saveimage(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    cax = ax.imshow(img, cmap=cm.coolwarm)
-    ax.set_title('Density')
-    fig.colorbar(cax, orientation='horizontal')
+    im = ax.imshow(img, cmap=cm.coolwarm)
+    ax.set_title('Concentration')
+
+    # Create colourbar.
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    fig.colorbar(im, cax=cax, orientation='vertical')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}.png'.format(name)))
+    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -73,12 +80,18 @@ def savesource(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    cax = ax.imshow(img, cmap=cm.coolwarm)
+    im = ax.imshow(img, cmap=cm.coolwarm)
     ax.set_title('Source')
-    fig.colorbar(cax, orientation='horizontal')
+
+    # Create colourbar.
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    fig.colorbar(im, cax=cax, orientation='vertical')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}-source.png'.format(name)))
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-source.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -91,17 +104,23 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    #cax = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
-    cax = ax.imshow(vel, interpolation='nearest', cmap=cm.coolwarm)
+    #im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    im = ax.imshow(vel, interpolation='nearest', cmap=cm.coolwarm)
     ax.set_title('Velocity')
-    fig.colorbar(cax, orientation='horizontal')
+
+    # Create colourbar.
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    fig.colorbar(im, cax=cax, orientation='vertical')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)))
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
     m, n = vel.shape
-    hx, hy = 1.0/(m-1), 1.0/(n-1)
+    hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
 
     # Create grid for streamlines.
     Y, X = np.mgrid[0:m, 0:n]
@@ -110,13 +129,20 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    strm = ax.streamplot(X, Y, vel*hx/hy, V, density=2,
-#    strm = ax.streamplot(X, Y, vel*hx, V, density=2,
-#                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+    ax.set_title('Streamlines')
+    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=2,
                          color=vel, linewidth=1, cmap=cm.coolwarm)
-    fig.colorbar(strm.lines, orientation='horizontal')
+#                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+#    fig.colorbar(strm.lines, orientation='vertical')
 
-    fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)))
+    # Create colourbar.
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    fig.colorbar(strm.lines, cax=cax, orientation='vertical')
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
     # Save velocity profile after cut.
@@ -127,9 +153,11 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]))
     t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]))
     plt.legend(handles=[t0, t1, t2, t3])
-    ax.set_title('Velocity profile')
+    ax.set_title('Velocity profile at different times')
 
-    fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)))
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -139,12 +167,18 @@ def saveerror(path: str, name: str, k: np.array, kgt: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    cax = ax.imshow(np.abs(k - kgt), cmap=cm.coolwarm)
+    im = ax.imshow(np.abs(k - kgt), cmap=cm.coolwarm)
     ax.set_title('Error in k')
-    fig.colorbar(cax, orientation='horizontal')
+
+    # Create colourbar.
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    fig.colorbar(im, cax=cax, orientation='vertical')
 
     # Save figure.
-    fig.savefig(os.path.join(path, '{0}-sourceerror.png'.format(name)))
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-sourceerror.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -507,43 +541,43 @@ saveresults(resultpath, 'analytic_example_decay_cmscr1d_exp_pb_beta_0.1',
 # Increasing regularistaion parameters.
 alpha0 = 1e-5
 alpha1 = 1e-5
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e-5
+alpha3 = 1e-5
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.00001',
             fa_pb, v, k, -fa_pb/tau)
 alpha0 = 1e-4
 alpha1 = 1e-4
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e-4
+alpha3 = 1e-4
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.0001',
             fa_pb, v, k, -fa_pb/tau)
 alpha0 = 1e-3
 alpha1 = 1e-3
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e-3
+alpha3 = 1e-3
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.001',
             fa_pb, v, k, -fa_pb/tau)
 alpha0 = 1e-2
 alpha1 = 1e-2
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e-2
+alpha3 = 1e-2
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.01',
             fa_pb, v, k, -fa_pb/tau)
 alpha0 = 1e-1
 alpha1 = 1e-1
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e-1
+alpha3 = 1e-1
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_0.1',
             fa_pb, v, k, -fa_pb/tau)
 alpha0 = 1e0
 alpha1 = 1e0
-alpha2 = 1e-6
-alpha3 = 1e-6
+alpha2 = 1e0
+alpha3 = 1e0
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb_reg_1.0',
             fa_pb, v, k, -fa_pb/tau)

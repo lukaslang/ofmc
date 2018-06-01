@@ -18,8 +18,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import os
+import datetime
 import glob
 import imageio
+import re
 import numpy as np
 from scipy import ndimage
 from scipy import interpolate
@@ -37,7 +39,8 @@ datapath = ('/Users/lukaslang/'
             'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
-resultpath = 'results'
+resultpath = 'results/{0}'.format(
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
@@ -46,7 +49,19 @@ alpha0 = 5e-3
 alpha1 = 1e-3
 alpha2 = 1e-4
 alpha3 = 1e-4
-beta = 1e-3
+beta = 5e-3
+
+# Set font style.
+font = {'weight': 'normal',
+        'size': 20}
+plt.rc('font', **font)
+
+# Set colormap.
+cmap = cm.viridis
+
+# Streamlines.
+density = 2
+linewidth = 2
 
 
 def loadimage(filename: str) -> np.array:
@@ -73,7 +88,7 @@ def saveimage(path: str, name: str, img: np.array):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
-    ax.set_title('Concentration')
+    ax.set_title('Fluorescence intensity')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -92,7 +107,7 @@ def savesource(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.coolwarm)
+    im = ax.imshow(img, cmap=cmap)
     ax.set_title('Source')
 
     # Create colourbar.
@@ -116,7 +131,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
     ax.set_title('Velocity')
 
     # Create colourbar.
@@ -141,8 +156,8 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
     ax.set_title('Streamlines')
-    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=2,
-                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=density,
+                         color=vel, linewidth=linewidth, norm=normi, cmap=cmap)
 #    fig.colorbar(strm.lines, orientation='vertical')
 
     # Create colourbar.
@@ -179,7 +194,7 @@ def savestrainrate(path: str, name: str, img: np.array, vel: np.array):
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(sr, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    im = ax.imshow(sr, interpolation='nearest', norm=normi, cmap=cmap)
     ax.set_title('Strain rate')
 
     # Create colourbar.
@@ -246,7 +261,7 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
         points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        lc = LineCollection(segments, cmap=cm.coolwarm, norm=normi)
+        lc = LineCollection(segments, cmap=cmap, norm=normi)
         lc.set_array(derivspl(y) * m / n)
         lc.set_linewidth(2)
         plt.gca().add_collection(lc)
@@ -254,7 +269,7 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
     # Create colourbar.
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)
-    mpl.colorbar.ColorbarBase(cax, cmap=cm.coolwarm, norm=normi)
+    mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=normi)
 
     # Save figure.
     fig.tight_layout()
@@ -309,7 +324,7 @@ def saveerror(path: str, name: str, img: np.array, spl):
         points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        lc = LineCollection(segments, cmap=cm.coolwarm, norm=normi)
+        lc = LineCollection(segments, cmap=cmap, norm=normi)
 
         lc.set_array(error[v])
         lc.set_linewidth(2)
@@ -318,7 +333,7 @@ def saveerror(path: str, name: str, img: np.array, spl):
     # Create colourbar.
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)
-    mpl.colorbar.ColorbarBase(cax, cmap=cm.coolwarm, norm=normi)
+    mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=normi)
 
     # Save figure.
     fig.tight_layout()
@@ -363,19 +378,19 @@ def save_spl_streamlines_(path: str, name: str, img: np.array, vel: np.array,
         points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        lc = LineCollection(segments, cmap=cm.coolwarm, norm=normi)
+        lc = LineCollection(segments, cmap=cmap, norm=normi)
         lc.set_array(derivspl(y) * m / n)
         lc.set_linewidth(2)
         plt.gca().add_collection(lc)
 
     # Plot streamlines.
-    ax.streamplot(X, Y, vel * hx / hy, V, density=2,
-                  color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+    ax.streamplot(X, Y, vel * hx / hy, V, density=density,
+                  color=vel, linewidth=linewidth, norm=normi, cmap=cmap)
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.1)
-    mpl.colorbar.ColorbarBase(cax, cmap=cm.coolwarm, norm=normi)
+    mpl.colorbar.ColorbarBase(cax, cmap=cmap, norm=normi)
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-spline-streamlines.png'.format(name)),
@@ -397,11 +412,6 @@ for gen in genotypes:
     # Run through datasets.
     for dat in datasets:
         datfolder = os.path.join(datapath, os.path.join(gen, dat))
-
-        resfolder = os.path.join(os.path.join(resultpath, gen), dat)
-        if not os.path.exists(resfolder):
-            os.makedirs(resfolder)
-
         print("Dataset {0}/{1}".format(gen, dat))
 
         # Identify Kymograph and do sanity check.
@@ -409,16 +419,36 @@ for gen in genotypes:
         if len(kymos) != 1:
             print("No Kymograph found for {0}!".format(dat))
 
+        # Extract name of kymograph and replace whitespaces.
         name = os.path.splitext(os.path.basename(kymos[0]))[0]
+        name = re.sub(' ', '_', name)
         print("Computing velocities for file '{0}'".format(name))
 
         # Load and preprocess Kymograph.
         img = loadimage(kymos[0])
 
+        # Compute velocity and source.
+        imgp = prepareimage(img)
+        vel, k = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
+                             beta, 'mesh')
+
+        resfolder = os.path.join(os.path.join(resultpath, gen), dat)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+
+        # Plot and save figures.
+        saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)
+        savevelocity(os.path.join(os.path.join(resultpath, gen), dat),
+                     name, img, vel)
+        savesource(os.path.join(os.path.join(resultpath, gen), dat),
+                   name, k)
+        savestrainrate(os.path.join(os.path.join(resultpath, gen), dat),
+                       name, img, vel)
+
         # Sanity check.
         roifile = 'manual_ROIs.zip'
         if roifile not in os.listdir(datfolder):
-            print("No Kymograph found for {0}!".format(dat))
+            print("No ROI file found for {0}!".format(dat))
             continue
 
         # Load roi zip.
@@ -427,23 +457,9 @@ for gen in genotypes:
         # Fit splines.
         spl = rh.roi2splines(roi)
 
-        # Compute velocity and source.
-        imgp = prepareimage(img)
-        vel, k = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
-                             beta, 'mesh')
-
-        # Plot and save figures.
-        saveimage(os.path.join(os.path.join(resultpath, gen), dat), name, img)
-
         # Save tracks and fitted splines.
         saveroi(resfolder, name, img, roi)
         savespl(resfolder, name, img, roi, spl)
-        savevelocity(os.path.join(os.path.join(resultpath, gen), dat),
-                     name, img, vel)
-        savesource(os.path.join(os.path.join(resultpath, gen), dat),
-                   name, k)
-        savestrainrate(os.path.join(os.path.join(resultpath, gen), dat),
-                       name, img, vel)
         saveerror(os.path.join(os.path.join(resultpath, gen), dat),
                   name, img, spl)
         save_spl_streamlines_(os.path.join(os.path.join(resultpath, gen), dat),

@@ -17,10 +17,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import datetime
 from dolfin import Constant
 from dolfin import Expression
 from dolfin import interpolate
@@ -53,6 +53,18 @@ from ofmc.model.cmscr import cmscr1d_exp_pb
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import ofmc.util.dolfinhelpers as dh
 
+# Set font style.
+font = {'weight': 'normal',
+        'size': 20}
+plt.rc('font', **font)
+
+# Set colormap.
+cmap = cm.viridis
+
+# Streamlines.
+density = 2
+linewidth = 2
+
 
 def saveimage(path: str, name: str, img: np.array):
     if not os.path.exists(path):
@@ -60,7 +72,7 @@ def saveimage(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.coolwarm)
+    im = ax.imshow(img, cmap=cmap)
     ax.set_title('Concentration')
 
     # Create colourbar.
@@ -80,7 +92,7 @@ def savesource(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.coolwarm)
+    im = ax.imshow(img, cmap=cmap)
     ax.set_title('Source')
 
     # Create colourbar.
@@ -104,8 +116,8 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    #im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
-    im = ax.imshow(vel, interpolation='nearest', cmap=cm.coolwarm)
+    #im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
+    im = ax.imshow(vel, interpolation='nearest', cmap=cmap)
     ax.set_title('Velocity')
 
     # Create colourbar.
@@ -130,9 +142,9 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
     ax.set_title('Streamlines')
-    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=2,
-                         color=vel, linewidth=1, cmap=cm.coolwarm)
-#                         color=vel, linewidth=1, norm=normi, cmap=cm.coolwarm)
+    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=density,
+                         color=vel, linewidth=linewidth, cmap=cmap)
+#                        color=vel, linewidth=linewidth, norm=normi, cmap=cmap)
 #    fig.colorbar(strm.lines, orientation='vertical')
 
     # Create colourbar.
@@ -148,11 +160,11 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Save velocity profile after cut.
     fig, ax = plt.subplots(figsize=(10, 5))
     t = np.linspace(0, m, 4, dtype=int, endpoint=False)
-    t0, = plt.plot(vel[t[0]], label='t={0}'.format(t[0]))
-    t1, = plt.plot(vel[t[1]], label='t={0}'.format(t[1]))
-    t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]))
-    t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]))
-    plt.legend(handles=[t0, t1, t2, t3])
+    t0, = plt.plot(vel[t[0]], label='t={0}'.format(t[0]), linewidth=linewidth)
+    t1, = plt.plot(vel[t[1]], label='t={0}'.format(t[1]), linewidth=linewidth)
+    t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]), linewidth=linewidth)
+    t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]), linewidth=linewidth)
+    plt.legend(handles=[t0, t1, t2, t3], bbox_to_anchor=(1, 1))
     ax.set_title('Velocity profile at different times')
 
     fig.tight_layout()
@@ -167,7 +179,7 @@ def saveerror(path: str, name: str, k: np.array, kgt: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(np.abs(k - kgt), cmap=cm.coolwarm)
+    im = ax.imshow(np.abs(k - kgt), cmap=cmap)
     ax.set_title('Error in k')
 
     # Create colourbar.
@@ -293,7 +305,7 @@ class f_decay_t(Expression):
 
 def saveresults(resultpath: str, name: str, f: np.array, v: np.array, k=None,
                 kgt=None):
-    resultpath = os.path.join('results', name)
+    resultpath = os.path.join(resultpath, name)
     if not os.path.exists(resultpath):
         os.makedirs(resultpath)
 
@@ -307,7 +319,12 @@ def saveresults(resultpath: str, name: str, f: np.array, v: np.array, k=None,
 
 
 # Set path where results are saved.
-resultpath = os.path.join('results')
+resultpath = 'results/{0}'.format(
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+resultpath = os.path.join(resultpath, 'analytical_example')
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 

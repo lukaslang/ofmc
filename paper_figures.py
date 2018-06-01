@@ -22,10 +22,16 @@ import imageio
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import re
 import warnings
 import ofmc.external.tifffile as tiff
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+# Set font style.
+font = {'weight': 'normal',
+        'size': 20}
+plt.rc('font', **font)
 
 
 # Set path with data.
@@ -45,7 +51,7 @@ def saveimage(path: str, name: str, img: np.array):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
-    ax.set_title('Concentration')
+    ax.set_title('Fluorescence intensity')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -55,7 +61,22 @@ def saveimage(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=100, bbox_inches='tight')
+                dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+
+def saveimage_no_legend(path: str, name: str, img: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Plot image.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(img, cmap=cm.gray)
+
+    # Save figure.
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -68,7 +89,7 @@ def savekymo(path: str, name: str, img: np.array):
     im = ax.imshow(img, cmap=cm.gray)
     ax.set_xlabel('Space')
     ax.set_ylabel('Time')
-    ax.set_title('Concentration')
+    ax.set_title('Fluorescence intensity')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -78,44 +99,57 @@ def savekymo(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=100, bbox_inches='tight')
+                dpi=300, bbox_inches='tight')
     plt.close(fig)
 
 
-# Choose dataset.
-gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
-dat = 'E2PSB1'
+print('Processing {0}'.format(datapath))
 
-datfolder = os.path.join(datapath, os.path.join(gen, dat))
-print("Dataset {0}/{1}".format(gen, dat))
+# Get folders with genotypes.
+genotypes = [d for d in os.listdir(datapath)
+             if os.path.isdir(os.path.join(datapath, d))]
 
-# Identify Kymograph and do sanity check.
-kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
-if len(kymos) != 1:
-    warnings.warn("No Kymograph found!")
+# Run through genotypes.
+for gen in genotypes:
+    # Get folders with datasets.
+    datasets = [d for d in os.listdir(os.path.join(datapath, gen))
+                if os.path.isdir(os.path.join(datapath, os.path.join(gen, d)))]
+    # Run through datasets.
+    for dat in datasets:
+        datfolder = os.path.join(datapath, os.path.join(gen, dat))
+        print("Dataset {0}/{1}".format(gen, dat))
 
-name = os.path.splitext(os.path.basename(kymos[0]))[0]
-print("Outputting file '{0}'".format(name))
+        # Identify Kymograph and do sanity check.
+        kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
+        if len(kymos) != 1:
+            warnings.warn("No Kymograph found!")
 
-# Load and preprocess Kymograph.
-img = imageio.imread(kymos[0])
+        # Extract name of kymograph and replace whitespaces.
+        name = os.path.splitext(os.path.basename(kymos[0]))[0]
+        name = re.sub(' ', '_', name)
+        print("Outputting file '{0}'".format(name))
 
-# Plot and save figures.
-savekymo(os.path.join(os.path.join(resultpath, gen), dat), name, img)
+        # Load and preprocess Kymograph.
+        img = imageio.imread(kymos[0])
 
-# Output first frames of image sequence.
-seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))
-if len(seq) != 1:
-    warnings.warn("No sequence found!")
-img = tiff.imread(seq)
+        # Plot and save figures.
+        # savekymo(os.path.join(os.path.join(resultpath, gen), dat), name, img)
+        savekymo(os.path.join(resultpath, gen), name, img)
 
-frames = img.shape[0] if len(img.shape) is 3 else img.shape[1]
+        # Output first frames of image sequence.
+        seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))
+        if len(seq) != 1:
+            warnings.warn("No sequence found!")
+        img = tiff.imread(seq)
 
-for k in range(frames):
-    if len(img.shape) is 4:
-        frame = img[0, k]
-    else:
-        frame = img[k]
+        frames = img.shape[0] if len(img.shape) is 3 else img.shape[1]
 
-    saveimage(os.path.join(os.path.join(resultpath, gen), dat),
-              '{0}-{1}'.format(dat, k), frame)
+        for k in range(frames):
+            if len(img.shape) is 4:
+                frame = img[0, k]
+            else:
+                frame = img[k]
+
+            filepath = os.path.join(os.path.join(resultpath, gen), dat)
+            # saveimage(filepath, '{0}-{1}'.format(dat, k), frame)
+            saveimage_no_legend(filepath, '{0}-{1}'.format(dat, k), frame)

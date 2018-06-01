@@ -350,16 +350,16 @@ if not os.path.exists(resultpath):
 # Set regularisation parameters.
 alpha0 = 1e-3  # v_x
 alpha1 = 1e-3  # v_t
-alpha2 = 1e-3  # k_x
-alpha3 = 1e-3  # k_t
-beta = 1e-1  # D_v k
-gamma = 1e-3  # k
+alpha2 = 1e-4  # k_x
+alpha3 = 1e-4  # k_t
+beta = 1e-3  # D_v k
+gamma = 1e-4  # k
 
 # Set parameters of data.
 w = 0.1
 lambdap = 1 / (4 * np.pi)
 tau = 1.0
-c0 = 0.0
+c0 = 1.0 + 1e-3
 
 # Create mesh and function spaces.
 m, n = 30, 100
@@ -703,51 +703,58 @@ saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_mesh_200',
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
 
 
-#c = 1.0
-#
-#
-#class f_decay(Expression):
-#    def eval(self, value, x):
-#        value[0] = np.cos((x[1] - w * x[0]) / lambdap) - c*x[0]
-#
-#    def value_shape(self):
-#        return ()
-#
-#
-#class f_decay_x(Expression):
-#    def eval(self, value, x):
-#        value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
-#
-#    def value_shape(self):
-#        return ()
-#
-#
-#class f_decay_t(Expression):
-#    def eval(self, value, x):
-#        value[0] = np.sin((x[1] - w * x[0]) / lambdap) \
-#            * w / lambdap - c
-#
-#    def value_shape(self):
-#        return ()
-#
-#
-## Run experiments with decaying data.
-#f = f_decay(degree=2)
-#ft = f_decay_t(degree=1)
-#fx = f_decay_x(degree=1)
-#datastr = DecayingData().string()
-#
-#fa_pb = interpolate(f, W)
-#fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
-#
-#m, n = 100, 100
-#mesh = UnitSquareMesh(m - 1, n - 1)
-#W = dh.create_function_space(mesh, 'periodic')
-#
-## Interpolate function.
-#fa_pb = interpolate(f, W)
-#fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
-#
-#v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
-#saveresults(resultpath, 'analytic_example_linear_decay_cms1d_exp_pb',
-#            fa_pb, v, k)
+# Example with constant source.
+c = 1.0
+
+
+class f_decay(Expression):
+    def eval(self, value, x):
+        value[0] = np.cos((x[1] - w * x[0]) / lambdap) - c * x[0]
+
+    def value_shape(self):
+        return ()
+
+
+class f_decay_x(Expression):
+    def eval(self, value, x):
+        value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
+
+    def value_shape(self):
+        return ()
+
+
+class f_decay_t(Expression):
+    def eval(self, value, x):
+        value[0] = np.sin((x[1] - w * x[0]) / lambdap) \
+            * w / lambdap - c
+
+    def value_shape(self):
+        return ()
+
+
+# Run experiments with decaying data.
+f = f_decay(degree=2)
+ft = f_decay_t(degree=1)
+fx = f_decay_x(degree=1)
+datastr = DecayingData().string()
+
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+m, n = 100, 100
+mesh = UnitSquareMesh(m - 1, n - 1)
+W = dh.create_function_space(mesh, 'periodic')
+
+# Interpolate function.
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+saveresults(resultpath,
+            'analytic_example_linear_decay_cms1d_l2h1h1_exp_pb',
+            'l2h1h1', fa_pb, v, k)
+
+v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+saveresults(resultpath,
+            'analytic_example_linear_decay_cmscr1d_l2h1h1cr_exp_pb',
+            'l2h1h1cr', fa_pb, v, k)

@@ -198,32 +198,33 @@ def saveparameters(resultpath: str, method: str):
     f = open(os.path.join(resultpath, 'parameters.txt'), 'w')
     f.write('Regularisation parameters:\n')
     if method == 'l2h1':
-        f.write('alpha0={0}\n'.format(alpha0))
-        f.write('alpha1={0}\n\n'.format(alpha1))
+        f.write('alpha0={0} (v_x)\n'.format(alpha0))
+        f.write('alpha1={0} (v_t)\n\n'.format(alpha1))
     elif method == 'l2h1h1':
-        f.write('alpha0={0}\n'.format(alpha0))
-        f.write('alpha1={0}\n'.format(alpha1))
-        f.write('alpha2={0}\n'.format(alpha2))
-        f.write('alpha3={0}\n\n'.format(alpha3))
+        f.write('alpha0={0} (v_x)\n'.format(alpha0))
+        f.write('alpha1={0} (v_t)\n'.format(alpha1))
+        f.write('alpha2={0} (k_x)\n'.format(alpha2))
+        f.write('alpha3={0} (k_t)\n\n'.format(alpha3))
     elif method == 'l2h1h1cr':
-        f.write('alpha0={0}\n'.format(alpha0))
-        f.write('alpha1={0}\n'.format(alpha1))
-        f.write('alpha2={0}\n'.format(alpha2))
-        f.write('alpha3={0}\n'.format(alpha3))
-        f.write('beta={0}\n\n'.format(beta))
+        f.write('alpha0={0} (v_x)\n'.format(alpha0))
+        f.write('alpha1={0} (v_t)\n'.format(alpha1))
+        f.write('alpha2={0} (k_x)\n'.format(alpha2))
+        f.write('alpha3={0} (k_t)\n'.format(alpha3))
+        f.write('beta={0} (D_v k)\n\n'.format(beta))
     elif method == 'l2h1l2':
-        f.write('alpha0={0}\n'.format(alpha0))
-        f.write('alpha1={0}\n'.format(alpha1))
-        f.write('gamma={0}\n\n'.format(gamma))
+        f.write('alpha0={0} (v_x)\n'.format(alpha0))
+        f.write('alpha1={0} (v_t)\n'.format(alpha1))
+        f.write('gamma={0} (k)\n\n'.format(gamma))
     else:
         f.write('Method not found!\n\n')
 
-    f.write('Regularisation parameters:\n')
+    f.write('Data:\n')
     f.write('c(t, x)={0}\n\n'.format(datastr))
     f.write('Data parameters:\n')
     f.write('w={0}\n'.format(w))
     f.write('lambda={0}\n'.format(lambdap))
     f.write('tau={0}\n'.format(tau))
+    f.write('c0={0}\n'.format(c0))
     f.close()
 
 
@@ -238,23 +239,23 @@ class Data:
 
 class ConstantData(Data):
     def f(self, t, x):
-        return np.cos((x - w * t) / lambdap)
+        return np.cos((x - w * t) / lambdap) + c0
 
     def string(self):
-        return "cos((x - w * t) / lambda)"
+        return "cos((x - w * t) / lambda) + c0"
 
 
 class DecayingData(Data):
     def f(self, t, x):
-        return np.exp(- t / tau) * np.cos((x - w * t) / lambdap)
+        return np.exp(- t / tau) * np.cos((x - w * t) / lambdap) + c0
 
     def string(self):
-        return "exp(- t / tau) * cos((x - w * t) / lambda)"
+        return "exp(- t / tau) * cos((x - w * t) / lambda) + c0"
 
 
 class f_const(Expression):
     def eval(self, value, x):
-        value[0] = np.cos((x[1] - w * x[0]) / lambdap)
+        value[0] = np.cos((x[1] - w * x[0]) / lambdap) + c0
 
     def value_shape(self):
         return ()
@@ -278,7 +279,8 @@ class f_const_t(Expression):
 
 class f_decay(Expression):
     def eval(self, value, x):
-        value[0] = np.exp(-x[0] / tau) * np.cos((x[1] - w * x[0]) / lambdap)
+        value[0] = np.exp(-x[0] / tau) * np.cos((x[1] - w * x[0]) / lambdap) \
+            + c0
 
     def value_shape(self):
         return ()
@@ -357,6 +359,7 @@ gamma = 1e-3  # k
 w = 0.1
 lambdap = 1 / (4 * np.pi)
 tau = 1.0
+c0 = 0.0
 
 # Create mesh and function spaces.
 m, n = 30, 100
@@ -430,27 +433,27 @@ saveresults(resultpath, 'analytic_example_decay_cm1d_l2h1_img_pb',
 
 v, k = cms1d_img(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_img',
-            'l2h1h1', f, v, k, -f/tau)
+            'l2h1h1', f, v, k, (c0 - f)/tau)
 
 v, k = cms1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_img_pb',
-            'l2h1h1', f, v, k, -f/tau)
+            'l2h1h1', f, v, k, (c0 - f)/tau)
 
 v, k = cms1dl2_img(f, alpha0, alpha1, gamma, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_img',
-            'l2h1l2', f, v, k, -f/tau)
+            'l2h1l2', f, v, k, (c0 - f)/tau)
 
 v, k = cms1dl2_img_pb(f, alpha0, alpha1, gamma, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_img_pb',
-            'l2h1l2', f, v, k, -f/tau)
+            'l2h1l2', f, v, k, (c0 - f)/tau)
 
 v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_img',
-            'l2h1h1cr', f, v, k, -f/tau)
+            'l2h1h1cr', f, v, k, (c0 - f)/tau)
 
 v, k = cmscr1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_img_pb',
-            'l2h1h1cr', f, v, k, -f/tau)
+            'l2h1h1cr', f, v, k, (c0 - f)/tau)
 
 # Run experiments with constant data.
 f = f_const(degree=2)
@@ -536,27 +539,27 @@ saveresults(resultpath, 'analytic_example_decay_cm1d_l2h1_exp_pb',
 
 v, k = cms1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp',
-            'l2h1h1', fa, v, k, -fa/tau)
+            'l2h1h1', fa, v, k, (c0 - fa)/tau)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 v, k = cms1dl2_exp(m, n, f, ft, fx, alpha0, alpha1, gamma)
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_exp',
-            'l2h1l2', fa, v, k, -fa/tau)
+            'l2h1l2', fa, v, k, (c0 - fa)/tau)
 
 v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, gamma)
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_exp_pb',
-            'l2h1l2', fa_pb, v, k, -fa_pb/tau)
+            'l2h1l2', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp',
-            'l2h1h1cr', fa, v, k, -fa/tau)
+            'l2h1h1cr', fa, v, k, (c0 - fa)/tau)
 
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb',
-            'l2h1h1cr', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 # Run experiments with given source.
 k = k_decay(degree=2)
@@ -593,25 +596,25 @@ saveresults(resultpath,
 k = cms1d_given_velocity_exp_pb(m, n, f, ft, fx, v, Constant(0.0),
                                 alpha2, alpha3)
 saveresults(resultpath,
-            'analytic_example_decay_given_velocity_cms1d_l1h2_exp_pb',
-            'l2h1', fa_pb, va_pb, k, -fa_pb/tau)
+            'analytic_example_decay_given_velocity_cms1d_l2h1_exp_pb',
+            'l2h1', fa_pb, va_pb, k, (c0 - fa_pb)/tau)
 
 # Visualise increasing regularisation parameter of convective regularisation.
 beta = 1e-3
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.001',
-            'l2h1h1cr', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 beta = 1e-2
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.01',
-            'l2h1h1cr', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 beta = 1e-1
 v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.1',
-            'l2h1h1cr', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 # Increasing regularistaion parameters.
 alpha0 = 1e-5
@@ -621,7 +624,7 @@ alpha3 = 1e-5
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath,
             'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_0.00001',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 alpha0 = 1e-4
 alpha1 = 1e-4
 alpha2 = 1e-4
@@ -629,7 +632,7 @@ alpha3 = 1e-4
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath,
             'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_0.0001',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 alpha0 = 1e-3
 alpha1 = 1e-3
 alpha2 = 1e-3
@@ -637,28 +640,28 @@ alpha3 = 1e-3
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath,
             'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_0.001',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 alpha0 = 1e-2
 alpha1 = 1e-2
 alpha2 = 1e-2
 alpha3 = 1e-2
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_0.01',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 alpha0 = 1e-1
 alpha1 = 1e-1
 alpha2 = 1e-1
 alpha3 = 1e-1
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_0.1',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 alpha0 = 1e0
 alpha1 = 1e0
 alpha2 = 1e0
 alpha3 = 1e0
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_reg_1.0',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 # Different mesh sizes.
 m, n = 50, 50
@@ -671,7 +674,7 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_mesh_50',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 m, n = 100, 100
 mesh = UnitSquareMesh(m - 1, n - 1)
@@ -683,7 +686,7 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_mesh_100',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 m, n = 200, 200
 mesh = UnitSquareMesh(m - 1, n - 1)
@@ -695,7 +698,7 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, k = cms1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
 saveresults(resultpath, 'analytic_example_decay_cms1d_l2h1h1_exp_pb_mesh_200',
-            'l2h1h1', fa_pb, v, k, -fa_pb/tau)
+            'l2h1h1', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 # vel, k = cmscr1dnewton(img, alpha0, alpha1, alpha2, alpha3, beta)
 

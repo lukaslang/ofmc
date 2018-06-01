@@ -18,8 +18,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import numpy.matlib as matlib
-from scipy import misc
 from scipy import ndimage
+import imageio
 import unittest
 import numpy as np
 from dolfin import Constant
@@ -160,7 +160,7 @@ class TestCmscr(unittest.TestCase):
     def test_cmscr1dnewton_data(self):
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
-        img = misc.imread(name)
+        img = imageio.imread(name)
 
         # Remove cut.
         img = np.vstack((img[0:4, :], img[6:, :]))

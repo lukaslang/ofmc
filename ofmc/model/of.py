@@ -77,8 +77,8 @@ def of1d_weak_solution(V: FunctionSpace,
     # Evaluate and print residual and functional value.
     res = abs(ft + fx*v)
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
+                                     assemble(func * dx)))
     return v
 
 

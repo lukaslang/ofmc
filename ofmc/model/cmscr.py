@@ -92,7 +92,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
                   + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2
                   + beta * (k.dx(0) + k.dx(1) * v) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
                                        assemble(func * dx)))
     return v, k
 

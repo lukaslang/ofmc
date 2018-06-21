@@ -18,6 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
+from scipy import interpolate
 from scipy.interpolate import UnivariateSpline
 
 
@@ -69,3 +70,37 @@ def removeduplicates(x: np.array, y: np.array) -> (np.array, np.array):
     xr = x[ind]
     yr = y[ind]
     return xr, yr
+
+
+def compute_error(vel: np.array, roi, spl) -> dict:
+    """Takes a velocity array, a roi instance, fitted splines, and returns a
+    dictionary of error arrays.
+
+    Args:
+        vel (np.array): The velocity.
+        roi: A roi instance.
+        spl: Fitted spolines.
+
+    Returns:
+        error (dict): A dictionary of errors.
+    """
+    m, n = vel.shape
+    gridx, gridy = np.mgrid[0:m, 0:n]
+    gridpoints = np.hstack([gridx.reshape(m * n, 1), gridy.reshape(m * n, 1)])
+
+    error = dict()
+    for v in roi:
+        y = roi[v]['y']
+
+        # Interpolate velocity.
+        y = np.arange(y[0], y[-1] + 0.5, 0.5)
+        x = np.array(spl[v](y))
+        veval = interpolate.griddata(gridpoints, vel.flatten(), (y, x),
+                                     method='cubic')
+
+        # Compute derivative of spline.
+        derivspl = spl[v].derivative()
+
+        # Compute error in velocity.
+        error[v] = abs(derivspl(y) * m / n - veval)
+    return error

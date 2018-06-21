@@ -96,8 +96,8 @@ def cms1d_weak_solution(V: VectorFunctionSpace,
     res = abs(ft + fx * v + f * v.dx(1) - k)
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
                   + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
+                                     assemble(func * dx)))
 
     # Compute energy of expected solution.
     # res = abs(ft + fx * 0.1 - f)
@@ -162,8 +162,8 @@ def cms1dl2_weak_solution(V: VectorFunctionSpace,
     res = abs(ft + fx * v + f * v.dx(1) - k)
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
                   + alpha2 * k ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
+                                     assemble(func * dx)))
     return v, k
 
 
@@ -205,8 +205,8 @@ def cms1d_weak_solution_given_source(V: FunctionSpace,
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * v.dx(1) - k)
     func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
+                                     assemble(func * dx)))
     return v
 
 
@@ -248,8 +248,8 @@ def cms1d_weak_solution_given_velocity(V: FunctionSpace,
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * vx - k)
     func = 0.5 * (res ** 2 + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
-    print('Res={0}, Func={1}\n'.format(assemble(res * dx),
-                                       assemble(func * dx)))
+    print('Res={0}, Func={1}'.format(assemble(res * dx),
+                                     assemble(func * dx)))
     return k
 
 

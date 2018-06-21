@@ -49,10 +49,10 @@ if not os.path.exists(resultpath):
 
 # Set regularisation parameter.
 alpha0 = 5e-3
-alpha1 = 1e-3
+alpha1 = 5e-3
 alpha2 = 1e-4
 alpha3 = 1e-4
-beta = 5e-3
+beta = 2.5e-3
 gamma = 1e-1
 
 # Set font style.

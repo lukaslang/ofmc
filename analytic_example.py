@@ -359,7 +359,7 @@ gamma = 1e-4  # k
 w = 0.1
 lambdap = 1 / (4 * np.pi)
 tau = 1.0
-c0 = 1.0 + 1e-3
+c0 = 0.0
 
 # Create mesh and function spaces.
 m, n = 30, 100

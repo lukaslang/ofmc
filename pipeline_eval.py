@@ -32,6 +32,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import ofmc.util.roihelpers as rh
+from ofmc.model.of import of1d_img
+from ofmc.model.cms import cms1dl2_img
+from ofmc.model.cms import cms1d_img
 from ofmc.model.cmscr import cmscr1d_img
 
 # Set path with data.
@@ -50,6 +53,7 @@ alpha1 = 1e-3
 alpha2 = 1e-4
 alpha3 = 1e-4
 beta = 5e-3
+gamma = 1e-1
 
 # Set font style.
 font = {'weight': 'normal',
@@ -431,6 +435,9 @@ for gen in genotypes:
         imgp = prepareimage(img)
         vel, k = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
                              beta, 'mesh')
+        # vel, k = cms1dl2_img(imgp, alpha0, alpha1, gamma, 'mesh')
+        # vel, k = cms1d_img(imgp, alpha0, alpha1, alpha2, alpha3, 'mesh')
+        # vel = of1d_img(imgp, alpha0, alpha1, 'mesh')
 
         resfolder = os.path.join(os.path.join(resultpath, gen), dat)
         if not os.path.exists(resfolder):

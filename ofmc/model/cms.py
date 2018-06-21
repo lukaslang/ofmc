@@ -98,6 +98,12 @@ def cms1d_weak_solution(V: VectorFunctionSpace,
                   + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
     print('Res={0}, Func={1}\n'.format(assemble(res * dx),
                                        assemble(func * dx)))
+
+    # Compute energy of expected solution.
+    # res = abs(ft + fx * 0.1 - f)
+    # func = 0.5 * (res ** 2 + alpha2 * fx ** 2 + alpha3 * ft ** 2)
+    # print('ResGt={0}, FuncGt={1}\n'.format(assemble(res * dx(V.mesh())),
+    #                                        assemble(func * dx(V.mesh()))))
     return v, k
 
 

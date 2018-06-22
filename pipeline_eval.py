@@ -71,29 +71,29 @@ def error(vel, roi, spl) -> float:
     for v in roi:
         err = sum(error[v]) / len(error[v])
         totalerr += err
-    print("Total error: {0}".format(totalerr))
+    # print("Total error: {0}".format(totalerr))
     return totalerr
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-2]
-alpha1_of1d = [1e-2, 1e-1]
+alpha0_of1d = [1e-3, 1e-2, 1e-1]
+alpha1_of1d = [1e-3, 1e-2, 1e-1]
 prod_of1d = itertools.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-2]
-alpha1_cms1dl2 = [1e-2]
-gamma_cms1dl2 = [1e-2, 1e-1]
+alpha0_cms1dl2 = [1e-3, 1e-2, 1e-1]
+alpha1_cms1dl2 = [1e-3, 1e-2, 1e-1]
+gamma_cms1dl2 = [1e-3, 1e-2, 1e-1]
 prod_cms1dl2 = itertools.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-2]
-alpha1_cms1d = [1e-2]
-alpha2_cms1d = [1e-2]
-alpha3_cms1d = [1e-2, 1e-1]
+alpha0_cms1d = [1e-3, 1e-2, 1e-1]
+alpha1_cms1d = [1e-3, 1e-2, 1e-1]
+alpha2_cms1d = [1e-3, 1e-2, 1e-1]
+alpha3_cms1d = [1e-3, 1e-2, 1e-1]
 prod_cms1d = itertools.product(alpha0_cms1d,
                                alpha1_cms1d,
                                alpha2_cms1d,
@@ -102,11 +102,11 @@ prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-2]
-alpha1_cmscr1d = [1e-2]
-alpha2_cmscr1d = [1e-2]
-alpha3_cmscr1d = [1e-2]
-beta_cmscr1d = [1e-2, 1e-1]
+alpha0_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha1_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha2_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha3_cmscr1d = [1e-3, 1e-2, 1e-1]
+beta_cmscr1d = [1e-3, 1e-2, 1e-1]
 prod_cmscr1d = itertools.product(alpha0_cmscr1d,
                                  alpha1_cmscr1d,
                                  alpha2_cmscr1d,
@@ -130,11 +130,12 @@ genotypes = [d for d in os.listdir(datapath)
              if os.path.isdir(os.path.join(datapath, d))]
 
 # Run through genotypes.
+num_datasets = 0
 for gen in genotypes:
     # Get folders with datasets.
     datasets = [d for d in os.listdir(os.path.join(datapath, gen))
-                if os.path.isdir(os.path.join(datapath, os.path.join(gen, d)))]
-
+                if os.path.isdir(os.path.join(datapath,
+                                              os.path.join(gen, d)))]
     # Run through datasets.
     for dat in datasets:
         datfolder = os.path.join(datapath, os.path.join(gen, dat))
@@ -167,7 +168,12 @@ for gen in genotypes:
         # Fit splines.
         spl[gen][dat] = rh.roi2splines(roi[gen][dat])
 
+        # Increase counter.
+        num_datasets += 1
+
 # Compute velocity and source for all parameter pairs.
+print("Running of1d on {0} datasets ".format(num_datasets) +
+      "and {0} parameter combinations.".format(prod_of1d_len))
 vel_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 err_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 for idx, p in enumerate(prod_of1d):
@@ -181,6 +187,8 @@ for idx, p in enumerate(prod_of1d):
 
 
 # Compute velocity and source for all parameter pairs.
+print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
+      "and {0} parameter combinations.".format(prod_cms1dl2_len))
 vel_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 k_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 err_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
@@ -194,6 +202,8 @@ for idx, p in enumerate(prod_cms1dl2):
                                                roi[gen][dat], spl[gen][dat])
 
 # Compute velocity and source for all parameter pairs.
+print("Running cms1d on {0} datasets ".format(num_datasets) +
+      "and {0} parameter combinations.".format(prod_cms1d_len))
 vel_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 k_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 err_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
@@ -207,6 +217,8 @@ for idx, p in enumerate(prod_cms1d):
                                              roi[gen][dat], spl[gen][dat])
 
 # Compute velocity and source for all parameter pairs.
+print("Running cmscr1d on {0} datasets ".format(num_datasets) +
+      "and {0} parameter combinations.".format(prod_cmscr1d_len))
 vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 err_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]

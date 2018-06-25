@@ -23,6 +23,7 @@ import datetime
 import glob
 import imageio
 import itertools
+import logging
 import re
 import numpy as np
 from scipy import ndimage
@@ -33,9 +34,14 @@ from ofmc.model.cms import cms1dl2_img
 from ofmc.model.cms import cms1d_img
 from ofmc.model.cmscr import cmscr1d_img
 
+ffc_logger = logging.getLogger('FFC')
+ffc_logger.setLevel(logging.WARNING)
+ufl_logger = logging.getLogger('UFL')
+ufl_logger.setLevel(logging.WARNING)
+
 # Set path with data.
 datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
+            'Dropbox (Cambridge University)/Drosophila/Data from Elena test')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -176,14 +182,17 @@ print("Running of1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(prod_of1d_len))
 vel_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 err_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
+count = 1
 for idx, p in enumerate(prod_of1d):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
+            print("{0}/{1}".format(count, num_datasets * prod_of1d_len))
             vel_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
                                                p[0], p[1], 'mesh')
             err_of1d[idx][gen][dat] = error(vel_of1d[idx][gen][dat],
                                             roi[gen][dat], spl[gen][dat])
+            count += 1
 
 
 # Compute velocity and source for all parameter pairs.
@@ -192,14 +201,17 @@ print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
 vel_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 k_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 err_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
+count = 1
 for idx, p in enumerate(prod_cms1dl2):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
+            print("{0}/{1}".format(count, num_datasets * prod_cms1dl2_len))
             vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
             err_cms1dl2[idx][gen][dat] = error(vel_cms1dl2[idx][gen][dat],
                                                roi[gen][dat], spl[gen][dat])
+            count += 1
 
 # Compute velocity and source for all parameter pairs.
 print("Running cms1d on {0} datasets ".format(num_datasets) +
@@ -207,14 +219,17 @@ print("Running cms1d on {0} datasets ".format(num_datasets) +
 vel_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 k_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 err_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
+count = 1
 for idx, p in enumerate(prod_cms1d):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
+            print("{0}/{1}".format(count, num_datasets * prod_cms1d_len))
             vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat] = \
                 cms1d_img(imgp[gen][dat], p[0], p[1], p[2], p[3], 'mesh')
             err_cms1d[idx][gen][dat] = error(vel_cms1d[idx][gen][dat],
                                              roi[gen][dat], spl[gen][dat])
+            count += 1
 
 # Compute velocity and source for all parameter pairs.
 print("Running cmscr1d on {0} datasets ".format(num_datasets) +
@@ -222,15 +237,18 @@ print("Running cmscr1d on {0} datasets ".format(num_datasets) +
 vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 err_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
+count = 1
 for idx, p in enumerate(prod_cmscr1d):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
+            print("{0}/{1}".format(count, num_datasets * prod_cmscr1d_len))
             vel_cmscr1d[idx][gen][dat], k_cmscr1d[idx][gen][dat] = \
                 cmscr1d_img(imgp[gen][dat],
                             p[0], p[1], p[2], p[3], p[4], 'mesh')
             err_cmscr1d[idx][gen][dat] = error(vel_cmscr1d[idx][gen][dat],
                                                roi[gen][dat], spl[gen][dat])
+            count += 1
 
 
 # Print errors.

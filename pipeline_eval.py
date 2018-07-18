@@ -22,13 +22,14 @@ import os
 import datetime
 import glob
 import imageio
-import itertools
+import itertools as it
 import logging
 import re
 import numpy as np
 from scipy import ndimage
 from read_roi import read_roi_zip
 import ofmc.util.roihelpers as rh
+import ofmc.util.pyplothelpers as ph
 from ofmc.model.of import of1d_img
 from ofmc.model.cms import cms1dl2_img
 from ofmc.model.cms import cms1d_img
@@ -41,7 +42,7 @@ ufl_logger.setLevel(logging.WARNING)
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena test')
+            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -71,7 +72,7 @@ def prepareimage(img: np.array) -> np.array:
 
 
 def error(vel, roi, spl) -> float:
-    # Print error.
+    # Compute accumulated error in velocity for each spline.
     error = rh.compute_error(vel, roi, spl)
     totalerr = 0
     for v in roi:
@@ -82,42 +83,42 @@ def error(vel, roi, spl) -> float:
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-3, 1e-2, 1e-1]
-alpha1_of1d = [1e-3, 1e-2, 1e-1]
-prod_of1d = itertools.product(alpha0_of1d, alpha1_of1d)
+alpha0_of1d = [1e-2, 1e-1]
+alpha1_of1d = [1e-2, 1e-1]
+prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-3, 1e-2, 1e-1]
-alpha1_cms1dl2 = [1e-3, 1e-2, 1e-1]
-gamma_cms1dl2 = [1e-3, 1e-2, 1e-1]
-prod_cms1dl2 = itertools.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
+alpha0_cms1dl2 = [1e-2, 1e-1]
+alpha1_cms1dl2 = [1e-2, 1e-1]
+gamma_cms1dl2 = [1e-2, 1e-1]
+prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-3, 1e-2, 1e-1]
-alpha1_cms1d = [1e-3, 1e-2, 1e-1]
-alpha2_cms1d = [1e-3, 1e-2, 1e-1]
-alpha3_cms1d = [1e-3, 1e-2, 1e-1]
-prod_cms1d = itertools.product(alpha0_cms1d,
-                               alpha1_cms1d,
-                               alpha2_cms1d,
-                               alpha3_cms1d)
+alpha0_cms1d = [1e-2, 1e-1]
+alpha1_cms1d = [1e-2, 1e-1]
+alpha2_cms1d = [1e-2, 1e-1]
+alpha3_cms1d = [1e-2, 1e-1]
+prod_cms1d = it.product(alpha0_cms1d,
+                        alpha1_cms1d,
+                        alpha2_cms1d,
+                        alpha3_cms1d)
 prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-3, 1e-2, 1e-1]
-alpha1_cmscr1d = [1e-3, 1e-2, 1e-1]
-alpha2_cmscr1d = [1e-3, 1e-2, 1e-1]
-alpha3_cmscr1d = [1e-3, 1e-2, 1e-1]
-beta_cmscr1d = [1e-3, 1e-2, 1e-1]
-prod_cmscr1d = itertools.product(alpha0_cmscr1d,
-                                 alpha1_cmscr1d,
-                                 alpha2_cmscr1d,
-                                 alpha3_cmscr1d,
-                                 beta_cmscr1d)
+alpha0_cmscr1d = [1e-3, 1e-2]
+alpha1_cmscr1d = [1e-3, 1e-2]
+alpha2_cmscr1d = [1e-3, 1e-2]
+alpha3_cmscr1d = [1e-3, 1e-2]
+beta_cmscr1d = [1e-3, 1e-2]
+prod_cmscr1d_1, prod_cmscr1d_2 = it.tee(it.product(alpha0_cmscr1d,
+                                                   alpha1_cmscr1d,
+                                                   alpha2_cmscr1d,
+                                                   alpha3_cmscr1d,
+                                                   beta_cmscr1d), 2)
 prod_cmscr1d_len = len(alpha0_cmscr1d) * len(alpha1_cmscr1d) \
     * len(alpha2_cmscr1d) * len(alpha3_cmscr1d) * len(beta_cmscr1d)
 
@@ -238,7 +239,7 @@ vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 err_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 count = 1
-for idx, p in enumerate(prod_cmscr1d):
+for idx, p in enumerate(prod_cmscr1d_1):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
@@ -263,3 +264,80 @@ for gen in name.keys():
         print("cms1d:   " + ", ".join('{0:.3f}'.format(x) for x in err))
         err = [x[gen][dat] for x in err_cmscr1d]
         print("cmscr1d: " + ", ".join('{0:.3f}'.format(x) for x in err))
+
+# Output best result for each method and each dataset.
+for gen in name.keys():
+    for dat in name[gen].keys():
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+
+        tmpimg = img[gen][dat]
+        tmpname = name[gen][dat]
+        tmproi = roi[gen][dat]
+        tmpspl = spl[gen][dat]
+
+        # of1d
+        resfolder = os.path.join(os.path.join(
+                                 os.path.join(resultpath, 'of1d'), gen), dat)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_of1d[idx_of1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cms1d
+        resfolder = os.path.join(os.path.join(
+                                 os.path.join(resultpath, 'cms1d'), gen), dat)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cms1d[idx_cms1d][gen][dat]
+        tmpk = k_cms1d[idx_cms1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cms1dl2
+        resfolder = os.path.join(os.path.join(os.path.join(resultpath, 'cms1dl2'), gen), dat)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cms1dl2[idx_cms1dl2][gen][dat]
+        tmpk = k_cms1dl2[idx_cms1dl2][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cmscr1d
+        resfolder = os.path.join(os.path.join(os.path.join(resultpath, 'cmscr1d'), gen), dat)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cmscr1d[idx_cmscr1d][gen][dat]
+        tmpk = k_cmscr1d[idx_cmscr1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+# TODO: Compute average errors.
+# TODO: Output tables.

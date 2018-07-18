@@ -42,7 +42,7 @@ ufl_logger.setLevel(logging.WARNING)
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
+            'Dropbox (Cambridge University)/Drosophila/Data from Elena test')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -280,8 +280,8 @@ for gen in name.keys():
         tmpspl = spl[gen][dat]
 
         # of1d
-        resfolder = os.path.join(os.path.join(
-                                 os.path.join(resultpath, 'of1d'), gen), dat)
+        tmpfolder = [resultpath, 'of1d', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
         tmpvel = vel_of1d[idx_of1d][gen][dat]
@@ -294,8 +294,8 @@ for gen in name.keys():
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cms1d
-        resfolder = os.path.join(os.path.join(
-                                 os.path.join(resultpath, 'cms1d'), gen), dat)
+        tmpfolder = [resultpath, 'cms1d', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
         tmpvel = vel_cms1d[idx_cms1d][gen][dat]
@@ -310,7 +310,8 @@ for gen in name.keys():
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cms1dl2
-        resfolder = os.path.join(os.path.join(os.path.join(resultpath, 'cms1dl2'), gen), dat)
+        tmpfolder = [resultpath, 'cms1dl2', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
         tmpvel = vel_cms1dl2[idx_cms1dl2][gen][dat]
@@ -325,7 +326,8 @@ for gen in name.keys():
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cmscr1d
-        resfolder = os.path.join(os.path.join(os.path.join(resultpath, 'cmscr1d'), gen), dat)
+        tmpfolder = [resultpath, 'cmscr1d', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
         tmpvel = vel_cmscr1d[idx_cmscr1d][gen][dat]
@@ -338,6 +340,53 @@ for gen in name.keys():
         ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
                                 tmpvel, tmproi, tmpspl)
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+
+# Output LaTeX table in sorte order.
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+
+        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\'
+        print(formatstr.format(re.sub('_', '\\_', gen),
+                               re.sub('_', '\\_', dat),
+                               err_of1d[idx_of1d][gen][dat],
+                               err_cms1dl2[idx_cms1dl2][gen][dat],
+                               err_cms1d[idx_cms1d][gen][dat],
+                               err_cmscr1d[idx_cmscr1d][gen][dat]))
+print('\\hline')
+
+# Output average over all datasets.
+# Output LaTeX table in sorte order.
+sum_of1d = 0.0
+sum_cms1dl2 = 0.0
+sum_cms1d = 0.0
+sum_cmscr1d = 0.0
+count = 0.0
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+
+        sum_of1d += err_of1d[idx_of1d][gen][dat]
+        sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
+        sum_cms1d += err_cms1d[idx_cms1d][gen][dat]
+        sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
+        count += 1.0
+
+formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\'
+print(formatstr.format(sum_of1d / count,
+                       sum_cms1dl2 / count,
+                       sum_cms1d / count,
+                       sum_cmscr1d / count))
+
 
 # TODO: Compute average errors.
 # TODO: Output tables.

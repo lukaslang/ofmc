@@ -42,7 +42,7 @@ ufl_logger.setLevel(logging.WARNING)
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena test')
+            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -84,24 +84,24 @@ def error(vel, roi, spl) -> (float, float):
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-1]
-alpha1_of1d = [1e-1]
+alpha0_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha1_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
 prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-1]
-alpha1_cms1dl2 = [1e-1]
-gamma_cms1dl2 = [1e-1]
+alpha0_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha1_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+gamma_cms1dl2 = [1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
 prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-1]
-alpha1_cms1d = [1e-1]
-alpha2_cms1d = [1e-1]
-alpha3_cms1d = [1e-1]
+alpha0_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha1_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha2_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha3_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
 prod_cms1d = it.product(alpha0_cms1d,
                         alpha1_cms1d,
                         alpha2_cms1d,
@@ -110,11 +110,11 @@ prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-2]
-alpha1_cmscr1d = [1e-2]
-alpha2_cmscr1d = [1e-2]
-alpha3_cmscr1d = [1e-2]
-beta_cmscr1d = [1e-3]
+alpha0_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha1_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha2_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha3_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+beta_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
 prod_cmscr1d_1, prod_cmscr1d_2 = it.tee(it.product(alpha0_cmscr1d,
                                                    alpha1_cmscr1d,
                                                    alpha2_cmscr1d,
@@ -287,6 +287,53 @@ for gen in name.keys():
         err = [x[gen][dat] for x in err_cmscr1d]
         print("cmscr1d: " + ", ".join('{0:.3f}'.format(x) for x in err))
 
+
+# Output LaTeX table in sorte order.
+print('LaTeX table with results:')
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+
+        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\'
+        print(formatstr.format(re.sub('_', '\\_', gen),
+                               re.sub('_', '\\_', dat),
+                               err_of1d[idx_of1d][gen][dat],
+                               err_cms1dl2[idx_cms1dl2][gen][dat],
+                               err_cms1d[idx_cms1d][gen][dat],
+                               err_cmscr1d[idx_cmscr1d][gen][dat]))
+print('\\hline')
+
+# Output average over all datasets.
+# Output LaTeX table in sorted order.
+sum_of1d = 0.0
+sum_cms1dl2 = 0.0
+sum_cms1d = 0.0
+sum_cmscr1d = 0.0
+count = 0.0
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+
+        sum_of1d += err_of1d[idx_of1d][gen][dat]
+        sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
+        sum_cms1d += err_cms1d[idx_cms1d][gen][dat]
+        sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
+        count += 1.0
+
+formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\'
+print(formatstr.format(sum_of1d / count,
+                       sum_cms1dl2 / count,
+                       sum_cms1d / count,
+                       sum_cmscr1d / count))
+
 # Output best result for each method and each dataset.
 for gen in name.keys():
     for dat in name[gen].keys():
@@ -362,50 +409,3 @@ for gen in name.keys():
         ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
                                 tmpvel, tmproi, tmpspl)
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
-
-
-# Output LaTeX table in sorte order.
-print('LaTeX table with results:')
-for gen in sorted(name.keys()):
-    for dat in sorted(name[gen].keys()):
-        # Find indices of best results (not necessarily unique).
-        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
-        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
-        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
-
-        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\'
-        print(formatstr.format(re.sub('_', '\\_', gen),
-                               re.sub('_', '\\_', dat),
-                               err_of1d[idx_of1d][gen][dat],
-                               err_cms1dl2[idx_cms1dl2][gen][dat],
-                               err_cms1d[idx_cms1d][gen][dat],
-                               err_cmscr1d[idx_cmscr1d][gen][dat]))
-print('\\hline')
-
-# Output average over all datasets.
-# Output LaTeX table in sorte order.
-sum_of1d = 0.0
-sum_cms1dl2 = 0.0
-sum_cms1d = 0.0
-sum_cmscr1d = 0.0
-count = 0.0
-for gen in sorted(name.keys()):
-    for dat in sorted(name[gen].keys()):
-        # Find indices of best results (not necessarily unique).
-        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
-        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
-        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
-
-        sum_of1d += err_of1d[idx_of1d][gen][dat]
-        sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
-        sum_cms1d += err_cms1d[idx_cms1d][gen][dat]
-        sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
-        count += 1.0
-
-formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\'
-print(formatstr.format(sum_of1d / count,
-                       sum_cms1dl2 / count,
-                       sum_cms1d / count,
-                       sum_cmscr1d / count))

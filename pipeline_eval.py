@@ -71,36 +71,37 @@ def prepareimage(img: np.array) -> np.array:
     return img
 
 
-def error(vel, roi, spl) -> float:
+def error(vel, roi, spl) -> (float, float):
     # Compute accumulated error in velocity for each spline.
     error = rh.compute_error(vel, roi, spl)
     totalerr = 0
+    maxerror = 0
     for v in roi:
         err = sum(error[v]) / len(error[v])
         totalerr += err
-    # print("Total error: {0}".format(totalerr))
-    return totalerr
+        maxerror = max(maxerror, max(error[v]))
+    return (totalerr, maxerror)
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-2, 1e-1]
-alpha1_of1d = [1e-2, 1e-1]
+alpha0_of1d = [1e-1]
+alpha1_of1d = [1e-1]
 prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-2, 1e-1]
-alpha1_cms1dl2 = [1e-2, 1e-1]
-gamma_cms1dl2 = [1e-2, 1e-1]
+alpha0_cms1dl2 = [1e-1]
+alpha1_cms1dl2 = [1e-1]
+gamma_cms1dl2 = [1e-1]
 prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-2, 1e-1]
-alpha1_cms1d = [1e-2, 1e-1]
-alpha2_cms1d = [1e-2, 1e-1]
-alpha3_cms1d = [1e-2, 1e-1]
+alpha0_cms1d = [1e-1]
+alpha1_cms1d = [1e-1]
+alpha2_cms1d = [1e-1]
+alpha3_cms1d = [1e-1]
 prod_cms1d = it.product(alpha0_cms1d,
                         alpha1_cms1d,
                         alpha2_cms1d,
@@ -109,11 +110,11 @@ prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-3, 1e-2]
-alpha1_cmscr1d = [1e-3, 1e-2]
-alpha2_cmscr1d = [1e-3, 1e-2]
-alpha3_cmscr1d = [1e-3, 1e-2]
-beta_cmscr1d = [1e-3, 1e-2]
+alpha0_cmscr1d = [1e-2]
+alpha1_cmscr1d = [1e-2]
+alpha2_cmscr1d = [1e-2]
+alpha3_cmscr1d = [1e-2]
+beta_cmscr1d = [1e-3]
 prod_cmscr1d_1, prod_cmscr1d_2 = it.tee(it.product(alpha0_cmscr1d,
                                                    alpha1_cmscr1d,
                                                    alpha2_cmscr1d,
@@ -183,6 +184,7 @@ print("Running of1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(prod_of1d_len))
 vel_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 err_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
+max_err_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 count = 1
 for idx, p in enumerate(prod_of1d):
     # Run through datasets.
@@ -191,8 +193,8 @@ for idx, p in enumerate(prod_of1d):
             print("{0}/{1}".format(count, num_datasets * prod_of1d_len))
             vel_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
                                                p[0], p[1], 'mesh')
-            err_of1d[idx][gen][dat] = error(vel_of1d[idx][gen][dat],
-                                            roi[gen][dat], spl[gen][dat])
+            err_of1d[idx][gen][dat], max_err_of1d[idx][gen][dat] = \
+                error(vel_of1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
 
@@ -202,6 +204,8 @@ print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
 vel_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 k_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 err_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
+max_err_cms1dl2 = [collections.defaultdict(dict) for
+                   x in range(prod_cms1dl2_len)]
 count = 1
 for idx, p in enumerate(prod_cms1dl2):
     # Run through datasets.
@@ -210,8 +214,8 @@ for idx, p in enumerate(prod_cms1dl2):
             print("{0}/{1}".format(count, num_datasets * prod_cms1dl2_len))
             vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
-            err_cms1dl2[idx][gen][dat] = error(vel_cms1dl2[idx][gen][dat],
-                                               roi[gen][dat], spl[gen][dat])
+            err_cms1dl2[idx][gen][dat], max_err_cms1dl2[idx][gen][dat] = \
+                error(vel_cms1dl2[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
 # Compute velocity and source for all parameter pairs.
@@ -220,6 +224,7 @@ print("Running cms1d on {0} datasets ".format(num_datasets) +
 vel_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 k_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 err_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
+max_err_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 count = 1
 for idx, p in enumerate(prod_cms1d):
     # Run through datasets.
@@ -228,8 +233,8 @@ for idx, p in enumerate(prod_cms1d):
             print("{0}/{1}".format(count, num_datasets * prod_cms1d_len))
             vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat] = \
                 cms1d_img(imgp[gen][dat], p[0], p[1], p[2], p[3], 'mesh')
-            err_cms1d[idx][gen][dat] = error(vel_cms1d[idx][gen][dat],
-                                             roi[gen][dat], spl[gen][dat])
+            err_cms1d[idx][gen][dat], max_err_cms1d[idx][gen][dat] = \
+                error(vel_cms1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
 # Compute velocity and source for all parameter pairs.
@@ -238,6 +243,8 @@ print("Running cmscr1d on {0} datasets ".format(num_datasets) +
 vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 err_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
+max_err_cmscr1d = [collections.defaultdict(dict) for
+                   x in range(prod_cmscr1d_len)]
 count = 1
 for idx, p in enumerate(prod_cmscr1d_1):
     # Run through datasets.
@@ -247,12 +254,27 @@ for idx, p in enumerate(prod_cmscr1d_1):
             vel_cmscr1d[idx][gen][dat], k_cmscr1d[idx][gen][dat] = \
                 cmscr1d_img(imgp[gen][dat],
                             p[0], p[1], p[2], p[3], p[4], 'mesh')
-            err_cmscr1d[idx][gen][dat] = error(vel_cmscr1d[idx][gen][dat],
-                                               roi[gen][dat], spl[gen][dat])
+            err_cmscr1d[idx][gen][dat], max_err_cmscr1d[idx][gen][dat] = \
+                error(vel_cmscr1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
 
 # Print errors.
+print('Cumulative absolute error:')
+for gen in name.keys():
+    for dat in name[gen].keys():
+        print("Dataset {0}/{1}".format(gen, dat))
+        err = [x[gen][dat] for x in err_of1d]
+        print("of1d:    " + ", ".join('{0:.3f}'.format(x) for x in err))
+        err = [x[gen][dat] for x in err_cms1dl2]
+        print("cms1dl2: " + ", ".join('{0:.3f}'.format(x) for x in err))
+        err = [x[gen][dat] for x in err_cms1d]
+        print("cms1d:   " + ", ".join('{0:.3f}'.format(x) for x in err))
+        err = [x[gen][dat] for x in err_cmscr1d]
+        print("cmscr1d: " + ", ".join('{0:.3f}'.format(x) for x in err))
+
+# Print max. errors.
+print('Maximum absolute error:')
 for gen in name.keys():
     for dat in name[gen].keys():
         print("Dataset {0}/{1}".format(gen, dat))
@@ -343,6 +365,7 @@ for gen in name.keys():
 
 
 # Output LaTeX table in sorte order.
+print('LaTeX table with results:')
 for gen in sorted(name.keys()):
     for dat in sorted(name[gen].keys()):
         # Find indices of best results (not necessarily unique).
@@ -386,7 +409,3 @@ print(formatstr.format(sum_of1d / count,
                        sum_cms1dl2 / count,
                        sum_cms1d / count,
                        sum_cmscr1d / count))
-
-
-# TODO: Compute average errors.
-# TODO: Output tables.

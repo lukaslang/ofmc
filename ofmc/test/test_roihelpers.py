@@ -151,6 +151,16 @@ class TestRoiHelpers(unittest.TestCase):
         fd = f.derivative()
         np.testing.assert_allclose(fd(x) * m / n, np.repeat(0.1, num))
 
+    def test_spline_derivative_points(self):
+        m, n = 30, 100
+
+        # Create spline woth points.
+        x = [0, 30, 60, 90]
+        y = [0, 10, 20, 30]
+        spl = UnivariateSpline(x, y, k=3)
+        splderiv = spl.derivative()
+        np.testing.assert_allclose(splderiv(0) * m / n, 0.1)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -62,7 +62,7 @@ Installation MacOS + Anaconda3.
 a. Download and install Anaconda from https://anaconda.org/
 b. Create environment and install FEniCS:
 
->> conda create -n fenicsproject -c conda-forge fenics
+>> conda create -n fenicsproject -c conda-forge fenics=2017.2.0
 
 c. Activate the environment:
 
@@ -75,6 +75,12 @@ d. Install scipy, matplotlib, pillow, and read-roi:
 >> conda install -c conda-forge pillow
 >> conda install -c conda-forge read-roi
 >> conda install -c conda-forge imageio
+
+e. As of 18 July 2018 there is an issue with sympy, see https://groups.google.com/forum/#!topic/fenics-support/wfGpk7T1aFc
+
+In order to fix it downgrade using
+
+>> conda install -c conda-forge sympy=1.1.1
 
 Not yet in use:
 

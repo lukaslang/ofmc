@@ -2,6 +2,7 @@ results
 oldcode
 python/.cache
 *.pyc
+*.log
 .cache
 results-old
 ipython.html

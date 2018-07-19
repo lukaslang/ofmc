@@ -43,6 +43,8 @@ ufl_logger.setLevel(logging.WARNING)
 # Set path with data.
 datapath = ('/Users/lukaslang/'
             'Dropbox (Cambridge University)/Drosophila/Data from Elena')
+# datapath = ('/home/ll542/store/'
+#             'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(

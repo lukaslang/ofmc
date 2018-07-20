@@ -52,6 +52,10 @@ resultpath = 'results/{0}'.format(
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
+# Create path for output files.
+if not os.path.exists(os.path.join(resultpath, 'pkl')):
+    os.makedirs(os.path.join(resultpath, 'pkl'))
+
 # Set projection method.
 proj = 'SUM'
 
@@ -86,24 +90,24 @@ def error(vel, roi, spl) -> (float, float):
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha1_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha0_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha1_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha0_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
 gamma_cms1dl2 = [1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
 prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha1_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha2_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha3_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha0_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha2_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha3_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_cms1d = it.product(alpha0_cms1d,
                         alpha1_cms1d,
                         alpha2_cms1d,
@@ -112,11 +116,11 @@ prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha1_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha2_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-alpha3_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
-beta_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1]
+alpha0_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha2_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha3_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+beta_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_cmscr1d_1, prod_cmscr1d_2 = it.tee(it.product(alpha0_cmscr1d,
                                                    alpha1_cmscr1d,
                                                    alpha2_cmscr1d,
@@ -181,6 +185,16 @@ for gen in genotypes:
         # Increase counter.
         num_datasets += 1
 
+# Write data to result folder.
+with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'wb') as f:
+        pickle.dump(name, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'wb') as f:
+        pickle.dump(img, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'wb') as f:
+        pickle.dump(roi, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'wb') as f:
+        pickle.dump(spl, f, pickle.HIGHEST_PROTOCOL)
+
 # Compute velocity and source for all parameter pairs.
 print("Running of1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(prod_of1d_len))
@@ -199,6 +213,16 @@ for idx, p in enumerate(prod_of1d):
                 error(vel_of1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_of1d.pkl'), 'wb') as f:
+        pickle.dump(err_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_of1d.pkl'), 'wb') as f:
+        pickle.dump(max_err_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'wb') as f:
+        pickle.dump(vel_of1d, f, pickle.HIGHEST_PROTOCOL)
+
+# Clear memory.
+del err_of1d, max_err_of1d, vel_of1d
 
 # Compute velocity and source for all parameter pairs.
 print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
@@ -220,6 +244,19 @@ for idx, p in enumerate(prod_cms1dl2):
                 error(vel_cms1dl2[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_cms1dl2.pkl'), 'wb') as f:
+        pickle.dump(err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_cms1dl2.pkl'), 'wb') as f:
+        pickle.dump(max_err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'wb') as f:
+        pickle.dump(vel_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'k_cms1dl2.pkl'), 'wb') as f:
+        pickle.dump(k_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+
+# Clear memory.
+del err_cms1dl2, max_err_cms1dl2, vel_cms1dl2, k_cms1dl2
+
 # Compute velocity and source for all parameter pairs.
 print("Running cms1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(prod_cms1d_len))
@@ -238,6 +275,19 @@ for idx, p in enumerate(prod_cms1d):
             err_cms1d[idx][gen][dat], max_err_cms1d[idx][gen][dat] = \
                 error(vel_cms1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
+
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_cms1d.pkl'), 'wb') as f:
+        pickle.dump(err_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_cms1d.pkl'), 'wb') as f:
+        pickle.dump(max_err_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'vel_cms1d.pkl'), 'wb') as f:
+        pickle.dump(vel_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'wb') as f:
+        pickle.dump(k_cms1d, f, pickle.HIGHEST_PROTOCOL)
+
+# Clear memory.
+del err_cms1d, max_err_cms1d, vel_cms1d, k_cms1d
 
 # Compute velocity and source for all parameter pairs.
 print("Running cmscr1d on {0} datasets ".format(num_datasets) +
@@ -260,48 +310,15 @@ for idx, p in enumerate(prod_cmscr1d_1):
                 error(vel_cmscr1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
             count += 1
 
-# Write data to result folder.
-if not os.path.exists(os.path.join(resultpath, 'pkl')):
-    os.makedirs(os.path.join(resultpath, 'pkl'))
-with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'wb') as f:
-        pickle.dump(name, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'wb') as f:
-        pickle.dump(img, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'wb') as f:
-        pickle.dump(roi, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'wb') as f:
-        pickle.dump(spl, f, pickle.HIGHEST_PROTOCOL)
-
-with open(os.path.join(resultpath, 'pkl', 'err_of1d.pkl'), 'wb') as f:
-        pickle.dump(err_of1d, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'err_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'err_cms1d.pkl'), 'wb') as f:
-        pickle.dump(err_cms1d, f, pickle.HIGHEST_PROTOCOL)
+# Store results.
 with open(os.path.join(resultpath, 'pkl', 'err_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(err_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
-
-with open(os.path.join(resultpath, 'pkl', 'max_err_of1d.pkl'), 'wb') as f:
-        pickle.dump(max_err_of1d, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'max_err_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(max_err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'max_err_cms1d.pkl'), 'wb') as f:
-        pickle.dump(max_err_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'max_err_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(max_err_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
-
-with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'wb') as f:
-        pickle.dump(vel_of1d, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(vel_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'vel_cms1d.pkl'), 'wb') as f:
-        pickle.dump(vel_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'vel_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(vel_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
-
-with open(os.path.join(resultpath, 'pkl', 'k_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(k_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
-with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'wb') as f:
-        pickle.dump(k_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(k_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+
+# Clear memory.
+del err_cmscr1d, max_err_cmscr1d, vel_cmscr1d, k_cmscr1d

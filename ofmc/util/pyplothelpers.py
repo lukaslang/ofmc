@@ -40,7 +40,7 @@ linewidth = 2
 arrowstyle = '-'
 
 
-def saveimage(path: str, name: str, img: np.array):
+def saveimage(path: str, name: str, img: np.array, title=None):
     """Takes a path string, a filename, and an array and saves the plotted
     array.
 
@@ -48,6 +48,7 @@ def saveimage(path: str, name: str, img: np.array):
         path (str): The path to save the image to.
         name (str): The filename.
         img (np.array): The 2D array.
+        title(str): An optional title.
 
     Returns:
     """
@@ -57,7 +58,10 @@ def saveimage(path: str, name: str, img: np.array):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
-    ax.set_title('Fluorescence intensity')
+    if title is None:
+        ax.set_title('Fluorescence intensity')
+    else:
+        ax.set_title(title)
 
     # Create colourbar.
     divider = make_axes_locatable(ax)

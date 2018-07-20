@@ -161,6 +161,85 @@ class TestRoiHelpers(unittest.TestCase):
         splderiv = spl.derivative()
         np.testing.assert_allclose(splderiv(0) * m / n, 0.1)
 
+    def test_error(self):
+        # Load test zip.
+        roi = read_roi_zip('ofmc/test/data/Manual_ROIs.zip')
+
+        # Create splines.
+        spl = rh.roi2splines(roi)
+
+        # Load test image.
+        name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
+        img = imageio.imread(name)
+
+        # Create zero velocity field.
+        vel = np.zeros_like(img)
+        m, n = vel.shape
+
+        # Compute error.
+        err = rh.compute_error(vel, roi, spl)
+
+        # Plot splines.
+        for v in roi:
+            y = roi[v]['y']
+            y = np.arange(y[0], y[-1] + 1, 1)
+            splderiv = spl[v].derivative()
+            np.testing.assert_allclose(abs(splderiv(y) * m / n), err[v])
+
+    def test_endpoint_error(self):
+        # Load test zip.
+        roi = read_roi_zip('ofmc/test/data/Manual_ROIs.zip')
+
+        # Create splines.
+        spl = rh.roi2splines(roi)
+
+        # Load test image.
+        name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
+        img = imageio.imread(name)
+
+        # Create zero velocity field.
+        vel = np.zeros_like(img)
+        m, n = vel.shape
+
+        # Compute error.
+        err, curve = rh.compute_endpoint_error(vel, roi, spl)
+
+        # Plot image.
+        plt.imshow(img, cmap=cm.gray)
+
+        # Plot splines.
+        for v in roi:
+            y = roi[v]['y']
+            # Compute derivative of spline.
+            derivspl = spl[v].derivative()
+
+            points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments, cmap=cm.coolwarm,
+                                norm=plt.Normalize(-2, 2))
+            lc.set_array(derivspl(y))
+            lc.set_linewidth(2)
+            plt.gca().add_collection(lc)
+
+            # Plot integral curves.
+            y = np.arange(y[0], y[-1] + 1, 1)
+            points = np.array([curve[v], y]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+            lc = LineCollection(segments, cmap=cm.coolwarm,
+                                norm=plt.Normalize(-2, 2))
+            lc.set_linewidth(2)
+            plt.gca().add_collection(lc)
+        plt.show()
+
+        # Plot splines.
+        for v in roi:
+            y = roi[v]['y']
+            y = np.arange(y[0], y[-1] + 1, 1)
+            x = spl[v](y)
+            np.testing.assert_allclose(abs(x[0] - x), err[v])
+
 
 if __name__ == '__main__':
     unittest.main()

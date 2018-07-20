@@ -20,6 +20,7 @@
 import numpy as np
 from scipy import interpolate
 from scipy.interpolate import UnivariateSpline
+from scipy.integrate import solve_ivp
 
 
 def roi2splines(roi: dict) -> dict:
@@ -93,7 +94,7 @@ def compute_error(vel: np.array, roi, spl) -> dict:
         y = roi[v]['y']
 
         # Interpolate velocity.
-        y = np.arange(y[0], y[-1] + 0.5, 0.5)
+        y = np.arange(y[0], y[-1] + 1, 1)
         x = np.array(spl[v](y))
         veval = interpolate.griddata(gridpoints, vel.flatten(), (y, x),
                                      method='cubic')
@@ -104,3 +105,42 @@ def compute_error(vel: np.array, roi, spl) -> dict:
         # Compute error in velocity.
         error[v] = abs(derivspl(y) * m / n - veval)
     return error
+
+
+def compute_endpoint_error(vel: np.array, roi, spl) -> (dict, dict):
+    """Takes a velocity array, a roi instance, fitted splines, and returns a
+    dictionary of error arrays.
+
+    Args:
+        vel (np.array): The velocity.
+        roi: A roi instance.
+        spl: Fitted spolines.
+
+    Returns:
+        error (dict): A dictionary of errors.
+        curve (dict): A dictionary of points of the trajectory.
+    """
+    m, n = vel.shape
+    gridx, gridy = np.mgrid[0:m, 0:n]
+    gridpoints = np.hstack([gridx.reshape(m * n, 1), gridy.reshape(m * n, 1)])
+
+    # Define ODE.
+    def ode(t, y): return interpolate.griddata(gridpoints,
+                                               vel.flatten(), (t, y),
+                                               method='cubic')
+    error = dict()
+    curve = dict()
+    for v in roi:
+        y = roi[v]['y']
+
+        # Interpolate velocity.
+        y = np.arange(y[0], y[-1] + 1, 1)
+        x = np.array(spl[v](y))
+
+        # Solve initial value problem.
+        sol = solve_ivp(ode, [y[0], y[-1]], [x[0]], t_eval=y, method='RK45')
+
+        # Compute error in velocity.
+        error[v] = abs(x - sol.y[0, :])
+        curve[v] = sol.y[0, :]
+    return error, curve

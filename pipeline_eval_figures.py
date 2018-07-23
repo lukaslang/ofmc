@@ -17,14 +17,41 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import collections
 import os
 import re
 import numpy as np
 import ofmc.util.pyplothelpers as ph
+import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-19-17-19-13/'
+resultpath = 'results/2018-07-20-15-33-29/'
+
+
+def error(vel, roi, spl) -> (float, float):
+    # Compute accumulated error in velocity for each spline.
+    error = rh.compute_error(vel, roi, spl)
+    totalerr = 0
+    maxerror = 0
+    for v in roi:
+        err = sum(error[v]) / len(error[v])
+        totalerr += err
+        maxerror = max(maxerror, max(error[v]))
+    return (totalerr, maxerror)
+
+
+def endpoint_error(vel, roi, spl) -> (float, float):
+    # Compute accumulated error in position for each spline.
+    error, curve = rh.compute_endpoint_error(vel, roi, spl)
+    totalerr = 0
+    maxerror = 0
+    for v in roi:
+        err = sum(error[v]) / len(error[v])
+        totalerr += err
+        maxerror = max(maxerror, max(error[v]))
+    return (totalerr, maxerror)
+
 
 # Load dataset.
 with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'rb') as f:
@@ -35,24 +62,6 @@ with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'rb') as f:
         roi = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'rb') as f:
         spl = pickle.load(f)
-
-with open(os.path.join(resultpath, 'pkl', 'err_of1d.pkl'), 'rb') as f:
-        err_of1d = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'err_cms1dl2.pkl'), 'rb') as f:
-        err_cms1dl2 = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'err_cms1d.pkl'), 'rb') as f:
-        err_cms1d = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'err_cmscr1d.pkl'), 'rb') as f:
-        err_cmscr1d = pickle.load(f)
-
-with open(os.path.join(resultpath, 'pkl', 'max_err_of1d.pkl'), 'rb') as f:
-        max_err_of1d = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'max_err_cms1dl2.pkl'), 'rb') as f:
-        max_err_cms1dl2 = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'max_err_cms1d.pkl'), 'rb') as f:
-        max_err_cms1d = pickle.load(f)
-with open(os.path.join(resultpath, 'pkl', 'max_err_cmscr1d.pkl'), 'rb') as f:
-        max_err_cmscr1d = pickle.load(f)
 
 with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'rb') as f:
         vel_of1d = pickle.load(f)
@@ -69,6 +78,52 @@ with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'rb') as f:
         k_cms1d = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'rb') as f:
         k_cmscr1d = pickle.load(f)
+
+with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
+        converged_cmscr1d = pickle.load(f)
+
+# Compute errors.
+print('Computing error for of1d.')
+err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
+max_err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
+for idx in range(len(vel_of1d)):
+    # Run through datasets.
+    for gen in name.keys():
+        for dat in name[gen].keys():
+            err_of1d[idx][gen][dat], max_err_of1d[idx][gen][dat] = \
+                error(vel_of1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+
+print('Computing error for cms1dl2.')
+err_cms1dl2 = [collections.defaultdict(dict) for x in range(len(vel_cms1dl2))]
+max_err_cms1dl2 = [collections.defaultdict(dict)
+                   for x in range(len(vel_cms1dl2))]
+for idx in range(len(vel_cms1dl2)):
+    # Run through datasets.
+    for gen in name.keys():
+        for dat in name[gen].keys():
+            err_cms1dl2[idx][gen][dat], max_err_cms1dl2[idx][gen][dat] = \
+                error(vel_cms1dl2[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+
+print('Computing error for cms1d.')
+err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
+max_err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
+for idx in range(len(vel_cms1d)):
+    # Run through datasets.
+    for gen in name.keys():
+        for dat in name[gen].keys():
+            err_cms1d[idx][gen][dat], max_err_cms1d[idx][gen][dat] = \
+                error(vel_cms1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+
+print('Computing error for cmscr1d.')
+err_cmscr1d = [collections.defaultdict(dict) for x in range(len(vel_cmscr1d))]
+max_err_cmscr1d = [collections.defaultdict(dict)
+                   for x in range(len(vel_cmscr1d))]
+for idx in range(len(vel_cmscr1d)):
+    # Run through datasets.
+    for gen in name.keys():
+        for dat in name[gen].keys():
+            err_cmscr1d[idx][gen][dat], max_err_cmscr1d[idx][gen][dat] = \
+                error(vel_cmscr1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
 
 # Print errors.
 print('Cumulative absolute error:')

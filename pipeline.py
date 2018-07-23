@@ -22,6 +22,7 @@ import datetime
 import glob
 import imageio
 import re
+import logging
 import numpy as np
 from scipy import ndimage
 from read_roi import read_roi_zip
@@ -31,6 +32,11 @@ from ofmc.model.of import of1d_img
 from ofmc.model.cms import cms1dl2_img
 from ofmc.model.cms import cms1d_img
 from ofmc.model.cmscr import cmscr1d_img
+
+ffc_logger = logging.getLogger('FFC')
+ffc_logger.setLevel(logging.WARNING)
+ufl_logger = logging.getLogger('UFL')
+ufl_logger.setLevel(logging.WARNING)
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -97,13 +103,13 @@ for gen in genotypes:
         name = re.sub(' ', '_', name)
         print("Computing velocities for file '{0}'".format(name))
 
-        # Load and preprocess Kymograph.
+        # Load and preprocess kymograph.
         img = loadimage(kymos[0])
 
         # Compute velocity and source.
         imgp = prepareimage(img)
-        vel, k = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
-                             beta, 'mesh')
+        vel, k, converged = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
+                                        beta, 'mesh')
         # vel, k = cms1dl2_img(imgp, alpha0, alpha1, gamma, 'mesh')
         # vel, k = cms1d_img(imgp, alpha0, alpha1, alpha2, alpha3, 'mesh')
         # vel = of1d_img(imgp, alpha0, alpha1, 'mesh')

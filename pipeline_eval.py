@@ -270,9 +270,9 @@ for idx, p in enumerate(prod_cmscr1d):
     for gen in genotypes:
         for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * prod_cmscr1d_len))
-            vel_cmscr1d[idx][gen][dat],
-            k_cmscr1d[idx][gen][dat],
-            converged_cmscr1d[idx][gen][dat] = \
+            vel_cmscr1d[idx][gen][dat], \
+                k_cmscr1d[idx][gen][dat], \
+                converged_cmscr1d[idx][gen][dat] = \
                 cmscr1d_img(imgp[gen][dat],
                             p[0], p[1], p[2], p[3], p[4], 'mesh')
             count += 1

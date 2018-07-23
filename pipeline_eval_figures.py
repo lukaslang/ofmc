@@ -55,33 +55,35 @@ def endpoint_error(vel, roi, spl) -> (float, float):
 
 # Load dataset.
 with open(os.path.join(resultpath, 'pkl', 'genotypes.pkl'), 'rb') as f:
-        genotypes = pickle.load(f)
+    genotypes = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'datasets.pkl'), 'rb') as f:
-        datasets = pickle.load(f)
+    datasets = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'rb') as f:
-        name = pickle.load(f)
+    name = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'rb') as f:
-        img = pickle.load(f)
+    img = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'imgp.pkl'), 'rb') as f:
+    imgp = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'rb') as f:
-        roi = pickle.load(f)
+    roi = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'rb') as f:
-        spl = pickle.load(f)
+    spl = pickle.load(f)
 
 with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'rb') as f:
-        vel_of1d = pickle.load(f)
+    vel_of1d = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'rb') as f:
-        vel_cms1dl2 = pickle.load(f)
+    vel_cms1dl2 = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'vel_cms1d.pkl'), 'rb') as f:
-        vel_cms1d = pickle.load(f)
+    vel_cms1d = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'vel_cmscr1d.pkl'), 'rb') as f:
-        vel_cmscr1d = pickle.load(f)
+    vel_cmscr1d = pickle.load(f)
 
 with open(os.path.join(resultpath, 'pkl', 'k_cms1dl2.pkl'), 'rb') as f:
-        k_cms1dl2 = pickle.load(f)
+    k_cms1dl2 = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'rb') as f:
-        k_cms1d = pickle.load(f)
+    k_cms1d = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'rb') as f:
-        k_cmscr1d = pickle.load(f)
+    k_cmscr1d = pickle.load(f)
 
 with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
         converged_cmscr1d = pickle.load(f)
@@ -242,9 +244,16 @@ for gen in genotypes:
         idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
 
         tmpimg = img[gen][dat]
+        tmpimgp = imgp[gen][dat]
         tmpname = name[gen][dat]
         tmproi = roi[gen][dat]
         tmpspl = spl[gen][dat]
+
+        # Save images.
+        tmpfolder = [resultpath, gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        ph.saveimage(resfolder, tmpname, tmpimg)
+        ph.saveimage(resfolder, '{0}-filtered'.format(tmpname), tmpimgp)
 
         # of1d
         tmpfolder = [resultpath, 'of1d', gen, dat]

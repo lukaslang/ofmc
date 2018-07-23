@@ -176,17 +176,19 @@ for gen in genotypes:
 
 # Write data to result folder.
 with open(os.path.join(resultpath, 'pkl', 'genotypes.pkl'), 'wb') as f:
-        pickle.dump(genotypes, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(genotypes, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'datasets.pkl'), 'wb') as f:
-        pickle.dump(datasets, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(datasets, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'wb') as f:
-        pickle.dump(name, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(name, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'wb') as f:
-        pickle.dump(img, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(img, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'imgp.pkl'), 'wb') as f:
+    pickle.dump(imgp, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'wb') as f:
-        pickle.dump(roi, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(roi, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'wb') as f:
-        pickle.dump(spl, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(spl, f, pickle.HIGHEST_PROTOCOL)
 
 # Compute velocity and source for all parameter pairs.
 print("Running of1d on {0} datasets ".format(num_datasets) +
@@ -204,7 +206,7 @@ for idx, p in enumerate(prod_of1d):
 
 # Store results.
 with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'wb') as f:
-        pickle.dump(vel_of1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(vel_of1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_of1d
@@ -226,9 +228,9 @@ for idx, p in enumerate(prod_cms1dl2):
 
 # Store results.
 with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(vel_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(vel_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cms1dl2.pkl'), 'wb') as f:
-        pickle.dump(k_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(k_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_cms1dl2, k_cms1dl2
@@ -250,9 +252,9 @@ for idx, p in enumerate(prod_cms1d):
 
 # Store results.
 with open(os.path.join(resultpath, 'pkl', 'vel_cms1d.pkl'), 'wb') as f:
-        pickle.dump(vel_cms1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(vel_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'wb') as f:
-        pickle.dump(k_cms1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(k_cms1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_cms1d, k_cms1d
@@ -279,11 +281,11 @@ for idx, p in enumerate(prod_cmscr1d):
 
 # Store results.
 with open(os.path.join(resultpath, 'pkl', 'vel_cmscr1d.pkl'), 'wb') as f:
-        pickle.dump(vel_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(vel_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'wb') as f:
-        pickle.dump(k_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(k_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'wb') as f:
-        pickle.dump(converged_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(converged_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_cmscr1d, k_cmscr1d, converged_cmscr1d

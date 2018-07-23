@@ -91,6 +91,7 @@ print('Computing error for of1d.')
 err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
 max_err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
 for idx in range(len(vel_of1d)):
+    print("{0}/{1}".format(idx, len(vel_of1d)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
@@ -102,6 +103,7 @@ err_cms1dl2 = [collections.defaultdict(dict) for x in range(len(vel_cms1dl2))]
 max_err_cms1dl2 = [collections.defaultdict(dict)
                    for x in range(len(vel_cms1dl2))]
 for idx in range(len(vel_cms1dl2)):
+    print("{0}/{1}".format(idx, len(vel_cms1dl2)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
@@ -112,6 +114,7 @@ print('Computing error for cms1d.')
 err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
 max_err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
 for idx in range(len(vel_cms1d)):
+    print("{0}/{1}".format(idx, len(vel_cms1d)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
@@ -123,6 +126,7 @@ err_cmscr1d = [collections.defaultdict(dict) for x in range(len(vel_cmscr1d))]
 max_err_cmscr1d = [collections.defaultdict(dict)
                    for x in range(len(vel_cmscr1d))]
 for idx in range(len(vel_cmscr1d)):
+    print("{0}/{1}".format(idx, len(vel_cmscr1d)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
@@ -303,3 +307,5 @@ for gen in genotypes:
         ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
                                 tmpvel, tmproi, tmpspl)
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+print("Done.")

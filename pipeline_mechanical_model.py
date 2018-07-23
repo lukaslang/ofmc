@@ -137,7 +137,8 @@ img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
 # img = ca_sav[:, 11:ii].transpose()
 
 # Compute velocity and source.
-vel, k = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
+vel, k, converged = cmscr1d_img(img,
+                                alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 
 # Plot and save figures.
 ph.saveimage(resfolder, name, img)

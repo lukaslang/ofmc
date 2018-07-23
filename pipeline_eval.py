@@ -257,13 +257,17 @@ print("Running cmscr1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(prod_cmscr1d_len))
 vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
+converged_cmscr1d = [collections.defaultdict(dict)
+                     for x in range(prod_cmscr1d_len)]
 count = 1
 for idx, p in enumerate(prod_cmscr1d_1):
     # Run through datasets.
     for gen in name.keys():
         for dat in name[gen].keys():
             print("{0}/{1}".format(count, num_datasets * prod_cmscr1d_len))
-            vel_cmscr1d[idx][gen][dat], k_cmscr1d[idx][gen][dat] = \
+            vel_cmscr1d[idx][gen][dat],
+            k_cmscr1d[idx][gen][dat],
+            converged_cmscr1d[idx][gen][dat] = \
                 cmscr1d_img(imgp[gen][dat],
                             p[0], p[1], p[2], p[3], p[4], 'mesh')
             count += 1
@@ -273,6 +277,8 @@ with open(os.path.join(resultpath, 'pkl', 'vel_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(vel_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'wb') as f:
         pickle.dump(k_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'wb') as f:
+        pickle.dump(converged_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
-del vel_cmscr1d, k_cmscr1d
+del vel_cmscr1d, k_cmscr1d, converged_cmscr1d

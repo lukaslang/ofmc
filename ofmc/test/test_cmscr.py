@@ -37,6 +37,7 @@ import ofmc.util.dolfinhelpers as dh
 class TestCmscr(unittest.TestCase):
 
     def test_cmscr1d_weak_solution_default(self):
+        print("Running test 'test_cmscr1d_weak_solution_default'")
         # Define temporal and spatial sample points.
         m, n = 10, 20
 
@@ -49,8 +50,8 @@ class TestCmscr(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
-                                     1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, converged = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
+                                                1.0, 1.0, 1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -65,8 +66,8 @@ class TestCmscr(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
-                                     1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, converged = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
+                                                1.0, 1.0, 1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -76,6 +77,7 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1d_exp_default(self):
+        print("Running test 'test_cmscr1d_exp_default'")
         # Define temporal and spatial sample points.
         m, n = 10, 20
 
@@ -84,7 +86,7 @@ class TestCmscr(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cmscr1d_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, converged = cmscr1d_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -92,6 +94,7 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1d_exp_pb(self):
+        print("Running test 'test_cmscr1d_exp_pb'")
         # Define temporal and spatial sample points.
         m, n = 10, 20
 
@@ -100,7 +103,8 @@ class TestCmscr(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cmscr1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, converged = cmscr1d_exp_pb(m, n, f, fd, fd,
+                                         1.0, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -108,9 +112,10 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1d_img_default_fd(self):
+        print("Running test 'test_cmscr1d_img_default_fd'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'fd')
+        v, k, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -118,9 +123,10 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1d_img_default_mesh(self):
+        print("Running test 'test_cmscr1d_img_default_mesh'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -128,9 +134,10 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1d_img_periodic_mesh(self):
+        print("Running test 'test_cmscr1d_img_periodic_mesh'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cmscr1d_img_pb(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, converged = cmscr1d_img_pb(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -138,9 +145,10 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1dnewton(self):
+        print("Running test 'test_cmscr1dnewton'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -148,9 +156,10 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1dnewton_random(self):
+        print("Running test 'test_cmscr1dnewton_random'")
         # Create random non-moving image.
         img = matlib.repmat(np.random.rand(1, 25), 10, 1)
-        v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -158,6 +167,7 @@ class TestCmscr(unittest.TestCase):
         np.testing.assert_allclose(k, np.zeros_like(k))
 
     def test_cmscr1dnewton_data(self):
+        print("Running test 'test_cmscr1dnewton_data'")
         # Load test image.
         name = 'ofmc/test/data/DynamicReslice of E2PSB1PMT_10px.tif'
         img = imageio.imread(name)
@@ -173,7 +183,7 @@ class TestCmscr(unittest.TestCase):
         img = (img - img.min()) / (img.max() - img.min())
 
         # Compute solution.
-        v, k = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(k.shape, img.shape)

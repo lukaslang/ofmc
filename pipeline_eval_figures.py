@@ -79,6 +79,9 @@ with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'rb') as f:
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'rb') as f:
         k_cmscr1d = pickle.load(f)
 
+with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
+        converged_cmscr1d = pickle.load(f)
+
 # Compute errors.
 print('Computing error for of1d.')
 err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]

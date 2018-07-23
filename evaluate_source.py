@@ -158,8 +158,8 @@ beta = 5e-1
 # vel = of1d(f, alpha0, alpha1)
 # vel = cm1d(f, alpha0, alpha1)
 # vel, k = cms1d(f, alpha0, alpha1, alpha2, alpha3)
-vel, k = cmscr1d(f, alpha0, alpha1, alpha2, alpha3, beta)
-# vel, k = cmscr1dnewton(f, alpha0, alpha1, alpha2, alpha3, beta)
+vel, k, converged = cmscr1d(f, alpha0, alpha1, alpha2, alpha3, beta)
+# vel, k, converged = cmscr1dnewton(f, alpha0, alpha1, alpha2, alpha3, beta)
 
 # Plot and save figures.
 saveimage(os.path.join(resultpath, 'artificial-source'), name, f)

@@ -111,12 +111,12 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     if not os.path.exists(path):
         os.makedirs(path)
 
-    #maxvel = abs(vel).max()
-    #normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
+    # maxvel = abs(vel).max()
+    # normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
 
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
-    #im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
+    # im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
     im = ax.imshow(vel, interpolation='nearest', cmap=cmap)
     ax.set_title('Velocity')
 
@@ -403,11 +403,12 @@ v, k = cms1dl2_img_pb(f, alpha0, alpha1, gamma, 'mesh')
 saveresults(resultpath, 'analytic_example_const_cms1d_l2h1l2_img_pb',
             'l2h1l2', f, v, k)
 
-v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
+v, k, converged = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_const_cmscr1d_l2h1h1cr_img',
             'l2h1h1cr', f, v, k)
 
-v, k = cmscr1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
+v, k, converged = cmscr1d_img_pb(f,
+                                 alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_const_cmscr1d_l2h1h1cr_img_pb',
             'l2h1h1cr', f, v, k)
 
@@ -447,11 +448,12 @@ v, k = cms1dl2_img_pb(f, alpha0, alpha1, gamma, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_img_pb',
             'l2h1l2', f, v, k, (c0 - f)/tau)
 
-v, k = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
+v, k, converged = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_img',
             'l2h1h1cr', f, v, k, (c0 - f)/tau)
 
-v, k = cmscr1d_img_pb(f, alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
+v, k, converged = cmscr1d_img_pb(f,
+                                 alpha0, alpha1, alpha2, alpha3, beta, 'mesh')
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_img_pb',
             'l2h1h1cr', f, v, k, (c0 - f)/tau)
 
@@ -500,11 +502,13 @@ v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, gamma)
 saveresults(resultpath, 'analytic_example_const_cms1dl2_l2h1l2_exp_pb',
             'l2h1l2', fa_pb, v, k)
 
-v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp(m, n, f, ft, fx,
+                              alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_const_cmscr1d_l2h1h1cr_exp',
             'l2h1h1cr', fa, v, k)
 
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_const_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k)
 
@@ -553,11 +557,13 @@ v, k = cms1dl2_exp_pb(m, n, f, ft, fx, alpha0, alpha1, gamma)
 saveresults(resultpath, 'analytic_example_decay_cms1dl2_l2h1l2_exp_pb',
             'l2h1l2', fa_pb, v, k, (c0 - fa_pb)/tau)
 
-v, k = cmscr1d_exp(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp(m, n, f, ft, fx,
+                              alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp',
             'l2h1h1cr', fa, v, k, (c0 - fa)/tau)
 
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 
@@ -601,17 +607,20 @@ saveresults(resultpath,
 
 # Visualise increasing regularisation parameter of convective regularisation.
 beta = 1e-3
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.001',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 beta = 1e-2
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.01',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 beta = 1e-1
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb_beta_0.1',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
@@ -754,7 +763,8 @@ saveresults(resultpath,
             'analytic_example_linear_decay_cms1d_l2h1h1_exp_pb',
             'l2h1h1', fa_pb, v, k)
 
-v, k = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1, alpha2, alpha3, beta)
+v, k, converged = cmscr1d_exp_pb(m, n, f, ft, fx,
+                                 alpha0, alpha1, alpha2, alpha3, beta)
 saveresults(resultpath,
             'analytic_example_linear_decay_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k)

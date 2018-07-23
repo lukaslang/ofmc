@@ -18,12 +18,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 from dolfin import assemble
+from dolfin import derivative
 from dolfin import dx
 from dolfin import Function
 from dolfin import FunctionSpace
 from dolfin import Expression
 from dolfin import solve
 from dolfin import split
+from dolfin import NonlinearVariationalProblem
+from dolfin import NonlinearVariationalSolver
 from dolfin import TestFunctions
 from dolfin import TrialFunctions
 from dolfin import UnitSquareMesh
@@ -43,7 +46,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
                           f: Function, ft: Function, fx: Function,
                           alpha0: float, alpha1: float,
                           alpha2: float, alpha3: float,
-                          beta: float) -> (Function, Function):
+                          beta: float) -> (Function, Function, bool):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with source and with spatio-temporal and
     convective regularisation for a 1D image sequence with natural boundary
@@ -63,6 +66,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
     Returns:
         v (Function): The velocity.
         k (Function): The source.
+        status (bool): True if Newton's method converged.
     """
     # Define trial and test functions.
     w = Function(V)
@@ -81,8 +85,27 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
                      + k.dx(0) * v * w2.dx(1)
                      + k.dx(1) * v * v * w2.dx(1))) * dx
 
+    # Compute Gateaux derivative.
+    DA = derivative(A, w)
+
+    # Set up solver.
+    problem = NonlinearVariationalProblem(A, w, [], DA)
+    solver = NonlinearVariationalSolver(problem)
+
+    # Set solver parameters.
+    prm = solver.parameters
+    prm['newton_solver']['error_on_nonconvergence'] = False
+    prm['newton_solver']['maximum_iterations'] = 30
+    prm['newton_solver']['absolute_tolerance'] = 1e-15
+    prm['newton_solver']['relative_tolerance'] = 1e-15
+
     # Compute solution via Newton method.
-    solve(A == 0, w)
+    itern, status = solver.solve()
+    if not bool(status):
+        print("Newton's method did not converge within {0} ".format(itern) +
+              "iterations for parameters alpha0={0}, ".format(alpha0) +
+              "alpha1={0}, alpha3={1}, ".format(alpha1, alpha2) +
+              "alpha4={0}, beta={1}".format(alpha3, beta))
 
     # Recover solution.
     v, k = w.split(deepcopy=True)
@@ -93,15 +116,15 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
                   + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2
                   + beta * (k.dx(0) + k.dx(1) * v) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                       assemble(func * dx)))
-    return v, k
+                                     assemble(func * dx)))
+    return v, k, bool(status)
 
 
 def cmscr1d_exp(m: int, n: int,
                 f: Expression, ft: Expression, fx: Expression,
                 alpha0: float, alpha1: float,
                 alpha2: float, alpha3: float,
-                beta: float) -> (np.array, np.array):
+                beta: float) -> (np.array, np.array, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation.
 
@@ -120,6 +143,7 @@ def cmscr1d_exp(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
+        converged (bool): True if Newton's method converged.
 
     """
     # Define mesh and function space.
@@ -127,20 +151,20 @@ def cmscr1d_exp(m: int, n: int,
     V = dh.create_vector_function_space(mesh, 'default')
 
     # Compute velocity and source.
-    v, k = cmscr1d_weak_solution(V, f, ft, fx,
-                                 alpha0, alpha1, alpha2, alpha3, beta)
+    v, k, converged = cmscr1d_weak_solution(V, f, ft, fx, alpha0, alpha1,
+                                            alpha2, alpha3, beta)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, converged
 
 
 def cmscr1d_exp_pb(m: int, n: int,
                    f: Expression, ft: Expression, fx: Expression,
                    alpha0: float, alpha1: float,
                    alpha2: float, alpha3: float,
-                   beta: float) -> (np.array, np.array):
+                   beta: float) -> (np.array, np.array, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation with periodic
     spatial boundary.
@@ -160,6 +184,7 @@ def cmscr1d_exp_pb(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
+        converged (bool): True if Newton's method converged.
 
     """
     # Define mesh and function space.
@@ -167,19 +192,19 @@ def cmscr1d_exp_pb(m: int, n: int,
     V = dh.create_vector_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v, k = cmscr1d_weak_solution(V, f, ft, fx,
-                                 alpha0, alpha1, alpha2, alpha3, beta)
+    v, k, converged = cmscr1d_weak_solution(V, f, ft, fx, alpha0, alpha1,
+                                            alpha2, alpha3, beta)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, converged
 
 
 def cmscr1d_img(img: np.array,
                 alpha0: float, alpha1: float,
                 alpha2: float, alpha3: float,
-                beta: float, deriv) -> (np.array, np.array):
+                beta: float, deriv) -> (np.array, np.array, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation.
 
@@ -200,6 +225,7 @@ def cmscr1d_img(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
+        converged (bool): True if Newton's method converged.
 
     """
     # Check for valid arguments.
@@ -229,19 +255,19 @@ def cmscr1d_img(img: np.array,
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Compute velocity.
-    v, k = cmscr1d_weak_solution(W, f, ft, fx,
-                                 alpha0, alpha1, alpha2, alpha3, beta)
+    v, k, converged = cmscr1d_weak_solution(W, f, ft, fx, alpha0, alpha1,
+                                            alpha2, alpha3, beta)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, converged
 
 
 def cmscr1d_img_pb(img: np.array,
                    alpha0: float, alpha1: float,
                    alpha2: float, alpha3: float,
-                   beta: float, deriv='mesh') -> np.array:
+                   beta: float, deriv='mesh') -> (np.array, np.array, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation with periodic
     spatial boundary.
@@ -260,6 +286,7 @@ def cmscr1d_img_pb(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
+        converged (bool): True if Newton's method converged.
 
     """
     # Check for valid arguments.
@@ -283,17 +310,17 @@ def cmscr1d_img_pb(img: np.array,
     ft, fx = f.dx(0), f.dx(1)
 
     # Compute velocity.
-    v, k = cmscr1d_weak_solution(W, f, ft, fx,
-                                 alpha0, alpha1, alpha2, alpha3, beta)
+    v, k, converged = cmscr1d_weak_solution(W, f, ft, fx, alpha0, alpha1,
+                                            alpha2, alpha3, beta)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, converged
 
 
 def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
-                  alpha3: float, beta: float) -> (np.array, np.array):
+                  alpha3: float, beta: float) -> (np.array, np.array, bool):
     """Same as cmscr1d but doesn't use FEniCS Newton method.
 
     Args:
@@ -308,6 +335,7 @@ def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
     Returns:
         v: A velocity array of shape (m, n).
         k: A source array of shape (m, n).
+        converged (bool): True if Newton's method converged.
 
     """
     # Create mesh.
@@ -395,4 +423,4 @@ def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
     # Convert back to array.
     vel = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return vel, k
+    return vel, k, res > tol

@@ -96,8 +96,8 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
     prm = solver.parameters
     prm['newton_solver']['error_on_nonconvergence'] = False
     prm['newton_solver']['maximum_iterations'] = 30
-    prm['newton_solver']['absolute_tolerance'] = 1e-15
-    prm['newton_solver']['relative_tolerance'] = 1e-15
+    prm['newton_solver']['absolute_tolerance'] = 1e-10
+    prm['newton_solver']['relative_tolerance'] = 1e-10
 
     # Compute solution via Newton method.
     itern, status = solver.solve()

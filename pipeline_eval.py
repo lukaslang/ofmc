@@ -78,24 +78,24 @@ def prepareimage(img: np.array) -> np.array:
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-3]
-alpha1_of1d = [1e-3]
+alpha0_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
 prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-3]
-alpha1_cms1dl2 = [1e-3]
-gamma_cms1dl2 = [1e-3]
+alpha0_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
+gamma_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
 prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
     * len(gamma_cms1dl2)
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-3]
-alpha1_cms1d = [1e-3]
-alpha2_cms1d = [1e-3]
-alpha3_cms1d = [1e-3]
+alpha0_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha2_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha3_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_cms1d = it.product(alpha0_cms1d,
                         alpha1_cms1d,
                         alpha2_cms1d,
@@ -104,11 +104,11 @@ prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
     * len(alpha2_cms1d) * len(alpha3_cms1d)
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-3]
-alpha1_cmscr1d = [1e-3]
-alpha2_cmscr1d = [1e-3]
-alpha3_cmscr1d = [1e-3]
-beta_cmscr1d = [1e-3]
+alpha0_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha1_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha2_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+alpha3_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
+beta_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
 prod_cmscr1d = it.product(alpha0_cmscr1d,
                           alpha1_cmscr1d,
                           alpha2_cmscr1d,

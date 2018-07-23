@@ -26,7 +26,7 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-20-15-33-29/'
+resultpath = 'results/2018-07-23-14-14-11/'
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -134,37 +134,48 @@ for idx in range(len(vel_cmscr1d)):
                 err_cmscr1d[idx][gen][dat] = np.inf
                 max_err_cmscr1d[idx][gen][dat] = np.inf
 
+# Open file.
+f = open(os.path.join(resultpath, 'results.txt'), 'w')
+
 # Print errors.
-print('Cumulative absolute error:')
+f.write('Cumulative absolute error:\n')
 for gen in genotypes:
     for dat in datasets[gen]:
-        print("Dataset {0}/{1}".format(gen, dat))
+        f.write("Dataset {0}/{1}\n".format(gen, dat))
         err = [x[gen][dat] for x in err_of1d]
-        print("of1d:    " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("of1d:    " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in err_cms1dl2]
-        print("cms1dl2: " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cms1dl2: " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in err_cms1d]
-        print("cms1d:   " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cms1d:   " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in err_cmscr1d]
-        print("cmscr1d: " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cmscr1d: " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
 
 # Print max. errors.
-print('Maximum absolute error:')
+f.write('Maximum absolute error:\n')
 for gen in genotypes:
     for dat in datasets[gen]:
-        print("Dataset {0}/{1}".format(gen, dat))
+        f.write("Dataset {0}/{1}".format(gen, dat))
         err = [x[gen][dat] for x in max_err_of1d]
-        print("of1d:    " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("of1d:    " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in max_err_cms1dl2]
-        print("cms1dl2: " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cms1dl2: " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in max_err_cms1d]
-        print("cms1d:   " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cms1d:   " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
         err = [x[gen][dat] for x in max_err_cmscr1d]
-        print("cmscr1d: " + ", ".join('{0:.3f}'.format(x) for x in err))
+        f.write("cmscr1d: " +
+                ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
 
 
 # Output LaTeX table in sorte order.
-print('LaTeX table with results:')
+f.write('LaTeX table with results:\n')
 for gen in sorted(name.keys()):
     for dat in sorted(name[gen].keys()):
         # Find indices of best results (not necessarily unique).
@@ -173,14 +184,14 @@ for gen in sorted(name.keys()):
         idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
         idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
 
-        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\'
-        print(formatstr.format(re.sub('_', '\\_', gen),
-                               re.sub('_', '\\_', dat),
-                               err_of1d[idx_of1d][gen][dat],
-                               err_cms1dl2[idx_cms1dl2][gen][dat],
-                               err_cms1d[idx_cms1d][gen][dat],
-                               err_cmscr1d[idx_cmscr1d][gen][dat]))
-print('\\hline')
+        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\\n'
+        f.write(formatstr.format(re.sub('_', '\\_', gen),
+                                 re.sub('_', '\\_', dat),
+                                 err_of1d[idx_of1d][gen][dat],
+                                 err_cms1dl2[idx_cms1dl2][gen][dat],
+                                 err_cms1d[idx_cms1d][gen][dat],
+                                 err_cmscr1d[idx_cmscr1d][gen][dat]))
+f.write('\\hline\n')
 
 # Output average over all datasets.
 # Output LaTeX table in sorted order.
@@ -208,11 +219,14 @@ for gen in sorted(name.keys()):
 
         count += 1.0
 
-formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\'
-print(formatstr.format(sum_of1d / count,
-                       sum_cms1dl2 / count,
-                       sum_cms1d / count,
-                       sum_cmscr1d / count_converged))
+formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\\n'
+f.write(formatstr.format(sum_of1d / count,
+                         sum_cms1dl2 / count,
+                         sum_cms1d / count,
+                         sum_cmscr1d / count_converged))
+
+# Close file.
+f.close()
 
 # Output best result for each method and each dataset.
 for gen in genotypes:

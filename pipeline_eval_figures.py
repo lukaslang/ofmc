@@ -17,6 +17,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import matplotlib
+matplotlib.use('agg')
 import collections
 import os
 import re
@@ -165,7 +167,7 @@ for gen in genotypes:
 f.write('Maximum absolute error:\n')
 for gen in genotypes:
     for dat in datasets[gen]:
-        f.write("Dataset {0}/{1}".format(gen, dat))
+        f.write("Dataset {0}/{1}\n".format(gen, dat))
         err = [x[gen][dat] for x in max_err_of1d]
         f.write("of1d:    " +
                 ", ".join('{0:.3f}'.format(x) for x in err) + "\n")

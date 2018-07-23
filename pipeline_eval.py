@@ -109,11 +109,11 @@ alpha1_cmscr1d = [1e-3, 1e-2]
 alpha2_cmscr1d = [1e-3, 1e-2]
 alpha3_cmscr1d = [1e-3, 1e-2]
 beta_cmscr1d = [1e-3, 1e-2]
-prod_cmscr1d_1, prod_cmscr1d_2 = it.tee(it.product(alpha0_cmscr1d,
-                                                   alpha1_cmscr1d,
-                                                   alpha2_cmscr1d,
-                                                   alpha3_cmscr1d,
-                                                   beta_cmscr1d), 2)
+prod_cmscr1d = it.product(alpha0_cmscr1d,
+                          alpha1_cmscr1d,
+                          alpha2_cmscr1d,
+                          alpha3_cmscr1d,
+                          beta_cmscr1d)
 prod_cmscr1d_len = len(alpha0_cmscr1d) * len(alpha1_cmscr1d) \
     * len(alpha2_cmscr1d) * len(alpha3_cmscr1d) * len(beta_cmscr1d)
 
@@ -133,13 +133,14 @@ genotypes = [d for d in os.listdir(datapath)
 
 # Run through genotypes.
 num_datasets = 0
+datasets = dict()
 for gen in genotypes:
     # Get folders with datasets.
-    datasets = [d for d in os.listdir(os.path.join(datapath, gen))
-                if os.path.isdir(os.path.join(datapath,
-                                              os.path.join(gen, d)))]
+    datasets[gen] = [d for d in os.listdir(os.path.join(datapath, gen))
+                     if os.path.isdir(os.path.join(datapath,
+                                                   os.path.join(gen, d)))]
     # Run through datasets.
-    for dat in datasets:
+    for dat in datasets[gen]:
         datfolder = os.path.join(datapath, os.path.join(gen, dat))
         print("Dataset {0}/{1}".format(gen, dat))
 
@@ -174,6 +175,10 @@ for gen in genotypes:
         num_datasets += 1
 
 # Write data to result folder.
+with open(os.path.join(resultpath, 'pkl', 'genotypes.pkl'), 'wb') as f:
+        pickle.dump(genotypes, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'datasets.pkl'), 'wb') as f:
+        pickle.dump(datasets, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'wb') as f:
         pickle.dump(name, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'wb') as f:
@@ -190,8 +195,8 @@ vel_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
 count = 1
 for idx, p in enumerate(prod_of1d):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * prod_of1d_len))
             vel_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
                                                p[0], p[1], 'mesh')
@@ -212,8 +217,8 @@ k_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
 count = 1
 for idx, p in enumerate(prod_cms1dl2):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * prod_cms1dl2_len))
             vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
@@ -236,8 +241,8 @@ k_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
 count = 1
 for idx, p in enumerate(prod_cms1d):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * prod_cms1d_len))
             vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat] = \
                 cms1d_img(imgp[gen][dat], p[0], p[1], p[2], p[3], 'mesh')
@@ -260,10 +265,10 @@ k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
 converged_cmscr1d = [collections.defaultdict(dict)
                      for x in range(prod_cmscr1d_len)]
 count = 1
-for idx, p in enumerate(prod_cmscr1d_1):
+for idx, p in enumerate(prod_cmscr1d):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * prod_cmscr1d_len))
             vel_cmscr1d[idx][gen][dat],
             k_cmscr1d[idx][gen][dat],

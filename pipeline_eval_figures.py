@@ -54,6 +54,10 @@ def endpoint_error(vel, roi, spl) -> (float, float):
 
 
 # Load dataset.
+with open(os.path.join(resultpath, 'pkl', 'genotypes.pkl'), 'rb') as f:
+        genotypes = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'datasets.pkl'), 'rb') as f:
+        datasets = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'rb') as f:
         name = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'img.pkl'), 'rb') as f:
@@ -88,8 +92,8 @@ err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
 max_err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
 for idx in range(len(vel_of1d)):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             err_of1d[idx][gen][dat], max_err_of1d[idx][gen][dat] = \
                 error(vel_of1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
 
@@ -99,8 +103,8 @@ max_err_cms1dl2 = [collections.defaultdict(dict)
                    for x in range(len(vel_cms1dl2))]
 for idx in range(len(vel_cms1dl2)):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             err_cms1dl2[idx][gen][dat], max_err_cms1dl2[idx][gen][dat] = \
                 error(vel_cms1dl2[idx][gen][dat], roi[gen][dat], spl[gen][dat])
 
@@ -109,8 +113,8 @@ err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
 max_err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
 for idx in range(len(vel_cms1d)):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
+    for gen in genotypes:
+        for dat in datasets[gen]:
             err_cms1d[idx][gen][dat], max_err_cms1d[idx][gen][dat] = \
                 error(vel_cms1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
 
@@ -120,15 +124,20 @@ max_err_cmscr1d = [collections.defaultdict(dict)
                    for x in range(len(vel_cmscr1d))]
 for idx in range(len(vel_cmscr1d)):
     # Run through datasets.
-    for gen in name.keys():
-        for dat in name[gen].keys():
-            err_cmscr1d[idx][gen][dat], max_err_cmscr1d[idx][gen][dat] = \
-                error(vel_cmscr1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+    for gen in genotypes:
+        for dat in datasets[gen]:
+            if converged_cmscr1d[idx][gen][dat]:
+                err_cmscr1d[idx][gen][dat], max_err_cmscr1d[idx][gen][dat] = \
+                    error(vel_cmscr1d[idx][gen][dat],
+                          roi[gen][dat], spl[gen][dat])
+            else:
+                err_cmscr1d[idx][gen][dat] = np.inf
+                max_err_cmscr1d[idx][gen][dat] = np.inf
 
 # Print errors.
 print('Cumulative absolute error:')
-for gen in name.keys():
-    for dat in name[gen].keys():
+for gen in genotypes:
+    for dat in datasets[gen]:
         print("Dataset {0}/{1}".format(gen, dat))
         err = [x[gen][dat] for x in err_of1d]
         print("of1d:    " + ", ".join('{0:.3f}'.format(x) for x in err))
@@ -141,8 +150,8 @@ for gen in name.keys():
 
 # Print max. errors.
 print('Maximum absolute error:')
-for gen in name.keys():
-    for dat in name[gen].keys():
+for gen in genotypes:
+    for dat in datasets[gen]:
         print("Dataset {0}/{1}".format(gen, dat))
         err = [x[gen][dat] for x in max_err_of1d]
         print("of1d:    " + ", ".join('{0:.3f}'.format(x) for x in err))
@@ -180,6 +189,7 @@ sum_cms1dl2 = 0.0
 sum_cms1d = 0.0
 sum_cmscr1d = 0.0
 count = 0.0
+count_converged = 0.0
 for gen in sorted(name.keys()):
     for dat in sorted(name[gen].keys()):
         # Find indices of best results (not necessarily unique).
@@ -191,18 +201,22 @@ for gen in sorted(name.keys()):
         sum_of1d += err_of1d[idx_of1d][gen][dat]
         sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
         sum_cms1d += err_cms1d[idx_cms1d][gen][dat]
-        sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
+
+        if converged_cmscr1d[idx_cmscr1d][gen][dat]:
+            sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
+            count_converged += 1.0
+
         count += 1.0
 
 formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\'
 print(formatstr.format(sum_of1d / count,
                        sum_cms1dl2 / count,
                        sum_cms1d / count,
-                       sum_cmscr1d / count))
+                       sum_cmscr1d / count_converged))
 
 # Output best result for each method and each dataset.
-for gen in name.keys():
-    for dat in name[gen].keys():
+for gen in genotypes:
+    for dat in datasets[gen]:
         # Find indices of best results (not necessarily unique).
         idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])

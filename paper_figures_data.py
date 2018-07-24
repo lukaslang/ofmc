@@ -17,91 +17,24 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import datetime
 import glob
 import imageio
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import re
 import warnings
 import ofmc.external.tifffile as tiff
-from matplotlib import cm
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-# Set font style.
-font = {'weight': 'normal',
-        'size': 20}
-plt.rc('font', **font)
-
+import ofmc.util.pyplothelpers as ph
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
             'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
-resultpath = 'results/figures'
+resultpath = 'results/{0}'.format(
+        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
-
-
-def saveimage(path: str, name: str, img: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.gray)
-    ax.set_title('Fluorescence intensity')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
-    plt.close(fig)
-
-
-def saveimage_no_legend(path: str, name: str, img: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.imshow(img, cmap=cm.gray)
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
-    plt.close(fig)
-
-
-def savekymo(path: str, name: str, img: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.gray)
-    ax.set_xlabel('Space')
-    ax.set_ylabel('Time')
-    ax.set_title('Fluorescence intensity')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
-    plt.close(fig)
-
 
 print('Processing {0}'.format(datapath))
 
@@ -134,7 +67,8 @@ for gen in genotypes:
 
         # Plot and save figures.
         # savekymo(os.path.join(os.path.join(resultpath, gen), dat), name, img)
-        savekymo(os.path.join(resultpath, gen), name, img)
+        ph.saveimage(os.path.join(resultpath, gen),
+                     name, img, 'Fluorescence intensity')
 
         # Output first frames of image sequence.
         seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))
@@ -144,6 +78,7 @@ for gen in genotypes:
 
         frames = img.shape[0] if len(img.shape) is 3 else img.shape[1]
 
+        # Output each frame.
         for k in range(frames):
             if len(img.shape) is 4:
                 frame = img[0, k]
@@ -151,5 +86,4 @@ for gen in genotypes:
                 frame = img[k]
 
             filepath = os.path.join(os.path.join(resultpath, gen), dat)
-            # saveimage(filepath, '{0}-{1}'.format(dat, k), frame)
-            saveimage_no_legend(filepath, '{0}-{1}'.format(dat, k), frame)
+            ph.saveimage_nolegend(filepath, '{0}-{1}'.format(dat, k), frame)

@@ -28,7 +28,7 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-23-14-14-11/'
+resultpath = 'results/2018-07-24-11-25-29/'
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -199,7 +199,7 @@ for gen in sorted(name.keys()):
                                  err_cms1dl2[idx_cms1dl2][gen][dat],
                                  err_cms1d[idx_cms1d][gen][dat],
                                  err_cmscr1d[idx_cmscr1d][gen][dat]))
-f.write('\\hline\n')
+f.write('\\hline\\\\\n')
 
 # Output average over all datasets.
 # Output LaTeX table in sorted order.
@@ -232,6 +232,7 @@ f.write(formatstr.format(sum_of1d / count,
                          sum_cms1dl2 / count,
                          sum_cms1d / count,
                          sum_cmscr1d / count_converged))
+f.write('\\hline\n')
 
 # Close file.
 f.close()

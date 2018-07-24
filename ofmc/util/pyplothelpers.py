@@ -74,6 +74,30 @@ def saveimage(path: str, name: str, img: np.array, title=None):
     plt.close(fig)
 
 
+def saveimage_nolegend(path: str, name: str, img: np.array):
+    """Takes a path string, a filename, and an array and saves the plotted
+    array without legend.
+
+    Args:
+        path (str): The path to save the image to.
+        name (str): The filename.
+        img (np.array): The 2D array.
+
+    Returns:
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Plot image.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.imshow(img, cmap=cm.gray)
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
+                dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+
 def savesource(path: str, name: str, img: np.array):
     """Takes a path string, a filename, and an array and saves the plotted
     array.

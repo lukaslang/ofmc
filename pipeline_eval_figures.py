@@ -26,14 +26,9 @@ import numpy as np
 import ofmc.util.pyplothelpers as ph
 import ofmc.util.roihelpers as rh
 import pickle
-from joblib import Parallel, delayed
-import multiprocessing
 
 # Set path where results are saved.
 resultpath = 'results/2018-07-24-11-25-29_SUM/'
-
-# Set number of cores used for computing errors.
-num_cores = multiprocessing.cpu_count()
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -111,9 +106,7 @@ def compute_error(idx: int, count: int, vel: dict):
 
 print('Computing error for of1d.')
 num = len(vel_of1d)
-results = Parallel(n_jobs=num_cores)(delayed(compute_error)
-                                     (idx, num, vel_of1d)
-                                     for idx in range(num))
+results = [compute_error(idx, num, vel_of1d) for idx in range(num)]
 err_of1d, max_err_of1d = zip(*results)
 
 # Store results.
@@ -124,9 +117,7 @@ with open(os.path.join(resultpath, 'pkl', 'max_err_of1d.pkl'), 'wb') as f:
 
 print('Computing error for cms1dl2.')
 num = len(vel_cms1dl2)
-results = Parallel(n_jobs=num_cores)(delayed(compute_error)
-                                     (idx, num, vel_cms1dl2)
-                                     for idx in range(num))
+results = [compute_error(idx, num, vel_cms1dl2) for idx in range(num)]
 err_cms1dl2, max_err_cms1dl2 = zip(*results)
 
 # Store results.
@@ -137,9 +128,7 @@ with open(os.path.join(resultpath, 'pkl', 'max_err_cms1dl2.pkl'), 'wb') as f:
 
 print('Computing error for cms1d.')
 num = len(vel_cms1d)
-results = Parallel(n_jobs=num_cores)(delayed(compute_error)
-                                     (idx, num, vel_cms1d)
-                                     for idx in range(num))
+results = [compute_error(idx, num, vel_cms1d) for idx in range(num)]
 err_cms1d, max_err_cms1d = zip(*results)
 
 # Store results.
@@ -150,9 +139,7 @@ with open(os.path.join(resultpath, 'pkl', 'max_err_cms1d.pkl'), 'wb') as f:
 
 print('Computing error for cmscr1d.')
 num = len(vel_cmscr1d)
-results = Parallel(n_jobs=num_cores)(delayed(compute_error)
-                                     (idx, num, vel_cmscr1d)
-                                     for idx in range(num))
+results = [compute_error(idx, num, vel_cmscr1d) for idx in range(num)]
 err_cmscr1d, max_err_cmscr1d = zip(*results)
 
 # Store results.

@@ -26,9 +26,14 @@ import numpy as np
 import ofmc.util.pyplothelpers as ph
 import ofmc.util.roihelpers as rh
 import pickle
+from joblib import Parallel, delayed
+import multiprocessing
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-24-11-25-29/'
+resultpath = 'results/2018-07-24-11-25-29_SUM/'
+
+# Set number of cores used for computing errors.
+num_cores = multiprocessing.cpu_count()
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -90,57 +95,71 @@ with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'rb') as f:
 with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
         converged_cmscr1d = pickle.load(f)
 
+
 # Compute errors.
-print('Computing error for of1d.')
-err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
-max_err_of1d = [collections.defaultdict(dict) for x in range(len(vel_of1d))]
-for idx in range(len(vel_of1d)):
-    print("{0}/{1}".format(idx, len(vel_of1d)))
+def compute_error(idx: int, count: int, vel: dict):
+    err = collections.defaultdict(dict)
+    max_err = collections.defaultdict(dict)
+    print("{0}/{1}".format(idx + 1, len(vel_of1d)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
-            err_of1d[idx][gen][dat], max_err_of1d[idx][gen][dat] = \
-                error(vel_of1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+            err[gen][dat], max_err[gen][dat] = \
+                error(vel[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+    return err, max_err
+
+
+print('Computing error for of1d.')
+num = len(vel_of1d)
+results = Parallel(n_jobs=num_cores)(delayed(compute_error)
+                                     (idx, num, vel_of1d)
+                                     for idx in range(num))
+err_of1d, max_err_of1d = zip(*results)
+
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_of1d.pkl'), 'wb') as f:
+    pickle.dump(err_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_of1d.pkl'), 'wb') as f:
+    pickle.dump(max_err_of1d, f, pickle.HIGHEST_PROTOCOL)
 
 print('Computing error for cms1dl2.')
-err_cms1dl2 = [collections.defaultdict(dict) for x in range(len(vel_cms1dl2))]
-max_err_cms1dl2 = [collections.defaultdict(dict)
-                   for x in range(len(vel_cms1dl2))]
-for idx in range(len(vel_cms1dl2)):
-    print("{0}/{1}".format(idx, len(vel_cms1dl2)))
-    # Run through datasets.
-    for gen in genotypes:
-        for dat in datasets[gen]:
-            err_cms1dl2[idx][gen][dat], max_err_cms1dl2[idx][gen][dat] = \
-                error(vel_cms1dl2[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+num = len(vel_cms1dl2)
+results = Parallel(n_jobs=num_cores)(delayed(compute_error)
+                                     (idx, num, vel_cms1dl2)
+                                     for idx in range(num))
+err_cms1dl2, max_err_cms1dl2 = zip(*results)
+
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_cms1dl2.pkl'), 'wb') as f:
+    pickle.dump(err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_cms1dl2.pkl'), 'wb') as f:
+    pickle.dump(max_err_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 
 print('Computing error for cms1d.')
-err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
-max_err_cms1d = [collections.defaultdict(dict) for x in range(len(vel_cms1d))]
-for idx in range(len(vel_cms1d)):
-    print("{0}/{1}".format(idx, len(vel_cms1d)))
-    # Run through datasets.
-    for gen in genotypes:
-        for dat in datasets[gen]:
-            err_cms1d[idx][gen][dat], max_err_cms1d[idx][gen][dat] = \
-                error(vel_cms1d[idx][gen][dat], roi[gen][dat], spl[gen][dat])
+num = len(vel_cms1d)
+results = Parallel(n_jobs=num_cores)(delayed(compute_error)
+                                     (idx, num, vel_cms1d)
+                                     for idx in range(num))
+err_cms1d, max_err_cms1d = zip(*results)
+
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_cms1d.pkl'), 'wb') as f:
+    pickle.dump(err_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_cms1d.pkl'), 'wb') as f:
+    pickle.dump(max_err_cms1d, f, pickle.HIGHEST_PROTOCOL)
 
 print('Computing error for cmscr1d.')
-err_cmscr1d = [collections.defaultdict(dict) for x in range(len(vel_cmscr1d))]
-max_err_cmscr1d = [collections.defaultdict(dict)
-                   for x in range(len(vel_cmscr1d))]
-for idx in range(len(vel_cmscr1d)):
-    print("{0}/{1}".format(idx, len(vel_cmscr1d)))
-    # Run through datasets.
-    for gen in genotypes:
-        for dat in datasets[gen]:
-            if converged_cmscr1d[idx][gen][dat]:
-                err_cmscr1d[idx][gen][dat], max_err_cmscr1d[idx][gen][dat] = \
-                    error(vel_cmscr1d[idx][gen][dat],
-                          roi[gen][dat], spl[gen][dat])
-            else:
-                err_cmscr1d[idx][gen][dat] = np.inf
-                max_err_cmscr1d[idx][gen][dat] = np.inf
+num = len(vel_cmscr1d)
+results = Parallel(n_jobs=num_cores)(delayed(compute_error)
+                                     (idx, num, vel_cmscr1d)
+                                     for idx in range(num))
+err_cmscr1d, max_err_cmscr1d = zip(*results)
+
+# Store results.
+with open(os.path.join(resultpath, 'pkl', 'err_cmscr1d.pkl'), 'wb') as f:
+    pickle.dump(err_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'max_err_cmscr1d.pkl'), 'wb') as f:
+    pickle.dump(max_err_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Open file.
 f = open(os.path.join(resultpath, 'results.txt'), 'w')
@@ -182,8 +201,8 @@ for gen in genotypes:
                 ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
 
 
-# Output LaTeX table in sorte order.
-f.write('LaTeX table with results:\n')
+# Output LaTeX table in sorted order.
+f.write('LaTeX table with average error:\n')
 for gen in sorted(name.keys()):
     for dat in sorted(name[gen].keys()):
         # Find indices of best results (not necessarily unique).
@@ -199,10 +218,9 @@ for gen in sorted(name.keys()):
                                  err_cms1dl2[idx_cms1dl2][gen][dat],
                                  err_cms1d[idx_cms1d][gen][dat],
                                  err_cmscr1d[idx_cmscr1d][gen][dat]))
-f.write('\\hline\\\\\n')
+f.write('\\hline\n')
 
 # Output average over all datasets.
-# Output LaTeX table in sorted order.
 sum_of1d = 0.0
 sum_cms1dl2 = 0.0
 sum_cms1d = 0.0
@@ -234,10 +252,57 @@ f.write(formatstr.format(sum_of1d / count,
                          sum_cmscr1d / count_converged))
 f.write('\\hline\n')
 
+# Output LaTeX table in sorted order.
+f.write('LaTeX table with maximum error:\n')
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in max_err_cmscr1d])
+
+        formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\\n'
+        f.write(formatstr.format(re.sub('_', '\\_', gen),
+                                 re.sub('_', '\\_', dat),
+                                 max_err_of1d[idx_of1d][gen][dat],
+                                 max_err_cms1dl2[idx_cms1dl2][gen][dat],
+                                 max_err_cms1d[idx_cms1d][gen][dat],
+                                 max_err_cmscr1d[idx_cmscr1d][gen][dat]))
+f.write('\\hline\n')
+
+# Output maximum over all datasets.
+max_of1d = -np.inf
+max_cms1dl2 = -np.inf
+max_cms1d = -np.inf
+max_cmscr1d = -np.inf
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in max_err_cmscr1d])
+
+        max_of1d = max(max_of1d, max_err_of1d[idx_of1d][gen][dat])
+        max_cms1dl2 = max(max_cms1dl2, max_err_cms1dl2[idx_cms1dl2][gen][dat])
+        max_cms1d = max(max_cms1d, max_err_cms1d[idx_cms1d][gen][dat])
+
+        if converged_cmscr1d[idx_cmscr1d][gen][dat]:
+            max_cmscr1d = max(max_cmscr1d,
+                              max_err_cmscr1d[idx_cmscr1d][gen][dat])
+
+formatstr = 'Maximum & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\\n'
+f.write(formatstr.format(sum_of1d / count,
+                         sum_cms1dl2 / count,
+                         sum_cms1d / count,
+                         sum_cmscr1d / count_converged))
+f.write('\\hline\n')
+
 # Close file.
 f.close()
 
-# Output best result for each method and each dataset.
+# Output best result for each method and each dataset for average error.
 for gen in genotypes:
     for dat in datasets[gen]:
         # Find indices of best results (not necessarily unique).
@@ -259,7 +324,7 @@ for gen in genotypes:
         ph.saveimage(resfolder, '{0}-filtered'.format(tmpname), tmpimgp)
 
         # of1d
-        tmpfolder = [resultpath, 'of1d', gen, dat]
+        tmpfolder = [resultpath, 'of1d', 'best_avg_error', gen, dat]
         resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
@@ -273,7 +338,7 @@ for gen in genotypes:
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cms1d
-        tmpfolder = [resultpath, 'cms1d', gen, dat]
+        tmpfolder = [resultpath, 'cms1d', 'best_avg_error', gen, dat]
         resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
@@ -289,7 +354,7 @@ for gen in genotypes:
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cms1dl2
-        tmpfolder = [resultpath, 'cms1dl2', gen, dat]
+        tmpfolder = [resultpath, 'cms1dl2', 'best_avg_error', gen, dat]
         resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)
@@ -305,7 +370,90 @@ for gen in genotypes:
         ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
 
         # cmscr1d
-        tmpfolder = [resultpath, 'cmscr1d', gen, dat]
+        tmpfolder = [resultpath, 'cmscr1d', 'best_avg_error', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cmscr1d[idx_cmscr1d][gen][dat]
+        tmpk = k_cmscr1d[idx_cmscr1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+# Output best result for each method and each dataset for maximum error.
+for gen in genotypes:
+    for dat in datasets[gen]:
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
+        idx_cmscr1d = np.argmin([x[gen][dat] for x in max_err_cmscr1d])
+
+        tmpimg = img[gen][dat]
+        tmpimgp = imgp[gen][dat]
+        tmpname = name[gen][dat]
+        tmproi = roi[gen][dat]
+        tmpspl = spl[gen][dat]
+
+        # Save images.
+        tmpfolder = [resultpath, gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        ph.saveimage(resfolder, tmpname, tmpimg)
+        ph.saveimage(resfolder, '{0}-filtered'.format(tmpname), tmpimgp)
+
+        # of1d
+        tmpfolder = [resultpath, 'of1d', 'best_max_error', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_of1d[idx_of1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cms1d
+        tmpfolder = [resultpath, 'cms1d', 'best_max_error', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cms1d[idx_cms1d][gen][dat]
+        tmpk = k_cms1d[idx_cms1d][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cms1dl2
+        tmpfolder = [resultpath, 'cms1dl2', 'best_max_error', gen, dat]
+        resfolder = os.path.join(*tmpfolder)
+        if not os.path.exists(resfolder):
+            os.makedirs(resfolder)
+        tmpvel = vel_cms1dl2[idx_cms1dl2][gen][dat]
+        tmpk = k_cms1dl2[idx_cms1dl2][gen][dat]
+        ph.savevelocity(resfolder, tmpname, tmpimg, tmpvel)
+        ph.savesource(resfolder, tmpname, tmpk)
+        ph.saveroi(resfolder, tmpname, tmpimg, tmproi)
+        ph.savespl(resfolder, tmpname, tmpimg, tmproi, tmpspl)
+        ph.saveerror(resfolder, tmpname, tmpimg, tmpvel, tmproi, tmpspl)
+        ph.save_spl_streamlines(resfolder, tmpname, tmpimg,
+                                tmpvel, tmproi, tmpspl)
+        ph.save_roi_streamlines(resfolder, tmpname, tmpimg, tmpvel, tmproi)
+
+        # cmscr1d
+        tmpfolder = [resultpath, 'cmscr1d', 'best_max_error', gen, dat]
         resfolder = os.path.join(*tmpfolder)
         if not os.path.exists(resfolder):
             os.makedirs(resfolder)

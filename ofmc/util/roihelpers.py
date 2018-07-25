@@ -97,7 +97,7 @@ def compute_error(vel: np.array, roi, spl) -> dict:
         y = np.arange(y[0], y[-1] + 1, 1)
         x = np.array(spl[v](y))
         veval = interpolate.griddata(gridpoints, vel.flatten(), (y, x),
-                                     method='cubic')
+                                     method='linear')
 
         # Compute derivative of spline.
         derivspl = spl[v].derivative()

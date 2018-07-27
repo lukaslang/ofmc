@@ -39,6 +39,9 @@ density = 2
 linewidth = 2
 arrowstyle = '-'
 
+# Set output quality.
+dpi = 100
+
 
 def saveimage(path: str, name: str, img: np.array, title=None):
     """Takes a path string, a filename, and an array and saves the plotted
@@ -70,7 +73,7 @@ def saveimage(path: str, name: str, img: np.array, title=None):
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -94,7 +97,7 @@ def saveimage_nolegend(path: str, name: str, img: np.array):
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -125,7 +128,7 @@ def savesource(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-source.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -159,7 +162,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
     m, n = vel.shape
@@ -185,7 +188,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
     # Save velocity profile after cut.
@@ -195,7 +198,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -233,7 +236,7 @@ def savestrainrate(path: str, name: str, img: np.array, vel: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-strainrate.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -264,7 +267,7 @@ def saveroi(path: str, name: str, img: np.array, roi):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-roi.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -320,7 +323,7 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-spline.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -380,7 +383,7 @@ def saveerror(path: str, name: str, img: np.array, vel: np.array, roi, spl):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-error.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -451,7 +454,7 @@ def save_spl_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-streamlines-splines.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -504,5 +507,5 @@ def save_roi_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-streamlines-roi.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)

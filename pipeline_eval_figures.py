@@ -186,7 +186,7 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+        idx_cmscr1d = np.nanargmin([x[gen][dat] for x in err_cmscr1d])
 
         formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\\n'
         f.write(formatstr.format(re.sub('_', '\\_', gen),
@@ -210,7 +210,7 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in err_cmscr1d])
+        idx_cmscr1d = np.nanargmin([x[gen][dat] for x in err_cmscr1d])
 
         sum_of1d += err_of1d[idx_of1d][gen][dat]
         sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
@@ -303,15 +303,17 @@ for gen in genotypes:
 
 
 # Output best result for each dataset.
-def output_best_result(err_name: str,
-                       model: str, err: list, vel: dict, k=None):
+def output_best_result(err_name: str, model: str, err: list,
+                       vel: dict, k=None):
     print("Plotting {0} results for {1}".format(err_name, model))
     for gen in genotypes:
         for dat in datasets[gen]:
             print("Plotting results for {0}/{1}".format(gen, dat))
 
             # Find index of best results (not necessarily unique).
-            idx = np.argmin([x[gen][dat] for x in err])
+            idx = np.nanargmin([x[gen][dat] for x in err])
+            if not np.isscalar:
+                idx = idx[0]
 
             # Get data.
             tmpimg = img[gen][dat]

@@ -28,7 +28,7 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-27-10-09-50/'
+resultpath = 'results/2018-07-23-17-50-01/'
 
 
 def error(vel, roi, spl) -> (float, float):

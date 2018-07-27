@@ -56,6 +56,7 @@ def endpoint_error(vel, roi, spl) -> (float, float):
 
 
 # Load dataset.
+print('Loading results from {0}.'.format(resultpath))
 with open(os.path.join(resultpath, 'pkl', 'genotypes.pkl'), 'rb') as f:
     genotypes = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'datasets.pkl'), 'rb') as f:

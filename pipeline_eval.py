@@ -196,19 +196,27 @@ with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'wb') as f:
 print("Running of1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(len(prod_of1d)))
 vel_of1d = [collections.defaultdict(dict) for x in range(len(prod_of1d))]
+res_of1d = [collections.defaultdict(dict) for x in range(len(prod_of1d))]
+fun_of1d = [collections.defaultdict(dict) for x in range(len(prod_of1d))]
 count = 1
 for idx, p in enumerate(prod_of1d):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * len(prod_of1d)))
-            vel_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
-                                               p[0], p[1], 'mesh')
+            vel_of1d[idx][gen][dat], \
+                res_of1d[idx][gen][dat], \
+                fun_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
+                                                   p[0], p[1], 'mesh')
             count += 1
 
 # Store results.
 with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'wb') as f:
     pickle.dump(vel_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'res_of1d.pkl'), 'wb') as f:
+    pickle.dump(res_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'fun_of1d.pkl'), 'wb') as f:
+    pickle.dump(fun_of1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_of1d
@@ -218,13 +226,16 @@ print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(len(prod_cms1dl2)))
 vel_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
 k_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
+res_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
+fun_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
 count = 1
 for idx, p in enumerate(prod_cms1dl2):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * len(prod_cms1dl2)))
-            vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat] = \
+            vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat], \
+                res_of1d[idx][gen][dat], fun_of1d[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
             count += 1
 
@@ -233,6 +244,10 @@ with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'wb') as f:
     pickle.dump(vel_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cms1dl2.pkl'), 'wb') as f:
     pickle.dump(k_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'res_cms1dl2.pkl'), 'wb') as f:
+    pickle.dump(res_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'fun_cms1dl2.pkl'), 'wb') as f:
+    pickle.dump(fun_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_cms1dl2, k_cms1dl2
@@ -242,13 +257,16 @@ print("Running cms1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(len(prod_cms1d)))
 vel_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
 k_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
+res_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
+fun_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
 count = 1
 for idx, p in enumerate(prod_cms1d):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * len(prod_cms1d)))
-            vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat] = \
+            vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat], \
+                res_cms1d[idx][gen][dat], fun_cms1d[idx][gen][dat] = \
                 cms1d_img(imgp[gen][dat], p[0], p[1], p[2], p[3], 'mesh')
             count += 1
 
@@ -257,6 +275,10 @@ with open(os.path.join(resultpath, 'pkl', 'vel_cms1d.pkl'), 'wb') as f:
     pickle.dump(vel_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cms1d.pkl'), 'wb') as f:
     pickle.dump(k_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'res_cms1d.pkl'), 'wb') as f:
+    pickle.dump(res_cms1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'fun_cms1d.pkl'), 'wb') as f:
+    pickle.dump(fun_cms1d, f, pickle.HIGHEST_PROTOCOL)
 
 # Clear memory.
 del vel_cms1d, k_cms1d
@@ -266,6 +288,8 @@ print("Running cmscr1d on {0} datasets ".format(num_datasets) +
       "and {0} parameter combinations.".format(len(prod_cmscr1d)))
 vel_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
 k_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
+res_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
+fun_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
 converged_cmscr1d = [collections.defaultdict(dict)
                      for x in range(len(prod_cmscr1d))]
 count = 1
@@ -276,6 +300,8 @@ for idx, p in enumerate(prod_cmscr1d):
             print("{0}/{1}".format(count, num_datasets * len(prod_cmscr1d)))
             vel_cmscr1d[idx][gen][dat], \
                 k_cmscr1d[idx][gen][dat], \
+                res_cmscr1d[idx][gen][dat], \
+                fun_cmscr1d[idx][gen][dat], \
                 converged_cmscr1d[idx][gen][dat] = \
                 cmscr1d_img(imgp[gen][dat],
                             p[0], p[1], p[2], p[3], p[4], 'mesh')
@@ -286,6 +312,10 @@ with open(os.path.join(resultpath, 'pkl', 'vel_cmscr1d.pkl'), 'wb') as f:
     pickle.dump(vel_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'k_cmscr1d.pkl'), 'wb') as f:
     pickle.dump(k_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'res_cmscr1d.pkl'), 'wb') as f:
+    pickle.dump(res_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'fun_cmscr1d.pkl'), 'wb') as f:
+    pickle.dump(fun_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'wb') as f:
     pickle.dump(converged_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 

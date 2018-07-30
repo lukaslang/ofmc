@@ -26,11 +26,11 @@ from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import UnitIntervalMesh
 from matplotlib import cm
-from ofmc.model.cm import cm1d
-from ofmc.model.cms import cms1d
-from ofmc.model.cmscr import cmscr1d
+from ofmc.model.cm import cm1d_img
+from ofmc.model.cms import cms1d_img
+from ofmc.model.cmscr import cmscr1d_img
 from ofmc.model.cmscr import cmscr1dnewton
-from ofmc.model.of import of1d
+from ofmc.model.of import of1d_img
 from ofmc.util.transport import transport1d
 from ofmc.util.velocity import velocity
 from ofmc.util.dolfinhelpers import funvec2img
@@ -158,7 +158,8 @@ beta = 5e-1
 # vel = of1d(f, alpha0, alpha1)
 # vel = cm1d(f, alpha0, alpha1)
 # vel, k = cms1d(f, alpha0, alpha1, alpha2, alpha3)
-vel, k, converged = cmscr1d(f, alpha0, alpha1, alpha2, alpha3, beta)
+vel, k, res, fun, converged = cmscr1d_img(f, alpha0, alpha1, alpha2, alpha3,
+                                          beta, 'mesh')
 # vel, k, converged = cmscr1dnewton(f, alpha0, alpha1, alpha2, alpha3, beta)
 
 # Plot and save figures.

@@ -56,7 +56,8 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cms1d_weak_solution(W, f, f.dx(0), f.dx(1), 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1d_weak_solution(W, f, f.dx(0), f.dx(1),
+                                             1.0, 1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -71,7 +72,8 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cms1d_weak_solution(W, f, f.dx(0), f.dx(1), 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1d_weak_solution(W, f, f.dx(0), f.dx(1),
+                                             1.0, 1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -93,8 +95,8 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
-                                     1.0, 1.0, 1.0)
+        v, k, res, fun = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
+                                               1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -109,8 +111,8 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
-                                     1.0, 1.0, 1.0)
+        v, k, res, fun = cms1dl2_weak_solution(W, f, f.dx(0), f.dx(1),
+                                               1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -134,8 +136,9 @@ class TestCms(unittest.TestCase):
         k = Function(V)
 
         # Compute velocity.
-        v = cms1d_weak_solution_given_source(V, f, f.dx(0), f.dx(1), k,
-                                             1.0, 1.0)
+        v, res, fun = cms1d_weak_solution_given_source(V, f,
+                                                       f.dx(0), f.dx(1), k,
+                                                       1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m * n)
@@ -147,8 +150,9 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v = cms1d_weak_solution_given_source(V, f, f.dx(0), f.dx(1), k,
-                                             1.0, 1.0)
+        v, res, fun = cms1d_weak_solution_given_source(V, f,
+                                                       f.dx(0), f.dx(1), k,
+                                                       1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m * (n - 1))
@@ -170,8 +174,9 @@ class TestCms(unittest.TestCase):
         vx = Function(V)
 
         # Compute source.
-        k = cms1d_weak_solution_given_velocity(V, f, f.dx(0), f.dx(1), v, vx,
-                                               1.0, 1.0)
+        k, res, fun = cms1d_weak_solution_given_velocity(V, f,
+                                                         f.dx(0), f.dx(1),
+                                                         v, vx, 1.0, 1.0)
         k = k.vector().get_local()
 
         np.testing.assert_allclose(k.shape, m * n)
@@ -183,8 +188,9 @@ class TestCms(unittest.TestCase):
         f = Function(V)
 
         # Compute source.
-        k = cms1d_weak_solution_given_velocity(V, f, f.dx(0), f.dx(1), v, vx,
-                                               1.0, 1.0)
+        k, res, fun = cms1d_weak_solution_given_velocity(V, f,
+                                                         f.dx(0), f.dx(1),
+                                                         v, vx, 1.0, 1.0)
         k = k.vector().get_local()
 
         np.testing.assert_allclose(k.shape, m * (n - 1))
@@ -199,7 +205,7 @@ class TestCms(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cms1d_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1d_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -215,7 +221,7 @@ class TestCms(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cms1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -231,7 +237,7 @@ class TestCms(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cms1dl2_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1dl2_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -247,7 +253,7 @@ class TestCms(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k = cms1dl2_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0)
+        v, k, res, fun = cms1dl2_exp_pb(m, n, f, fd, fd, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -266,7 +272,7 @@ class TestCms(unittest.TestCase):
         k = Constant(0.0)
 
         # Compute velocity.
-        v = cms1d_given_source_exp(m, n, f, fd, fd, k, 1.0, 1.0)
+        v, res, fun = cms1d_given_source_exp(m, n, f, fd, fd, k, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -283,7 +289,7 @@ class TestCms(unittest.TestCase):
         k = Constant(0.0)
 
         # Compute velocity.
-        v = cms1d_given_source_exp_pb(m, n, f, fd, fd, k, 1.0, 1.0)
+        v, res, fun = cms1d_given_source_exp_pb(m, n, f, fd, fd, k, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -301,7 +307,8 @@ class TestCms(unittest.TestCase):
         vx = Constant(0.0)
 
         # Compute source.
-        k = cms1d_given_velocity_exp(m, n, f, fd, fd, v, vx, 1.0, 1.0)
+        k, res, fun = cms1d_given_velocity_exp(m, n,
+                                               f, fd, fd, v, vx, 1.0, 1.0)
 
         np.testing.assert_allclose(k.shape, (m, n))
         np.testing.assert_allclose(k, np.zeros_like(k))
@@ -319,7 +326,8 @@ class TestCms(unittest.TestCase):
         vx = Constant(0.0)
 
         # Compute velocity.
-        k = cms1d_given_velocity_exp_pb(m, n, f, fd, fd, v, vx, 1.0, 1.0)
+        k, res, fun = cms1d_given_velocity_exp_pb(m, n,
+                                                  f, fd, fd, v, vx, 1.0, 1.0)
 
         np.testing.assert_allclose(k.shape, (m, n))
         np.testing.assert_allclose(k, np.zeros_like(k))
@@ -327,7 +335,7 @@ class TestCms(unittest.TestCase):
     def test_cms1d_img_default_fd(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1d_img(img, 1.0, 1.0, 1.0, 1.0, 'fd')
+        v, k, res, fun = cms1d_img(img, 1.0, 1.0, 1.0, 1.0, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -337,7 +345,7 @@ class TestCms(unittest.TestCase):
     def test_cms1d_img_default_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1d_img(img, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun = cms1d_img(img, 1.0, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -347,7 +355,7 @@ class TestCms(unittest.TestCase):
     def test_cms1d_img_periodic_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1d_img_pb(img, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun = cms1d_img_pb(img, 1.0, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -357,7 +365,7 @@ class TestCms(unittest.TestCase):
     def test_cms1dl2_img_default_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1dl2_img(img, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun = cms1dl2_img(img, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -367,7 +375,7 @@ class TestCms(unittest.TestCase):
     def test_cms1dl2_img_periodic_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k = cms1dl2_img_pb(img, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun = cms1dl2_img_pb(img, 1.0, 1.0, 1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

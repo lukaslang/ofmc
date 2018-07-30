@@ -43,7 +43,8 @@ import ofmc.util.numpyhelpers as nh
 def cms1d_weak_solution(V: VectorFunctionSpace,
                         f: Function, ft: Function, fx: Function,
                         alpha0: float, alpha1: float,
-                        alpha2: float, alpha3: float) -> (Function, Function):
+                        alpha2: float, alpha3: float) -> (Function, Function,
+                                                          float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with source and with spatio-temporal
     regularisation for a 1D image sequence, i.e.
@@ -71,6 +72,8 @@ def cms1d_weak_solution(V: VectorFunctionSpace,
     Returns:
         v (Function): The velocity.
         k (Function): The source.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     v, k = TrialFunctions(V)
@@ -94,23 +97,23 @@ def cms1d_weak_solution(V: VectorFunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * v.dx(1) - k)
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
-                  + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
+    fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
+                 + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
+                                     assemble(fun * dx)))
 
     # Compute energy of expected solution.
     # res = abs(ft + fx * 0.1 - f)
     # func = 0.5 * (res ** 2 + alpha2 * fx ** 2 + alpha3 * ft ** 2)
     # print('ResGt={0}, FuncGt={1}\n'.format(assemble(res * dx(V.mesh())),
     #                                        assemble(func * dx(V.mesh()))))
-    return v, k
+    return v, k, assemble(res * dx), assemble(fun * dx)
 
 
 def cms1dl2_weak_solution(V: VectorFunctionSpace,
                           f: Function, ft: Function, fx: Function,
                           alpha0: float, alpha1: float,
-                          alpha2: float) -> (Function, Function):
+                          alpha2: float) -> (Function, Function, float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the
     L2-L2-L2 mass conserving flow functional with source and with
     spatio-temporal regularisation for the velocity and L2 regularisation for
@@ -138,6 +141,8 @@ def cms1dl2_weak_solution(V: VectorFunctionSpace,
     Returns:
         v (Function): The velocity.
         k (Function): The source.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     v, k = TrialFunctions(V)
@@ -160,17 +165,19 @@ def cms1dl2_weak_solution(V: VectorFunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * v.dx(1) - k)
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
-                  + alpha2 * k ** 2)
+    fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2
+                 + alpha2 * k ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
-    return v, k
+                                     assemble(fun * dx)))
+    return v, k, res, fun
 
 
 def cms1d_weak_solution_given_source(V: FunctionSpace,
                                      f: Function, ft: Function, fx: Function,
                                      k: Function,
-                                     alpha0: float, alpha1: float) -> Function:
+                                     alpha0: float,
+                                     alpha1: float) -> (Function,
+                                                        float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with a given source and with
     spatio-temporal regularisation for a 1D image sequence with natural
@@ -187,6 +194,8 @@ def cms1d_weak_solution_given_source(V: FunctionSpace,
 
     Returns:
         v (Function): The velocity.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     v = TrialFunction(V)
@@ -204,17 +213,17 @@ def cms1d_weak_solution_given_source(V: FunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * v.dx(1) - k)
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
+    fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
-    return v
+                                     assemble(fun * dx)))
+    return v, res, fun
 
 
 def cms1d_weak_solution_given_velocity(V: FunctionSpace,
                                        f: Function, ft: Function, fx: Function,
                                        v: Function, vx: Function,
-                                       alpha2: float, alpha3: float) -> \
-                                       Function:
+                                       alpha2: float, alpha3: float) \
+                                       -> (Function, float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with a given velocity and with
     spatio-temporal regularisation for a 1D image sequence with natural
@@ -232,6 +241,8 @@ def cms1d_weak_solution_given_velocity(V: FunctionSpace,
 
     Returns:
         k (Function): The source.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     k = TrialFunction(V)
@@ -247,16 +258,17 @@ def cms1d_weak_solution_given_velocity(V: FunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * vx - k)
-    func = 0.5 * (res ** 2 + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
+    fun = 0.5 * (res ** 2 + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
-    return k
+                                     assemble(fun * dx)))
+    return k, res, fun
 
 
 def cms1d_exp(m: int, n: int,
               f: Expression, ft: Expression, fx: Expression,
               alpha0: float, alpha1: float,
-              alpha2: float, alpha3: float) -> (np.array, np.array):
+              alpha2: float, alpha3: float) \
+              -> (np.array, np.array, float, float):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence.
 
@@ -274,25 +286,28 @@ def cms1d_exp(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_vector_function_space(mesh, 'default')
 
     # Compute velocity and source.
-    v, k = cms1d_weak_solution(V, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+    v, k, res, fun = cms1d_weak_solution(V, f, ft, fx,
+                                         alpha0, alpha1, alpha2, alpha3)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1d_exp_pb(m: int, n: int,
                  f: Expression, ft: Expression, fx: Expression,
                  alpha0: float, alpha1: float,
-                 alpha2: float, alpha3: float) -> (np.array, np.array):
+                 alpha2: float, alpha3: float) \
+                 -> (np.array, np.array, float, float):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with periodic boundary.
 
@@ -310,25 +325,27 @@ def cms1d_exp_pb(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_vector_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v, k = cms1d_weak_solution(V, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+    v, k, res, fun = cms1d_weak_solution(V, f, ft, fx,
+                                         alpha0, alpha1, alpha2, alpha3)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1dl2_exp(m: int, n: int,
                 f: Expression, ft: Expression, fx: Expression,
                 alpha0: float, alpha1: float,
-                alpha2: float) -> (np.array, np.array):
+                alpha2: float) -> (np.array, np.array, float, float):
     """Computes the L2-HL2 mass conserving flow with source for a 1D image
     sequence.
 
@@ -345,25 +362,27 @@ def cms1dl2_exp(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_vector_function_space(mesh, 'default')
 
     # Compute velocity and source.
-    v, k = cms1dl2_weak_solution(V, f, ft, fx, alpha0, alpha1, alpha2)
+    v, k, res, fun = cms1dl2_weak_solution(V, f, ft, fx,
+                                           alpha0, alpha1, alpha2)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1dl2_exp_pb(m: int, n: int,
                    f: Expression, ft: Expression, fx: Expression,
                    alpha0: float, alpha1: float,
-                   alpha2: float) -> (np.array, np.array):
+                   alpha2: float) -> (np.array, np.array, float, float):
     """Computes the L2-L2 mass conserving flow with source for a 1D image
     sequence with periodic boundary.
 
@@ -380,25 +399,27 @@ def cms1dl2_exp_pb(m: int, n: int,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_vector_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v, k = cms1dl2_weak_solution(V, f, ft, fx, alpha0, alpha1, alpha2)
+    v, k, res, fun = cms1dl2_weak_solution(V, f, ft, fx,
+                                           alpha0, alpha1, alpha2)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1d_img(img: np.array,
               alpha0: float, alpha1: float,
               alpha2: float, alpha3: float,
-              deriv) -> (np.array, np.array):
+              deriv) -> (np.array, np.array, float, float):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence.
 
@@ -418,7 +439,8 @@ def cms1d_img(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh', 'fd'}
@@ -447,18 +469,19 @@ def cms1d_img(img: np.array,
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Compute velocity.
-    v, k = cms1d_weak_solution(W, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+    v, k, res, fun = cms1d_weak_solution(W, f, ft, fx,
+                                         alpha0, alpha1, alpha2, alpha3)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1d_img_pb(img: np.array,
                  alpha0: float, alpha1: float,
                  alpha2: float, alpha3: float,
-                 deriv='mesh') -> np.array:
+                 deriv='mesh') -> (np.array, np.array, float, float):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with periodic spatial boundary.
 
@@ -475,7 +498,8 @@ def cms1d_img_pb(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh'}
@@ -498,17 +522,18 @@ def cms1d_img_pb(img: np.array,
     ft, fx = f.dx(0), f.dx(1)
 
     # Compute velocity.
-    v, k = cms1d_weak_solution(W, f, ft, fx, alpha0, alpha1, alpha2, alpha3)
+    v, k, res, fun = cms1d_weak_solution(W, f, ft, fx,
+                                         alpha0, alpha1, alpha2, alpha3)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1dl2_img(img: np.array,
                 alpha0: float, alpha1: float,
-                alpha2: float, deriv) -> (np.array, np.array):
+                alpha2: float, deriv) -> (np.array, np.array, float, float):
     """Computes the L2-L2 mass conserving flow with source for a 1D image
     sequence.
 
@@ -527,7 +552,8 @@ def cms1dl2_img(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh', 'fd'}
@@ -556,17 +582,19 @@ def cms1dl2_img(img: np.array,
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Compute velocity.
-    v, k = cms1dl2_weak_solution(W, f, ft, fx, alpha0, alpha1, alpha2)
+    v, k, res, fun = cms1dl2_weak_solution(W, f, ft, fx,
+                                           alpha0, alpha1, alpha2)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1dl2_img_pb(img: np.array,
                    alpha0: float, alpha1: float,
-                   alpha2: float, deriv='mesh') -> np.array:
+                   alpha2: float, deriv='mesh') \
+                   -> (np.array, np.array, float, float):
     """Computes the L2-L2 mass conserving flow with source for a 1D image
     sequence with periodic spatial boundary.
 
@@ -582,7 +610,8 @@ def cms1dl2_img_pb(img: np.array,
     Returns:
         v (np.array): A velocity array of shape (m, n).
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh'}
@@ -605,18 +634,20 @@ def cms1dl2_img_pb(img: np.array,
     ft, fx = f.dx(0), f.dx(1)
 
     # Compute velocity.
-    v, k = cms1dl2_weak_solution(W, f, ft, fx, alpha0, alpha1, alpha2)
+    v, k, res, fun = cms1dl2_weak_solution(W, f, ft, fx,
+                                           alpha0, alpha1, alpha2)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)
     k = dh.funvec2img(k.vector().get_local(), m, n)
-    return v, k
+    return v, k, res, fun
 
 
 def cms1d_given_source_exp(m: int, n: int,
                            f: Expression, ft: Expression, fx: Expression,
                            k: Expression,
-                           alpha0: float, alpha1: float) -> np.array:
+                           alpha0: float, alpha1: float) \
+                           -> (np.array, float, float):
     """Computes the L2-H1 mass conserving flow with given source for a 1D image
     sequence.
 
@@ -632,17 +663,19 @@ def cms1d_given_source_exp(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'default')
 
     # Compute velocity and source.
-    v = cms1d_weak_solution_given_source(V, f, ft, fx, k, alpha0, alpha1)
+    v, res, fun = cms1d_weak_solution_given_source(V, f, ft, fx, k,
+                                                   alpha0, alpha1)
 
     # Convert back to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n)
+    return dh.funvec2img(v.vector().get_local(), m, n), res, fun
 
 
 def cms1d_given_source_exp_pb(m: int, n: int,
@@ -664,23 +697,26 @@ def cms1d_given_source_exp_pb(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v = cms1d_weak_solution_given_source(V, f, ft, fx, k, alpha0, alpha1)
+    v, res, fun = cms1d_weak_solution_given_source(V, f, ft, fx, k,
+                                                   alpha0, alpha1)
 
     # Convert back to array and return.
-    return dh.funvec2img_pb(v.vector().get_local(), m, n)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n), res, fun
 
 
 def cms1d_given_velocity_exp(m: int, n: int,
                              f: Expression, ft: Expression, fx: Expression,
                              v: Expression, vx: Expression,
-                             alpha2: float, alpha3: float) -> np.array:
+                             alpha2: float, alpha3: float) \
+                             -> (np.array, float, float):
     """Computes the L2-H1 mass conserving flow with given velocity for a 1D
     image sequence.
 
@@ -697,23 +733,26 @@ def cms1d_given_velocity_exp(m: int, n: int,
 
     Returns:
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'default')
 
     # Compute source.
-    k = cms1d_weak_solution_given_velocity(V, f, ft, fx, v, vx, alpha2, alpha3)
+    k, res, fun = cms1d_weak_solution_given_velocity(V, f, ft, fx, v, vx,
+                                                     alpha2, alpha3)
 
     # Convert back to array and return.
-    return dh.funvec2img(k.vector().get_local(), m, n)
+    return dh.funvec2img(k.vector().get_local(), m, n), res, fun
 
 
 def cms1d_given_velocity_exp_pb(m: int, n: int,
                                 f: Expression, ft: Expression, fx: Expression,
                                 v: Expression, vx: Expression,
-                                alpha2: float, alpha3: float) -> np.array:
+                                alpha2: float, alpha3: float) \
+                                -> (np.array, float, float):
     """Computes the L2-H1 mass conserving flow with given velocity for a 1D
     image sequence with periodic boundary.
 
@@ -730,14 +769,16 @@ def cms1d_given_velocity_exp_pb(m: int, n: int,
 
     Returns:
         k (np.array): A source array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'periodic')
 
     # Compute source.
-    k = cms1d_weak_solution_given_velocity(V, f, ft, fx, v, vx, alpha2, alpha3)
+    k, res, fun = cms1d_weak_solution_given_velocity(V, f, ft, fx, v, vx,
+                                                     alpha2, alpha3)
 
     # Convert back to array and return.
-    return dh.funvec2img_pb(k.vector().get_local(), m, n)
+    return dh.funvec2img_pb(k.vector().get_local(), m, n), res, fun

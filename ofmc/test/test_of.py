@@ -45,7 +45,7 @@ class TestOf(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v, res, fun = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m*n)
@@ -57,7 +57,7 @@ class TestOf(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v, res, fun = of1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m*(n - 1))
@@ -72,7 +72,7 @@ class TestOf(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v = of1d_exp(m, n, f, fd, fd, 1.0, 1.0)
+        v, res, fun = of1d_exp(m, n, f, fd, fd, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -86,7 +86,7 @@ class TestOf(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v = of1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
+        v, res, fun = of1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -94,7 +94,7 @@ class TestOf(unittest.TestCase):
     def test_of1d_img_default_fd(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = of1d_img(img, 1, 1, 'fd')
+        v, res, fun = of1d_img(img, 1, 1, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -102,7 +102,7 @@ class TestOf(unittest.TestCase):
     def test_of1d_img_default_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = of1d_img(img, 1, 1, 'mesh')
+        v, res, fun = of1d_img(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -110,7 +110,7 @@ class TestOf(unittest.TestCase):
     def test_of1d_img_periodic_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = of1d_img_pb(img, 1, 1, 'mesh')
+        v, res, fun = of1d_img_pb(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

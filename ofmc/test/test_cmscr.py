@@ -50,8 +50,10 @@ class TestCmscr(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k, converged = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
-                                                1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun, converged = cmscr1d_weak_solution(W, f,
+                                                          f.dx(0), f.dx(1),
+                                                          1.0, 1.0,
+                                                          1.0, 1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -66,8 +68,10 @@ class TestCmscr(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v, k, converged = cmscr1d_weak_solution(W, f, f.dx(0), f.dx(1),
-                                                1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun, converged = cmscr1d_weak_solution(W, f,
+                                                          f.dx(0), f.dx(1),
+                                                          1.0, 1.0, 1.0,
+                                                          1.0, 1.0)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -86,7 +90,8 @@ class TestCmscr(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k, converged = cmscr1d_exp(m, n, f, fd, fd, 1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun, converged = cmscr1d_exp(m, n, f, fd, fd,
+                                                1.0, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -103,8 +108,8 @@ class TestCmscr(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v, k, converged = cmscr1d_exp_pb(m, n, f, fd, fd,
-                                         1.0, 1.0, 1.0, 1.0, 1.0)
+        v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, fd, fd,
+                                                   1.0, 1.0, 1.0, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -115,7 +120,8 @@ class TestCmscr(unittest.TestCase):
         print("Running test 'test_cmscr1d_img_default_fd'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'fd')
+        v, k, res, fun, converged = cmscr1d_img(img,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -126,7 +132,8 @@ class TestCmscr(unittest.TestCase):
         print("Running test 'test_cmscr1d_img_default_mesh'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -137,7 +144,8 @@ class TestCmscr(unittest.TestCase):
         print("Running test 'test_cmscr1d_img_periodic_mesh'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k, converged = cmscr1d_img_pb(img, 1.0, 1.0, 1.0, 1.0, 1.0, 'mesh')
+        v, k, res, fun, converged = cmscr1d_img_pb(img, 1.0, 1.0, 1.0, 1.0,
+                                                   1.0, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -148,7 +156,7 @@ class TestCmscr(unittest.TestCase):
         print("Running test 'test_cmscr1dnewton'")
         # Create zero image.
         img = np.zeros((10, 25))
-        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, res, fun, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -159,7 +167,7 @@ class TestCmscr(unittest.TestCase):
         print("Running test 'test_cmscr1dnewton_random'")
         # Create random non-moving image.
         img = matlib.repmat(np.random.rand(1, 25), 10, 1)
-        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, res, fun, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
@@ -183,7 +191,7 @@ class TestCmscr(unittest.TestCase):
         img = (img - img.min()) / (img.max() - img.min())
 
         # Compute solution.
-        v, k, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
+        v, k, res, fun, converged = cmscr1dnewton(img, 1, 1, 1, 1, 1)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(k.shape, img.shape)

@@ -108,11 +108,13 @@ for gen in genotypes:
 
         # Compute velocity and source.
         imgp = prepareimage(img)
-        vel, k, converged = cmscr1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
-                                        beta, 'mesh')
-        # vel, k = cms1dl2_img(imgp, alpha0, alpha1, gamma, 'mesh')
-        # vel, k = cms1d_img(imgp, alpha0, alpha1, alpha2, alpha3, 'mesh')
-        # vel = of1d_img(imgp, alpha0, alpha1, 'mesh')
+        vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
+                                                  alpha2, alpha3,
+                                                  beta, 'mesh')
+        # vel, k, res, fun = cms1dl2_img(imgp, alpha0, alpha1, gamma, 'mesh')
+        # vel, k, res, fun = cms1d_img(imgp, alpha0, alpha1, alpha2, alpha3,
+        #                              'mesh')
+        # vel, res, fun = of1d_img(imgp, alpha0, alpha1, 'mesh')
 
         resfolder = os.path.join(os.path.join(resultpath, gen), dat)
         if not os.path.exists(resfolder):

@@ -33,7 +33,8 @@ import ofmc.util.numpyhelpers as nh
 
 def cm1d_weak_solution(V: FunctionSpace,
                        f: Function, ft: Function, fx: Function,
-                       alpha0: float, alpha1: float) -> Function:
+                       alpha0: float, alpha1: float) -> (Function,
+                                                         float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with spatio-temporal regularisation
     for a 1D image sequence, i.e.
@@ -55,6 +56,8 @@ def cm1d_weak_solution(V: FunctionSpace,
 
     Returns:
         v (Function): The velocity.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     v = TrialFunction(V)
@@ -72,10 +75,10 @@ def cm1d_weak_solution(V: FunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx * v + f * v.dx(1))
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
+    fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
-    return v
+                                     assemble(fun * dx)))
+    return v, assemble(res * dx), assemble(fun * dx)
 
 
 def cm1d_exp(m: int, n: int,
@@ -94,6 +97,8 @@ def cm1d_exp(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
+        res (float): The residual.
+        func (float): The value of the functional.
 
     """
     # Define mesh and function space.
@@ -101,10 +106,10 @@ def cm1d_exp(m: int, n: int,
     V = dh.create_function_space(mesh, 'default')
 
     # Compute velocity.
-    v = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n)
+    return dh.funvec2img(v.vector().get_local(), m, n), res, fun
 
 
 def cm1d_exp_pb(m: int, n: int,
@@ -124,6 +129,8 @@ def cm1d_exp_pb(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
+        res (float): The residual.
+        func (float): The value of the functional.
 
     """
     # Define mesh and function space.
@@ -131,10 +138,10 @@ def cm1d_exp_pb(m: int, n: int,
     V = dh.create_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img_pb(v.vector().get_local(), m, n)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n), res, fun
 
 
 def cm1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
@@ -153,6 +160,8 @@ def cm1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
+        res (float): The residual.
+        func (float): The value of the functional.
 
     """
     # Check for valid arguments.
@@ -181,10 +190,10 @@ def cm1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Compute velocity.
-    v = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n)
+    return dh.funvec2img(v.vector().get_local(), m, n), res, fun
 
 
 def cm1d_img_pb(img: np.array, alpha0: float, alpha1: float,
@@ -206,6 +215,8 @@ def cm1d_img_pb(img: np.array, alpha0: float, alpha1: float,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
+        res (float): The residual.
+        func (float): The value of the functional.
 
     """
     # Check for valid arguments.
@@ -228,10 +239,10 @@ def cm1d_img_pb(img: np.array, alpha0: float, alpha1: float,
     ft, fx = f.dx(0), f.dx(1)
 
     # Compute velocity.
-    v = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = cm1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img_pb(v.vector().get_local(), m, n)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n), res, fun
 
 
 def cm1dsource(img: np.array, k: np.array, alpha0: float,

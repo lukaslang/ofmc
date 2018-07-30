@@ -38,7 +38,8 @@ import ofmc.util.numpyhelpers as nh
 
 def of1d_weak_solution(V: FunctionSpace,
                        f: Function, ft: Function, fx: Function,
-                       alpha0: float, alpha1: float) -> Function:
+                       alpha0: float, alpha1: float) \
+                       -> (Function, float, float):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     Horn-Schunck optical flow functional with spatio-temporal regularisation
     for a 1D image sequence, i.e.
@@ -59,6 +60,8 @@ def of1d_weak_solution(V: FunctionSpace,
 
     Returns:
         v (Function): The velocity.
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define trial and test functions.
     v = TrialFunction(V)
@@ -76,15 +79,15 @@ def of1d_weak_solution(V: FunctionSpace,
 
     # Evaluate and print residual and functional value.
     res = abs(ft + fx*v)
-    func = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
+    fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
-                                     assemble(func * dx)))
-    return v
+                                     assemble(fun * dx)))
+    return v, assemble(res * dx), assemble(fun * dx)
 
 
 def of1d_exp(m: int, n: int,
              f: Expression, ft: Expression, fx: Expression,
-             alpha0: float, alpha1) -> np.array:
+             alpha0: float, alpha1) -> (np.array, float, float):
     """Computes the L2-H1 optical flow for a 1D image sequence.
 
     Takes a one-dimensional image sequence and partial derivatives, and returns
@@ -102,22 +105,23 @@ def of1d_exp(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'default')
 
     # Compute velocity.
-    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n)
+    return dh.funvec2img(v.vector().get_local(), m, n), res, fun
 
 
 def of1d_exp_pb(m: int, n: int,
                 f: Expression, ft: Expression, fx: Expression,
-                alpha0: float, alpha1) -> np.array:
+                alpha0: float, alpha1) -> (np.array, float, float):
     """Computes the L2-H1 optical flow for a 1D image sequence with periodic
     boundary in space.
 
@@ -136,20 +140,22 @@ def of1d_exp_pb(m: int, n: int,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Define mesh and function space.
     mesh = UnitSquareMesh(m - 1, n - 1)
     V = dh.create_function_space(mesh, 'periodic')
 
     # Compute velocity.
-    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img_pb(v.vector().get_local(), m, n)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n), res, fun
 
 
-def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
+def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) \
+             -> (np.array, float, float):
     """Computes the L2-H1 optical flow for a 1D image sequence.
 
     Takes a one-dimensional image sequence and returns a minimiser of the
@@ -168,7 +174,8 @@ def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh', 'fd'}
@@ -196,14 +203,14 @@ def of1d_img(img: np.array, alpha0: float, alpha1: float, deriv) -> np.array:
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Compute velocity.
-    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img(v.vector().get_local(), m, n)
+    return dh.funvec2img(v.vector().get_local(), m, n), res, fun
 
 
 def of1d_img_pb(img: np.array, alpha0: float, alpha1: float,
-                deriv='mesh') -> np.array:
+                deriv='mesh') -> (np.array, float, float):
     """Computes the L2-H1 optical flow for a 1D image sequence with periodic
     boundary in space.
 
@@ -224,7 +231,8 @@ def of1d_img_pb(img: np.array, alpha0: float, alpha1: float,
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
-
+        res (float): The residual.
+        fun (float): The function value.
     """
     # Check for valid arguments.
     valid = {'mesh'}
@@ -246,10 +254,10 @@ def of1d_img_pb(img: np.array, alpha0: float, alpha1: float,
     ft, fx = f.dx(0), f.dx(1)
 
     # Compute velocity.
-    v = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
+    v, res, fun = of1d_weak_solution(V, f, ft, fx, alpha0, alpha1)
 
     # Convert to array and return.
-    return dh.funvec2img_pb(v.vector().get_local(), m, n)
+    return dh.funvec2img_pb(v.vector().get_local(), m, n), res, fun
 
 
 def of2dmcs(img1: np.array, img2: np.array, alpha0: float, alpha1: float,

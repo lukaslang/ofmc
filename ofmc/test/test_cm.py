@@ -47,11 +47,13 @@ class TestCm(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v = cm1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v, res, fun = cm1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m*n)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
         V = dh.create_function_space(mesh, 'periodic')
 
@@ -59,11 +61,13 @@ class TestCm(unittest.TestCase):
         f = Function(V)
 
         # Compute velocity.
-        v = cm1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
+        v, res, fun = cm1d_weak_solution(V, f, f.dx(0), f.dx(1), 1.0, 1.0)
         v = v.vector().get_local()
 
         np.testing.assert_allclose(v.shape, m*(n - 1))
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1d_exp_default(self):
         # Define temporal and spatial sample points.
@@ -74,10 +78,12 @@ class TestCm(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v = cm1d_exp(m, n, f, fd, fd, 1.0, 1.0)
+        v, res, fun = cm1d_exp(m, n, f, fd, fd, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1d_exp_pb(self):
         # Define temporal and spatial sample points.
@@ -88,34 +94,42 @@ class TestCm(unittest.TestCase):
         fd = Constant(0.0)
 
         # Compute velocity.
-        v = cm1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
+        v, res, fun = cm1d_exp_pb(m, n, f, fd, fd, 1.0, 1.0)
 
         np.testing.assert_allclose(v.shape, (m, n))
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1d_img_default_fd(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = cm1d_img(img, 1, 1, 'fd')
+        v, res, fun = cm1d_img(img, 1, 1, 'fd')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1d_img_default_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = cm1d_img(img, 1, 1, 'mesh')
+        v, res, fun = cm1d_img(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1d_img_periodic_mesh(self):
         # Create zero image.
         img = np.zeros((10, 25))
-        v = cm1d_img_pb(img, 1, 1, 'mesh')
+        v, res, fun = cm1d_img_pb(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
     def test_cm1dsource(self):
         # Create zero image.
@@ -136,10 +150,12 @@ class TestCm(unittest.TestCase):
     def test_cm1d_random(self):
         # Create random non-moving image.
         img = matlib.repmat(np.random.rand(1, 25), 10, 1)
-        v = cm1d_img(img, 1, 1, 'mesh')
+        v, res, fun = cm1d_img(img, 1, 1, 'mesh')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(res, 0)
+        np.testing.assert_allclose(fun, 0)
 
 
 if __name__ == '__main__':

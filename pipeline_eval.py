@@ -56,7 +56,7 @@ if not os.path.exists(resultpath):
 if not os.path.exists(os.path.join(resultpath, 'pkl')):
     os.makedirs(os.path.join(resultpath, 'pkl'))
 
-# Set projection method.
+# Set projection method (SUM, MAX, AVG).
 proj = 'SUM'
 
 
@@ -78,45 +78,47 @@ def prepareimage(img: np.array) -> np.array:
 
 
 # Paramters for of1d.
-alpha0_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha1_of1d = [1e-4, 1e-3, 1e-2, 1e-1]
-prod_of1d = it.product(alpha0_of1d, alpha1_of1d)
-prod_of1d_len = len(alpha0_of1d) * len(alpha1_of1d)
+alpha0_of1d = [1e-3, 1e-2, 1e-1]
+alpha1_of1d = [1e-3, 1e-2, 1e-1]
+prod_of1d = list(it.product(alpha0_of1d, alpha1_of1d))
 
 # Paramters for cms1dl2.
-alpha0_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha1_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
-gamma_cms1dl2 = [1e-4, 1e-3, 1e-2, 1e-1]
-prod_cms1dl2 = it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2)
-prod_cms1dl2_len = len(alpha0_cms1dl2) * len(alpha1_cms1dl2) \
-    * len(gamma_cms1dl2)
+alpha0_cms1dl2 = [1e-3, 1e-2, 1e-1]
+alpha1_cms1dl2 = [1e-3, 1e-2, 1e-1]
+gamma_cms1dl2 = [1e-3, 1e-2, 1e-1]
+prod_cms1dl2 = list(it.product(alpha0_cms1dl2, alpha1_cms1dl2, gamma_cms1dl2))
 
 # Paramters for cms1d.
-alpha0_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha1_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha2_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha3_cms1d = [1e-4, 1e-3, 1e-2, 1e-1]
-prod_cms1d = it.product(alpha0_cms1d,
-                        alpha1_cms1d,
-                        alpha2_cms1d,
-                        alpha3_cms1d)
-prod_cms1d_len = len(alpha0_cms1d) * len(alpha1_cms1d) \
-    * len(alpha2_cms1d) * len(alpha3_cms1d)
+alpha0_cms1d = [1e-3, 1e-2, 1e-1]
+alpha1_cms1d = [1e-3, 1e-2, 1e-1]
+alpha2_cms1d = [1e-3, 1e-2, 1e-1]
+alpha3_cms1d = [1e-3, 1e-2, 1e-1]
+prod_cms1d = list(it.product(alpha0_cms1d,
+                             alpha1_cms1d,
+                             alpha2_cms1d,
+                             alpha3_cms1d))
 
 # Paramters for cms1dcr.
-alpha0_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha1_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha2_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
-alpha3_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
-beta_cmscr1d = [1e-4, 1e-3, 1e-2, 1e-1]
-prod_cmscr1d = it.product(alpha0_cmscr1d,
-                          alpha1_cmscr1d,
-                          alpha2_cmscr1d,
-                          alpha3_cmscr1d,
-                          beta_cmscr1d)
-prod_cmscr1d_len = len(alpha0_cmscr1d) * len(alpha1_cmscr1d) \
-    * len(alpha2_cmscr1d) * len(alpha3_cmscr1d) * len(beta_cmscr1d)
+alpha0_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha1_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha2_cmscr1d = [1e-3, 1e-2, 1e-1]
+alpha3_cmscr1d = [1e-3, 1e-2, 1e-1]
+beta_cmscr1d = [1e-3, 1e-2, 1e-1]
+prod_cmscr1d = list(it.product(alpha0_cmscr1d,
+                               alpha1_cmscr1d,
+                               alpha2_cmscr1d,
+                               alpha3_cmscr1d,
+                               beta_cmscr1d))
 
+# Write parameter settings to file.
+with open(os.path.join(resultpath, 'pkl', 'prod_of1d.pkl'), 'wb') as f:
+    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1dl2.pkl'), 'wb') as f:
+    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1d.pkl'), 'wb') as f:
+    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+with open(os.path.join(resultpath, 'pkl', 'prod_cmscr1d.pkl'), 'wb') as f:
+    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
 
 print('Processing {0}'.format(datapath))
 
@@ -192,14 +194,14 @@ with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'wb') as f:
 
 # Compute velocity and source for all parameter pairs.
 print("Running of1d on {0} datasets ".format(num_datasets) +
-      "and {0} parameter combinations.".format(prod_of1d_len))
-vel_of1d = [collections.defaultdict(dict) for x in range(prod_of1d_len)]
+      "and {0} parameter combinations.".format(len(prod_of1d)))
+vel_of1d = [collections.defaultdict(dict) for x in range(len(prod_of1d))]
 count = 1
 for idx, p in enumerate(prod_of1d):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
-            print("{0}/{1}".format(count, num_datasets * prod_of1d_len))
+            print("{0}/{1}".format(count, num_datasets * len(prod_of1d)))
             vel_of1d[idx][gen][dat] = of1d_img(imgp[gen][dat],
                                                p[0], p[1], 'mesh')
             count += 1
@@ -213,15 +215,15 @@ del vel_of1d
 
 # Compute velocity and source for all parameter pairs.
 print("Running cms1dl2 on {0} datasets ".format(num_datasets) +
-      "and {0} parameter combinations.".format(prod_cms1dl2_len))
-vel_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
-k_cms1dl2 = [collections.defaultdict(dict) for x in range(prod_cms1dl2_len)]
+      "and {0} parameter combinations.".format(len(prod_cms1dl2)))
+vel_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
+k_cms1dl2 = [collections.defaultdict(dict) for x in range(len(prod_cms1dl2))]
 count = 1
 for idx, p in enumerate(prod_cms1dl2):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
-            print("{0}/{1}".format(count, num_datasets * prod_cms1dl2_len))
+            print("{0}/{1}".format(count, num_datasets * len(prod_cms1dl2)))
             vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
             count += 1
@@ -237,15 +239,15 @@ del vel_cms1dl2, k_cms1dl2
 
 # Compute velocity and source for all parameter pairs.
 print("Running cms1d on {0} datasets ".format(num_datasets) +
-      "and {0} parameter combinations.".format(prod_cms1d_len))
-vel_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
-k_cms1d = [collections.defaultdict(dict) for x in range(prod_cms1d_len)]
+      "and {0} parameter combinations.".format(len(prod_cms1d)))
+vel_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
+k_cms1d = [collections.defaultdict(dict) for x in range(len(prod_cms1d))]
 count = 1
 for idx, p in enumerate(prod_cms1d):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
-            print("{0}/{1}".format(count, num_datasets * prod_cms1d_len))
+            print("{0}/{1}".format(count, num_datasets * len(prod_cms1d)))
             vel_cms1d[idx][gen][dat], k_cms1d[idx][gen][dat] = \
                 cms1d_img(imgp[gen][dat], p[0], p[1], p[2], p[3], 'mesh')
             count += 1
@@ -261,17 +263,17 @@ del vel_cms1d, k_cms1d
 
 # Compute velocity and source for all parameter pairs.
 print("Running cmscr1d on {0} datasets ".format(num_datasets) +
-      "and {0} parameter combinations.".format(prod_cmscr1d_len))
-vel_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
-k_cmscr1d = [collections.defaultdict(dict) for x in range(prod_cmscr1d_len)]
+      "and {0} parameter combinations.".format(len(prod_cmscr1d)))
+vel_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
+k_cmscr1d = [collections.defaultdict(dict) for x in range(len(prod_cmscr1d))]
 converged_cmscr1d = [collections.defaultdict(dict)
-                     for x in range(prod_cmscr1d_len)]
+                     for x in range(len(prod_cmscr1d))]
 count = 1
 for idx, p in enumerate(prod_cmscr1d):
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
-            print("{0}/{1}".format(count, num_datasets * prod_cmscr1d_len))
+            print("{0}/{1}".format(count, num_datasets * len(prod_cmscr1d)))
             vel_cmscr1d[idx][gen][dat], \
                 k_cmscr1d[idx][gen][dat], \
                 converged_cmscr1d[idx][gen][dat] = \

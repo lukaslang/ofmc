@@ -28,7 +28,7 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-23-17-50-01/'
+resultpath = 'results/2018-07-30-11-15-55/'
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -72,6 +72,15 @@ with open(os.path.join(resultpath, 'pkl', 'roi.pkl'), 'rb') as f:
 with open(os.path.join(resultpath, 'pkl', 'spl.pkl'), 'rb') as f:
     spl = pickle.load(f)
 
+with open(os.path.join(resultpath, 'pkl', 'prod_of1d.pkl'), 'rb') as f:
+    prod_of1d = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1dl2.pkl'), 'rb') as f:
+    prod_cms1dl2 = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1d.pkl'), 'rb') as f:
+    prod_cms1d = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cmscr1d.pkl'), 'rb') as f:
+    prod_cmscr1d = pickle.load(f)
+
 with open(os.path.join(resultpath, 'pkl', 'vel_of1d.pkl'), 'rb') as f:
     vel_of1d = pickle.load(f)
 with open(os.path.join(resultpath, 'pkl', 'vel_cms1dl2.pkl'), 'rb') as f:
@@ -96,7 +105,7 @@ with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
 def compute_error(idx: int, count: int, vel: dict):
     err = collections.defaultdict(dict)
     max_err = collections.defaultdict(dict)
-    print("Result {0}/{1}".format(idx + 1, len(vel_of1d)))
+    print("Result {0}/{1}".format(idx + 1, len(vel)))
     # Run through datasets.
     for gen in genotypes:
         for dat in datasets[gen]:
@@ -138,6 +147,20 @@ err_cms1dl2, max_err_cms1dl2 = load_or_compute_error('cms1dl2', vel_cms1dl2)
 err_cms1d, max_err_cms1d = load_or_compute_error('cms1d', vel_cms1d)
 err_cmscr1d, max_err_cmscr1d = load_or_compute_error('cmscr1d', vel_cmscr1d)
 
+# Check if there is at least a single run for
+# each dataset where cmscr1d converged.
+for gen in genotypes:
+    for dat in datasets[gen]:
+        valid_idx = [x for x in range(len(converged_cmscr1d))
+                     if converged_cmscr1d[x][gen][dat]]
+        print("{0}/{1} runs converged ".format(len(valid_idx),
+                                               len(converged_cmscr1d)) +
+              "for dataset {0}/{1}.".format(gen, dat))
+        if len(valid_idx) == 0:
+            errmsg = "No single converged run " + \
+                "for dataset {0}/{1}!".format(gen, dat)
+            raise RuntimeError(errmsg) from error
+
 # Open file.
 f = open(os.path.join(resultpath, 'results.txt'), 'w')
 
@@ -178,6 +201,15 @@ for gen in genotypes:
                 ", ".join('{0:.3f}'.format(x) for x in err) + "\n")
 
 
+def argmin(err, converged, gen, dat):
+    valid_idx = [x for x in range(len(converged))
+                 if converged[x][gen][dat]]
+    idx = np.argmin([err[x][gen][dat] for x in valid_idx])
+    if not np.isscalar:
+        idx = idx[0]
+    return valid_idx[idx]
+
+
 # Output LaTeX table in sorted order.
 f.write('LaTeX table with average error:\n')
 for gen in sorted(name.keys()):
@@ -186,7 +218,7 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.nanargmin([x[gen][dat] for x in err_cmscr1d])
+        idx_cmscr1d = argmin(err_cmscr1d, converged_cmscr1d, gen, dat)
 
         formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\\n'
         f.write(formatstr.format(re.sub('_', '\\_', gen),
@@ -210,15 +242,12 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
-        idx_cmscr1d = np.nanargmin([x[gen][dat] for x in err_cmscr1d])
+        idx_cmscr1d = argmin(err_cmscr1d, converged_cmscr1d, gen, dat)
 
         sum_of1d += err_of1d[idx_of1d][gen][dat]
         sum_cms1dl2 += err_cms1dl2[idx_cms1dl2][gen][dat]
         sum_cms1d += err_cms1d[idx_cms1d][gen][dat]
-
-        if converged_cmscr1d[idx_cmscr1d][gen][dat]:
-            sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
-            count_converged += 1.0
+        sum_cmscr1d += err_cmscr1d[idx_cmscr1d][gen][dat]
 
         count += 1.0
 
@@ -226,7 +255,7 @@ formatstr = 'Average & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\\n'
 f.write(formatstr.format(sum_of1d / count,
                          sum_cms1dl2 / count,
                          sum_cms1d / count,
-                         sum_cmscr1d / count_converged))
+                         sum_cmscr1d / count))
 f.write('\\hline\n')
 
 # Output LaTeX table in sorted order.
@@ -237,7 +266,7 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in max_err_cmscr1d])
+        idx_cmscr1d = argmin(max_err_cmscr1d, converged_cmscr1d, gen, dat)
 
         formatstr = '{0}/{1} & {2:.2f} & {3:.2f} & {4:.2f} & {5:.2f} \\\\\n'
         f.write(formatstr.format(re.sub('_', '\\_', gen),
@@ -259,21 +288,15 @@ for gen in sorted(name.keys()):
         idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
         idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
         idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
-        idx_cmscr1d = np.argmin([x[gen][dat] for x in max_err_cmscr1d])
+        idx_cmscr1d = argmin(max_err_cmscr1d, converged_cmscr1d, gen, dat)
 
         max_of1d = max(max_of1d, max_err_of1d[idx_of1d][gen][dat])
         max_cms1dl2 = max(max_cms1dl2, max_err_cms1dl2[idx_cms1dl2][gen][dat])
         max_cms1d = max(max_cms1d, max_err_cms1d[idx_cms1d][gen][dat])
-
-        if converged_cmscr1d[idx_cmscr1d][gen][dat]:
-            max_cmscr1d = max(max_cmscr1d,
-                              max_err_cmscr1d[idx_cmscr1d][gen][dat])
+        max_cmscr1d = max(max_cmscr1d, max_err_cmscr1d[idx_cmscr1d][gen][dat])
 
 formatstr = 'Maximum & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\\n'
-f.write(formatstr.format(sum_of1d / count,
-                         sum_cms1dl2 / count,
-                         sum_cms1d / count,
-                         sum_cmscr1d / count_converged))
+f.write(formatstr.format(max_of1d, max_cms1dl2, max_cms1d, max_cmscr1d))
 f.write('\\hline\n')
 
 # Close file.
@@ -304,16 +327,19 @@ for gen in genotypes:
 
 # Output best result for each dataset.
 def output_best_result(err_name: str, model: str, err: list,
-                       vel: dict, k=None):
+                       vel: dict, k=None, converged=None):
     print("Plotting {0} results for {1}".format(err_name, model))
     for gen in genotypes:
         for dat in datasets[gen]:
             print("Plotting results for {0}/{1}".format(gen, dat))
 
             # Find index of best results (not necessarily unique).
-            idx = np.nanargmin([x[gen][dat] for x in err])
-            if not np.isscalar:
-                idx = idx[0]
+            if converged is None:
+                idx = np.argmin([x[gen][dat] for x in err])
+                if not np.isscalar:
+                    idx = idx[0]
+            else:
+                idx = argmin(err, converged, gen, dat)
 
             # Get data.
             tmpimg = img[gen][dat]
@@ -337,21 +363,21 @@ def output_best_result(err_name: str, model: str, err: list,
 
 
 # Output best results for average error.
-output_best_result('best_avg_error', 'of1d', err_of1d, vel_of1d)
-output_best_result('best_avg_error', 'cms1dl2',
-                   err_cms1dl2, vel_cms1dl2, k_cms1dl2)
-output_best_result('best_avg_error', 'cms1d',
-                   err_cms1d, vel_cms1d, k_cms1d)
+#output_best_result('best_avg_error', 'of1d', err_of1d, vel_of1d)
+#output_best_result('best_avg_error', 'cms1dl2',
+#                   err_cms1dl2, vel_cms1dl2, k_cms1dl2)
+#output_best_result('best_avg_error', 'cms1d',
+#                   err_cms1d, vel_cms1d, k_cms1d)
 output_best_result('best_avg_error', 'cmscr1d',
-                   err_cmscr1d, vel_cmscr1d, k_cmscr1d)
+                   err_cmscr1d, vel_cmscr1d, k_cmscr1d, converged_cmscr1d)
 
-# Output best results for maximum error.
-output_best_result('best_max_error', 'of1d', max_err_of1d, vel_of1d)
-output_best_result('best_max_error', 'cms1dl2',
-                   max_err_cms1dl2, vel_cms1dl2, k_cms1dl2)
-output_best_result('best_max_error', 'cms1d',
-                   max_err_cms1d, vel_cms1d, k_cms1d)
+## Output best results for maximum error.
+#output_best_result('best_max_error', 'of1d', max_err_of1d, vel_of1d)
+#output_best_result('best_max_error', 'cms1dl2',
+#                   max_err_cms1dl2, vel_cms1dl2, k_cms1dl2)
+#output_best_result('best_max_error', 'cms1d',
+#                   max_err_cms1d, vel_cms1d, k_cms1d)
 output_best_result('best_max_error', 'cmscr1d',
-                   max_err_cmscr1d, vel_cmscr1d, k_cmscr1d)
+                   max_err_cmscr1d, vel_cmscr1d, k_cmscr1d, converged_cmscr1d)
 
 print("Done.")

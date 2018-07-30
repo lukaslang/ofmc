@@ -169,7 +169,7 @@ def cms1dl2_weak_solution(V: VectorFunctionSpace,
                  + alpha2 * k ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
                                      assemble(fun * dx)))
-    return v, k, res, fun
+    return v, k, assemble(res * dx), assemble(fun * dx)
 
 
 def cms1d_weak_solution_given_source(V: FunctionSpace,
@@ -216,7 +216,7 @@ def cms1d_weak_solution_given_source(V: FunctionSpace,
     fun = 0.5 * (res ** 2 + alpha0 * v.dx(1) ** 2 + alpha1 * v.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
                                      assemble(fun * dx)))
-    return v, res, fun
+    return v, assemble(res * dx), assemble(fun * dx)
 
 
 def cms1d_weak_solution_given_velocity(V: FunctionSpace,
@@ -261,7 +261,7 @@ def cms1d_weak_solution_given_velocity(V: FunctionSpace,
     fun = 0.5 * (res ** 2 + alpha2 * k.dx(1) ** 2 + alpha3 * k.dx(0) ** 2)
     print('Res={0}, Func={1}'.format(assemble(res * dx),
                                      assemble(fun * dx)))
-    return k, res, fun
+    return k, assemble(res * dx), assemble(fun * dx)
 
 
 def cms1d_exp(m: int, n: int,

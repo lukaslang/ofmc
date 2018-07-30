@@ -235,7 +235,7 @@ for idx, p in enumerate(prod_cms1dl2):
         for dat in datasets[gen]:
             print("{0}/{1}".format(count, num_datasets * len(prod_cms1dl2)))
             vel_cms1dl2[idx][gen][dat], k_cms1dl2[idx][gen][dat], \
-                res_of1d[idx][gen][dat], fun_of1d[idx][gen][dat] = \
+                res_cms1dl2[idx][gen][dat], fun_cms1dl2[idx][gen][dat] = \
                 cms1dl2_img(imgp[gen][dat], p[0], p[1], p[2], 'mesh')
             count += 1
 

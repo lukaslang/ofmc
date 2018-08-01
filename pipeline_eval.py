@@ -82,34 +82,34 @@ def prepareimage(img: np.array) -> np.array:
 
 if mode is 'DIFFERENT':
     # Paramters for of1d.
-    alpha0_of1d = [1e-3, 1e-2, 1e-1]
-    alpha1_of1d = [1e-3, 1e-2, 1e-1]
+    alpha0_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha1_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_of1d = list(it.product(alpha0_of1d, alpha1_of1d))
 
     # Paramters for cms1dl2.
-    alpha0_cms1dl2 = [1e-3, 1e-2, 1e-1]
-    alpha1_cms1dl2 = [1e-3, 1e-2, 1e-1]
-    gamma_cms1dl2 = [1e-3, 1e-2, 1e-1]
+    alpha0_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha1_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    gamma_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cms1dl2 = list(it.product(alpha0_cms1dl2,
                                    alpha1_cms1dl2,
                                    gamma_cms1dl2))
 
     # Paramters for cms1d.
-    alpha0_cms1d = [1e-3, 1e-2, 1e-1]
-    alpha1_cms1d = [1e-3, 1e-2, 1e-1]
-    alpha2_cms1d = [1e-3, 1e-2, 1e-1]
-    alpha3_cms1d = [1e-3, 1e-2, 1e-1]
+    alpha0_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha1_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha2_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha3_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cms1d = list(it.product(alpha0_cms1d,
                                  alpha1_cms1d,
                                  alpha2_cms1d,
                                  alpha3_cms1d))
 
     # Paramters for cms1dcr.
-    alpha0_cmscr1d = [1e-3, 1e-2, 1e-1]
-    alpha1_cmscr1d = [1e-3, 1e-2, 1e-1]
-    alpha2_cmscr1d = [1e-3, 1e-2, 1e-1]
-    alpha3_cmscr1d = [1e-3, 1e-2, 1e-1]
-    beta_cmscr1d = [1e-3, 1e-2, 1e-1]
+    alpha0_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha1_cmscr1d = [1e-3]
+    alpha2_cmscr1d = [1e-3]
+    alpha3_cmscr1d = [1e-3]
+    beta_cmscr1d = [1e-3]
     prod_cmscr1d = list(it.product(alpha0_cmscr1d,
                                    alpha1_cmscr1d,
                                    alpha2_cmscr1d,
@@ -118,25 +118,25 @@ if mode is 'DIFFERENT':
 
 elif mode is 'SAME':
     # Paramters for of1d.
-    alpha_v_of1d = [1e-3, 1e-2, 1e-1]
+    alpha_v_of1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_of1d = [(alpha, alpha) for alpha in alpha_v_of1d]
 
     # Paramters for cms1dl2.
-    alpha_v_cms1dl2 = [1e-3, 1e-2, 1e-1]
-    gamma_cms1dl2 = [1e-3, 1e-2, 1e-1]
+    alpha_v_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    gamma_cms1dl2 = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cms1dl2 = [(alpha, alpha, gamma) for (alpha, gamma)
                     in it.product(alpha_v_cms1dl2, gamma_cms1dl2)]
 
     # Paramters for cms1d.
-    alpha_v_cms1d = [1e-3, 1e-2, 1e-1]
-    alpha_k_cms1d = [1e-3, 1e-2, 1e-1]
+    alpha_v_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha_k_cms1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cms1d = [(alpha_v, alpha_v, alpha_k, alpha_k) for (alpha_v, alpha_k)
                   in it.product(alpha_v_cms1d, alpha_k_cms1d)]
 
     # Paramters for cms1dcr.
-    alpha_v_cmscr1d = [1e-3, 1e-2, 1e-1]
-    alpha_k_cmscr1d = [1e-3, 1e-2, 1e-1]
-    beta_cmscr1d = [1e-3, 1e-2, 1e-1]
+    alpha_v_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha_k_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    beta_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cmscr1d = [(alpha_v, alpha_v, alpha_k, alpha_k, beta)
                     for (alpha_v, alpha_k, beta)
                     in it.product(alpha_v_cmscr1d,

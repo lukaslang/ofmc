@@ -308,6 +308,28 @@ f.write(formatstr.format(sum_of1d / count,
                          sum_cmscr1d / count))
 f.write('\\hline\n')
 
+# Output indices and parameter settings of best results.
+f.write('Parameter settings for best average error:\n')
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in err_cms1d])
+        idx_cmscr1d = argmin(err_cmscr1d, converged_cmscr1d, gen, dat)
+
+        f.write("Dataset {0}/{1}\n".format(gen, dat))
+        f.write("of1d:    {0}, {1}".format(idx_of1d,
+                prod_of1d[idx_of1d]) + "\n")
+        f.write("cms1dl2: {0}, {1}".format(idx_cms1dl2,
+                prod_cms1dl2[idx_cms1dl2]) + "\n")
+        f.write("cms1d:   {0}, {1}".format(idx_cms1d,
+                prod_cms1d[idx_cms1d]) + "\n")
+        f.write("cmscr1d: {0}, {1}".format(idx_cmscr1d,
+                prod_cmscr1d[idx_cmscr1d]) + "\n")
+
+f.write('\\hline\n')
+
 f.write('LaTeX table with average error of zero velocity:\n')
 for gen in sorted(name.keys()):
     for dat in sorted(name[gen].keys()):
@@ -368,6 +390,28 @@ for gen in sorted(name.keys()):
 
 formatstr = 'Maximum & {0:.2f} & {1:.2f} & {2:.2f} & {3:.2f} \\\\\n'
 f.write(formatstr.format(max_of1d, max_cms1dl2, max_cms1d, max_cmscr1d))
+f.write('\\hline\n')
+
+# Output indices and parameter settings of best results.
+f.write('Parameter settings for best maximum error:\n')
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
+        # Find indices of best results (not necessarily unique).
+        idx_of1d = np.argmin([x[gen][dat] for x in max_err_of1d])
+        idx_cms1dl2 = np.argmin([x[gen][dat] for x in max_err_cms1dl2])
+        idx_cms1d = np.argmin([x[gen][dat] for x in max_err_cms1d])
+        idx_cmscr1d = argmin(max_err_cmscr1d, converged_cmscr1d, gen, dat)
+
+        f.write("Dataset {0}/{1}\n".format(gen, dat))
+        f.write("of1d:    {0}, {1}".format(idx_of1d,
+                prod_of1d[idx_of1d]) + "\n")
+        f.write("cms1dl2: {0}, {1}".format(idx_cms1dl2,
+                prod_cms1dl2[idx_cms1dl2]) + "\n")
+        f.write("cms1d:   {0}, {1}".format(idx_cms1d,
+                prod_cms1d[idx_cms1d]) + "\n")
+        f.write("cmscr1d: {0}, {1}".format(idx_cmscr1d,
+                prod_cmscr1d[idx_cmscr1d]) + "\n")
+
 f.write('\\hline\n')
 
 f.write('LaTeX table with maximum error of zero velocity:\n')

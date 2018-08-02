@@ -128,8 +128,8 @@ def compute_error(idx: int, count: int, vel: dict):
     max_err = collections.defaultdict(dict)
     print("Result {0}/{1}".format(idx + 1, len(vel)))
     # Run through datasets.
-    for gen in genotypes:
-        for dat in datasets[gen]:
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
             print("Computing error for {0}/{1}".format(gen, dat))
             err[gen][dat], max_err[gen][dat] = \
                 error(vel[idx][gen][dat], roi[gen][dat], spl[gen][dat])
@@ -164,8 +164,8 @@ def load_or_compute_error(model: str, vel: dict):
 
 def create_zero_vel():
     vel = [collections.defaultdict(dict)]
-    for gen in genotypes:
-        for dat in datasets[gen]:
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
             vel[0][gen][dat] = np.zeros_like(imgp[gen][dat])
     return vel
 
@@ -177,14 +177,30 @@ err_cms1d, max_err_cms1d = load_or_compute_error('cms1d', vel_cms1d)
 err_cmscr1d, max_err_cmscr1d = load_or_compute_error('cmscr1d', vel_cmscr1d)
 err_zero, max_err_zero = load_or_compute_error('zero', create_zero_vel())
 
+# Output parameter ranges.
+f = open(os.path.join(resultpath, 'parameters.txt'), 'w')
+f.write("Parameters for of1d:\n")
+f.write(", ".join('{0}: {1}'.format(idx, p)
+                  for idx, p in enumerate(prod_of1d)) + "\n")
+f.write("Parameters for cms1dl2:\n")
+f.write(", ".join('{0}: {1}'.format(idx, p)
+                  for idx, p in enumerate(prod_cms1dl2)) + "\n")
+f.write("Parameters for cms1d:\n")
+f.write(", ".join('{0}: {1}'.format(idx, p)
+                  for idx, p in enumerate(prod_cms1d)) + "\n")
+f.write("Parameters for cmscr1d:\n")
+f.write(", ".join('{0}: {1}'.format(idx, p)
+                  for idx, p in enumerate(prod_cmscr1d)) + "\n")
+f.close()
+
 # Open file.
 f = open(os.path.join(resultpath, 'results.txt'), 'w')
 
 # Check if there is at least a single run for
 # each dataset where cmscr1d converged.
 converged = True
-for gen in genotypes:
-    for dat in datasets[gen]:
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
         valid_idx = [x for x in range(len(converged_cmscr1d))
                      if converged_cmscr1d[x][gen][dat]]
         f.write("{0}/{1} cmscr1d runs converged ".format(len(valid_idx),
@@ -200,8 +216,8 @@ if not converged:
 
 # Print errors.
 f.write('Cumulative absolute error:\n')
-for gen in genotypes:
-    for dat in datasets[gen]:
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
         f.write("Dataset {0}/{1}\n".format(gen, dat))
         err = [x[gen][dat] for x in err_of1d]
         f.write("of1d:    " +
@@ -218,8 +234,8 @@ for gen in genotypes:
 
 # Print max. errors.
 f.write('Maximum absolute error:\n')
-for gen in genotypes:
-    for dat in datasets[gen]:
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
         f.write("Dataset {0}/{1}\n".format(gen, dat))
         err = [x[gen][dat] for x in max_err_of1d]
         f.write("of1d:    " +
@@ -425,8 +441,8 @@ f.close()
 
 # Output datasets.
 print("Plotting datasets.")
-for gen in genotypes:
-    for dat in datasets[gen]:
+for gen in sorted(name.keys()):
+    for dat in sorted(name[gen].keys()):
         print("Plotting dataset {0}/{1}".format(gen, dat))
 
         tmpimg = img[gen][dat]
@@ -450,8 +466,8 @@ for gen in genotypes:
 def output_best_result(err_name: str, model: str, err: list,
                        vel: dict, k=None, converged=None):
     print("Plotting {0} results for {1}".format(err_name, model))
-    for gen in genotypes:
-        for dat in datasets[gen]:
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
             print("Plotting results for {0}/{1}".format(gen, dat))
 
             # Find index of best results (not necessarily unique).
@@ -509,8 +525,8 @@ def compute_endpoint_error(idx: int, count: int, vel: dict):
     curves = collections.defaultdict(dict)
     print("Result {0}/{1}".format(idx + 1, len(vel)))
     # Run through datasets.
-    for gen in genotypes:
-        for dat in datasets[gen]:
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
             print("Computing endpoint error for {0}/{1}".format(gen, dat))
             err[gen][dat], max_err[gen][dat], curves[gen][dat] = \
                 endpoint_error(vel[idx][gen][dat],
@@ -556,8 +572,8 @@ def load_or_compute_endpoint_error(model: str, vel: dict):
 def output_best_endpoint_result(err_name: str, model: str, err: list,
                                 curves: list, converged=None):
     print("Plotting {0} results for {1}".format(err_name, model))
-    for gen in genotypes:
-        for dat in datasets[gen]:
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
             print("Plotting results for {0}/{1}".format(gen, dat))
 
             # Find index of best results (not necessarily unique).

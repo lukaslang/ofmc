@@ -27,9 +27,12 @@ import numpy as np
 import os
 
 # Set font style.
-font = {'weight': 'normal',
+font = {'family': 'serif',
+        'serif': ['Computer Modern'],
+        'weight': 'normal',
         'size': 20}
 plt.rc('font', **font)
+plt.rc('text', usetex=True)
 
 # Set colormap.
 cmap = cm.viridis

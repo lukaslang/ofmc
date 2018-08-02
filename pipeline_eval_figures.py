@@ -28,7 +28,7 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-31-13-31-10/'
+resultpath = 'results/2018-08-01-09-31-13/'
 
 # Flag whether to compute endpoint errors.
 eval_endpoint = False

@@ -124,10 +124,14 @@ def compute_endpoint_error(vel: np.array, roi, spl) -> (dict, dict):
     gridx, gridy = np.mgrid[0:m, 0:n]
     gridpoints = np.hstack([gridx.reshape(m * n, 1), gridy.reshape(m * n, 1)])
 
+    # Scale according to grid.
+    hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
+    vel = vel * hx / hy
+
     # Define ODE.
     def ode(t, y): return interpolate.griddata(gridpoints,
                                                vel.flatten(), (t, y),
-                                               method='cubic')
+                                               method='linear')
     error = dict()
     curve = dict()
     for v in roi:

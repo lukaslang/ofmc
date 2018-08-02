@@ -472,8 +472,6 @@ def save_roi_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     Returns:
     """
-    m, n = img.shape
-
     # Determine max. of splines and computed velocities.
     maxvel = abs(vel).max()
     normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
@@ -507,5 +505,54 @@ def save_roi_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-streamlines-roi.png'.format(name)),
+                dpi=dpi, bbox_inches='tight')
+    plt.close(fig)
+
+
+def save_spl_curves(path: str, name: str, img: np.array,
+                    roi, spl, curves):
+    """Takes a path string, a name, two arrays, a roi, and splines, and saves
+    the plotted array with splines superimposed.
+
+    Args:
+        path (str): The path to save the image to.
+        name (str): The filename.
+        img (np.array): The image.
+        vel (np.array): The velocity.
+        roi: A roi instance.
+        spl: Fitted spolines.
+
+    Returns:
+    """
+    # Plot image.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    plt.imshow(img, cmap=cm.gray)
+    ax.set_title('Splines and characteristics.')
+
+    # Plot splines.
+    for v in roi:
+        # Plot roi.
+        y = roi[v]['y']
+        points = np.array([spl[v](y), y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+        lc = LineCollection(segments)
+        lc.set_linewidth(2)
+        lc.set_color('C3')
+        plt.gca().add_collection(lc)
+
+        # Plot characteristics.
+        y = np.arange(y[0], y[-1] + 1, 1)
+        c = curves[v]
+        points = np.array([c, y]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+        lc = LineCollection(segments)
+        lc.set_linewidth(2)
+        lc.set_color('C0')
+        plt.gca().add_collection(lc)
+
+    fig.tight_layout()
+    fig.savefig(os.path.join(path, '{0}-splines-curves.png'.format(name)),
                 dpi=dpi, bbox_inches='tight')
     plt.close(fig)

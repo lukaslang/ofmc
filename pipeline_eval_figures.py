@@ -28,7 +28,10 @@ import ofmc.util.roihelpers as rh
 import pickle
 
 # Set path where results are saved.
-resultpath = 'results/2018-07-30-15-34-59/'
+resultpath = 'results/2018-07-31-13-31-10/'
+
+# Flag whether to compute endpoint errors.
+eval_endpoint = False
 
 
 def error(vel, roi, spl) -> (float, float):
@@ -45,14 +48,14 @@ def error(vel, roi, spl) -> (float, float):
 
 def endpoint_error(vel, roi, spl) -> (float, float):
     # Compute accumulated error in position for each spline.
-    error, curve = rh.compute_endpoint_error(vel, roi, spl)
+    error, curves = rh.compute_endpoint_error(vel, roi, spl)
     totalerr = 0
     maxerror = 0
     for v in roi:
         err = sum(error[v]) / len(error[v])
         totalerr += err
         maxerror = max(maxerror, max(error[v]))
-    return (totalerr, maxerror)
+    return (totalerr, maxerror, curves)
 
 
 # Load dataset.
@@ -174,22 +177,26 @@ err_cms1d, max_err_cms1d = load_or_compute_error('cms1d', vel_cms1d)
 err_cmscr1d, max_err_cmscr1d = load_or_compute_error('cmscr1d', vel_cmscr1d)
 err_zero, max_err_zero = load_or_compute_error('zero', create_zero_vel())
 
+# Open file.
+f = open(os.path.join(resultpath, 'results.txt'), 'w')
+
 # Check if there is at least a single run for
 # each dataset where cmscr1d converged.
+converged = True
 for gen in genotypes:
     for dat in datasets[gen]:
         valid_idx = [x for x in range(len(converged_cmscr1d))
                      if converged_cmscr1d[x][gen][dat]]
-        print("{0}/{1} runs converged ".format(len(valid_idx),
-                                               len(converged_cmscr1d)) +
-              "for dataset {0}/{1}.".format(gen, dat))
+        f.write("{0}/{1} cmscr1d runs converged ".format(len(valid_idx),
+                len(converged_cmscr1d)) +
+                "for dataset {0}/{1}.\n".format(gen, dat))
         if len(valid_idx) == 0:
-            errmsg = "No single converged run " + \
-                "for dataset {0}/{1}!".format(gen, dat)
-            raise RuntimeError(errmsg) from error
+            converged = False
 
-# Open file.
-f = open(os.path.join(resultpath, 'results.txt'), 'w')
+# Stop if there exists a dataset where no run converged.
+if not converged:
+    f.close()
+    raise RuntimeError("Some runs did not converge!") from error
 
 # Print errors.
 f.write('Cumulative absolute error:\n')
@@ -493,5 +500,121 @@ output_best_result('best_max_error', 'cms1d',
                    max_err_cms1d, vel_cms1d, k_cms1d)
 output_best_result('best_max_error', 'cmscr1d',
                    max_err_cmscr1d, vel_cmscr1d, k_cmscr1d, converged_cmscr1d)
+
+
+# Compute errors.
+def compute_endpoint_error(idx: int, count: int, vel: dict):
+    err = collections.defaultdict(dict)
+    max_err = collections.defaultdict(dict)
+    curves = collections.defaultdict(dict)
+    print("Result {0}/{1}".format(idx + 1, len(vel)))
+    # Run through datasets.
+    for gen in genotypes:
+        for dat in datasets[gen]:
+            print("Computing endpoint error for {0}/{1}".format(gen, dat))
+            err[gen][dat], max_err[gen][dat], curves[gen][dat] = \
+                endpoint_error(vel[idx][gen][dat],
+                               roi[gen][dat], spl[gen][dat])
+    return err, max_err, curves
+
+
+# Check if error evaluation is present, otherwise compute.
+def load_or_compute_endpoint_error(model: str, vel: dict):
+    err_file = os.path.join(resultpath,
+                            'pkl', 'endpoint_err_{0}.pkl'.format(model))
+    max_err_file = os.path.join(resultpath, 'pkl',
+                                'max_endpoint_err_{0}.pkl'.format(model))
+    curves_file = os.path.join(resultpath, 'pkl',
+                               'curves_{0}.pkl'.format(model))
+    if os.path.isfile(err_file) and \
+            os.path.isfile(max_err_file) and \
+            os.path.isfile(curves_file):
+        print('Loading endpoint error for {0}.'.format(model))
+        # Load existing results.
+        with open(err_file, 'rb') as f:
+            err = pickle.load(f)
+        with open(max_err_file, 'rb') as f:
+            max_err = pickle.load(f)
+        with open(curves_file, 'rb') as f:
+            curves = pickle.load(f)
+    else:
+        print('Computing endpoint error for {0}.'.format(model))
+        num = len(vel)
+        results = [compute_endpoint_error(idx, num, vel) for idx in range(num)]
+        err, max_err, curves = zip(*results)
+        # Store results.
+        with open(err_file, 'wb') as f:
+            pickle.dump(err, f, pickle.HIGHEST_PROTOCOL)
+        with open(max_err_file, 'wb') as f:
+            pickle.dump(max_err, f, pickle.HIGHEST_PROTOCOL)
+        with open(curves_file, 'wb') as f:
+            pickle.dump(curves, f, pickle.HIGHEST_PROTOCOL)
+    return err, max_err, curves
+
+
+# Output best result for each dataset.
+def output_best_endpoint_result(err_name: str, model: str, err: list,
+                                curves: list, converged=None):
+    print("Plotting {0} results for {1}".format(err_name, model))
+    for gen in genotypes:
+        for dat in datasets[gen]:
+            print("Plotting results for {0}/{1}".format(gen, dat))
+
+            # Find index of best results (not necessarily unique).
+            if converged is None:
+                idx = np.argmin([x[gen][dat] for x in err])
+                if not np.isscalar:
+                    idx = idx[0]
+            else:
+                idx = argmin(err, converged, gen, dat)
+
+            # Get data.
+            tmpimg = img[gen][dat]
+            tmpname = name[gen][dat]
+            tmproi = roi[gen][dat]
+            tmpspl = spl[gen][dat]
+
+            # Plot curves.
+            tmpfolder = [resultpath, model, err_name, gen, dat]
+            resfolder = os.path.join(*tmpfolder)
+            if not os.path.exists(resfolder):
+                os.makedirs(resfolder)
+            tmpcurves = curves[idx][gen][dat]
+            ph.save_spl_curves(resfolder, tmpname, tmpimg, tmproi, tmpspl,
+                               tmpcurves)
+
+
+# Compute and output endpoint errors.
+if eval_endpoint:
+    ep_err_of1d, \
+        max_ep_err_of1d, \
+        curves_of1d = load_or_compute_endpoint_error('of1d', vel_of1d)
+    ep_err_cms1dl2, \
+        max_ep_err_cms1dl2, \
+        curves_cms1dl2 = load_or_compute_endpoint_error('cms1dl2', vel_cms1dl2)
+    ep_err_cms1d, \
+        max_ep_err_cms1d, \
+        curves_cms1d = load_or_compute_endpoint_error('cms1d', vel_cms1d)
+    ep_err_cmscr1d, \
+        max_ep_err_cmscr1d, \
+        curves_cmscr1d = load_or_compute_endpoint_error('cmscr1d', vel_cmscr1d)
+
+    output_best_endpoint_result('best_avg_endpoint_error', 'of1d',
+                                ep_err_of1d, curves_of1d)
+    output_best_endpoint_result('best_avg_endpoint_error', 'cms1dl2',
+                                ep_err_cms1dl2, curves_cms1dl2)
+    output_best_endpoint_result('best_avg_endpoint_error', 'cms1d',
+                                ep_err_cms1d, curves_cms1d)
+    output_best_endpoint_result('best_avg_endpoint_error', 'cmscr1d',
+                                ep_err_cmscr1d, curves_cmscr1d)
+
+    output_best_endpoint_result('best_max_endpoint_error', 'of1d',
+                                max_ep_err_of1d, curves_of1d)
+    output_best_endpoint_result('best_max_endpoint_error', 'cms1dl2',
+                                max_ep_err_cms1dl2, curves_cms1dl2)
+    output_best_endpoint_result('best_max_endpoint_error', 'cms1d',
+                                max_ep_err_cms1d, curves_cms1d)
+    output_best_endpoint_result('best_max_endpoint_error', 'cmscr1d',
+                                max_ep_err_cmscr1d, curves_cmscr1d)
 
 print("Done.")

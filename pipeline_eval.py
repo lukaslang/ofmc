@@ -106,10 +106,10 @@ if mode is 'DIFFERENT':
 
     # Paramters for cms1dcr.
     alpha0_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
-    alpha1_cmscr1d = [1e-3]
-    alpha2_cmscr1d = [1e-3]
-    alpha3_cmscr1d = [1e-3]
-    beta_cmscr1d = [1e-3]
+    alpha1_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha2_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    alpha3_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
+    beta_cmscr1d = [1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1, 5e-1]
     prod_cmscr1d = list(it.product(alpha0_cmscr1d,
                                    alpha1_cmscr1d,
                                    alpha2_cmscr1d,
@@ -147,11 +147,11 @@ elif mode is 'SAME':
 with open(os.path.join(resultpath, 'pkl', 'prod_of1d.pkl'), 'wb') as f:
     pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'prod_cms1dl2.pkl'), 'wb') as f:
-    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(prod_cms1dl2, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'prod_cms1d.pkl'), 'wb') as f:
-    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(prod_cms1d, f, pickle.HIGHEST_PROTOCOL)
 with open(os.path.join(resultpath, 'pkl', 'prod_cmscr1d.pkl'), 'wb') as f:
-    pickle.dump(prod_of1d, f, pickle.HIGHEST_PROTOCOL)
+    pickle.dump(prod_cmscr1d, f, pickle.HIGHEST_PROTOCOL)
 
 print('Processing {0}'.format(datapath))
 

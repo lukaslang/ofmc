@@ -180,16 +180,16 @@ err_zero, max_err_zero = load_or_compute_error('zero', create_zero_vel())
 # Output parameter ranges.
 f = open(os.path.join(resultpath, 'parameters.txt'), 'w')
 f.write("Parameters for of1d:\n")
-f.write(", ".join('{0}: {1}'.format(idx, p)
+f.write("\n".join('{0}: {1}'.format(idx, p)
                   for idx, p in enumerate(prod_of1d)) + "\n")
 f.write("Parameters for cms1dl2:\n")
-f.write(", ".join('{0}: {1}'.format(idx, p)
+f.write("\n".join('{0}: {1}'.format(idx, p)
                   for idx, p in enumerate(prod_cms1dl2)) + "\n")
 f.write("Parameters for cms1d:\n")
-f.write(", ".join('{0}: {1}'.format(idx, p)
+f.write("\n".join('{0}: {1}'.format(idx, p)
                   for idx, p in enumerate(prod_cms1d)) + "\n")
 f.write("Parameters for cmscr1d:\n")
-f.write(", ".join('{0}: {1}'.format(idx, p)
+f.write("\n".join('{0}: {1}'.format(idx, p)
                   for idx, p in enumerate(prod_cmscr1d)) + "\n")
 f.close()
 
@@ -319,13 +319,13 @@ for gen in sorted(name.keys()):
         idx_cmscr1d = argmin(err_cmscr1d, converged_cmscr1d, gen, dat)
 
         f.write("Dataset {0}/{1}\n".format(gen, dat))
-        f.write("of1d:    {0}, {1}".format(idx_of1d,
+        f.write("of1d:    idx {0}, {1}".format(idx_of1d,
                 prod_of1d[idx_of1d]) + "\n")
-        f.write("cms1dl2: {0}, {1}".format(idx_cms1dl2,
+        f.write("cms1dl2: idx {0}, {1}".format(idx_cms1dl2,
                 prod_cms1dl2[idx_cms1dl2]) + "\n")
-        f.write("cms1d:   {0}, {1}".format(idx_cms1d,
+        f.write("cms1d:   idx {0}, {1}".format(idx_cms1d,
                 prod_cms1d[idx_cms1d]) + "\n")
-        f.write("cmscr1d: {0}, {1}".format(idx_cmscr1d,
+        f.write("cmscr1d: idx {0}, {1}".format(idx_cmscr1d,
                 prod_cmscr1d[idx_cmscr1d]) + "\n")
 
 f.write('\\hline\n')
@@ -403,13 +403,13 @@ for gen in sorted(name.keys()):
         idx_cmscr1d = argmin(max_err_cmscr1d, converged_cmscr1d, gen, dat)
 
         f.write("Dataset {0}/{1}\n".format(gen, dat))
-        f.write("of1d:    {0}, {1}".format(idx_of1d,
+        f.write("of1d:    idx {0}, {1}".format(idx_of1d,
                 prod_of1d[idx_of1d]) + "\n")
-        f.write("cms1dl2: {0}, {1}".format(idx_cms1dl2,
+        f.write("cms1dl2: idx {0}, {1}".format(idx_cms1dl2,
                 prod_cms1dl2[idx_cms1dl2]) + "\n")
-        f.write("cms1d:   {0}, {1}".format(idx_cms1d,
+        f.write("cms1d:   idx {0}, {1}".format(idx_cms1d,
                 prod_cms1d[idx_cms1d]) + "\n")
-        f.write("cmscr1d: {0}, {1}".format(idx_cmscr1d,
+        f.write("cmscr1d: idx {0}, {1}".format(idx_cmscr1d,
                 prod_cmscr1d[idx_cmscr1d]) + "\n")
 
 f.write('\\hline\n')

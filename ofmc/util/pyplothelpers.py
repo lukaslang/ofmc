@@ -27,8 +27,8 @@ import numpy as np
 import os
 
 # Set font style.
-font = {'family': 'serif',
-        'serif': ['Computer Modern'],
+font = {'family': 'sans-serif',
+        'serif': ['DejaVu Sans'],
         'weight': 'normal',
         'size': 20}
 plt.rc('font', **font)
@@ -64,9 +64,7 @@ def saveimage(path: str, name: str, img: np.array, title=None):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
-    if title is None:
-        ax.set_title('Fluorescence intensity')
-    else:
+    if title is not None:
         ax.set_title(title)
 
     # Create colourbar.
@@ -121,7 +119,7 @@ def savesource(path: str, name: str, img: np.array):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cmap)
-    ax.set_title('Source')
+    # ax.set_title('Source')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -155,7 +153,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
-    ax.set_title('Velocity')
+    # ax.set_title('Velocity')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -178,7 +176,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Streamlines')
+    # ax.set_title('Streamlines')
     strm = ax.streamplot(X, Y, vel * hx / hy, V, density=density,
                          arrowstyle=arrowstyle, color=vel, linewidth=linewidth,
                          norm=normi, cmap=cmap)
@@ -197,7 +195,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Save velocity profile after cut.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.plot(vel[5])
-    ax.set_title('Velocity profile right after the cut')
+    # ax.set_title('Velocity profile right after the cut')
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)),
@@ -229,7 +227,7 @@ def savestrainrate(path: str, name: str, img: np.array, vel: np.array):
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(sr, interpolation='nearest', norm=normi, cmap=cmap)
-    ax.set_title('Strain rate')
+    # ax.set_title('Strain rate')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -257,7 +255,7 @@ def saveroi(path: str, name: str, img: np.array, roi):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
-    ax.set_title('Manual tracks')
+    # ax.set_title('Manual tracks')
 
     for v in roi:
         plt.plot(roi[v]['x'], roi[v]['y'], 'C3', lw=2)
@@ -300,7 +298,7 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Velocity of spline')
+    # ax.set_title('Velocity of spline')
 
     # Plot splines.
     for v in roi:
@@ -349,7 +347,7 @@ def saveerror(path: str, name: str, img: np.array, vel: np.array, roi, spl):
 
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Error along tacks')
+    # ax.set_title('Error along tacks')
 
     # Evaluate velocity for each spline.
     error = compute_error(vel, roi, spl)
@@ -428,7 +426,7 @@ def save_spl_streamlines(path: str, name: str, img: np.array, vel: np.array,
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Streamlines and splines')
+    # ax.set_title('Streamlines and splines')
 
     # Plot splines and velocity.
     for v in roi:
@@ -489,7 +487,7 @@ def save_roi_streamlines(path: str, name: str, img: np.array, vel: np.array,
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Streamlines and splines')
+    # ax.set_title('Streamlines and splines')
 
     # Plot splines and velocity.
     for v in roi:
@@ -530,7 +528,7 @@ def save_spl_curves(path: str, name: str, img: np.array,
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Splines and characteristics.')
+    # ax.set_title('Splines and characteristics.')
 
     # Plot splines.
     for v in roi:

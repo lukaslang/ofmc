@@ -96,7 +96,7 @@ for gen in genotypes:
         # Identify Kymograph and do sanity check.
         kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
         if len(kymos) != 1:
-            print("No Kymograph found for {0}!".format(dat))
+            print("No kymograph found for {0}!".format(dat))
 
         # Extract name of kymograph and replace whitespaces.
         name = os.path.splitext(os.path.basename(kymos[0]))[0]

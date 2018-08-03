@@ -20,11 +20,23 @@
 import datetime
 import glob
 import imageio
+import logging
+import numpy as np
 import os
 import re
 import warnings
 import ofmc.external.tifffile as tiff
 import ofmc.util.pyplothelpers as ph
+from scipy import ndimage
+from ofmc.model.of import of1d_img
+from ofmc.model.cms import cms1dl2_img
+from ofmc.model.cms import cms1d_img
+from ofmc.model.cmscr import cmscr1d_img
+
+ffc_logger = logging.getLogger('FFC')
+ffc_logger.setLevel(logging.WARNING)
+ufl_logger = logging.getLogger('UFL')
+ufl_logger.setLevel(logging.WARNING)
 
 # Set path with data.
 datapath = ('/Users/lukaslang/'
@@ -38,52 +50,202 @@ if not os.path.exists(resultpath):
 
 print('Processing {0}'.format(datapath))
 
-# Get folders with genotypes.
-genotypes = [d for d in os.listdir(datapath)
-             if os.path.isdir(os.path.join(datapath, d))]
 
-# Run through genotypes.
-for gen in genotypes:
-    # Get folders with datasets.
-    datasets = [d for d in os.listdir(os.path.join(datapath, gen))
-                if os.path.isdir(os.path.join(datapath, os.path.join(gen, d)))]
-    # Run through datasets.
-    for dat in datasets:
-        datfolder = os.path.join(datapath, os.path.join(gen, dat))
-        print("Dataset {0}/{1}".format(gen, dat))
+def load_kymo(datfolder, dat):
+    # Identify Kymograph and do sanity check.
+    kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
+    if len(kymos) != 1:
+        warnings.warn("No Kymograph found!")
 
-        # Identify Kymograph and do sanity check.
-        kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
-        if len(kymos) != 1:
-            warnings.warn("No Kymograph found!")
+    # Extract name of kymograph and replace whitespaces.
+    name = os.path.splitext(os.path.basename(kymos[0]))[0]
+    name = re.sub(' ', '_', name)
 
-        # Extract name of kymograph and replace whitespaces.
-        name = os.path.splitext(os.path.basename(kymos[0]))[0]
-        name = re.sub(' ', '_', name)
-        print("Outputting file '{0}'".format(name))
+    # Load kymograph.
+    return imageio.imread(kymos[0]), name
 
-        # Load and preprocess Kymograph.
-        img = imageio.imread(kymos[0])
 
-        # Plot and save figures.
-        # savekymo(os.path.join(os.path.join(resultpath, gen), dat), name, img)
-        ph.saveimage(os.path.join(resultpath, gen),
-                     name, img, 'Fluorescence intensity')
+# Figure 1: output frames for one dataset.
+gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
+dat = 'E2PSB1'
+frames = [4, 6, 10, 20, 40, 60, 80, 90]
 
-        # Output first frames of image sequence.
-        seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))
-        if len(seq) != 1:
-            warnings.warn("No sequence found!")
-        img = tiff.imread(seq)
+# Output frames.
+datfolder = os.path.join(datapath, os.path.join(gen, dat))
+seq = glob.glob('{0}/{1}*.tif'.format(datfolder, dat))
+if len(seq) != 1:
+    warnings.warn("No sequence found!")
+img = tiff.imread(seq)
 
-        frames = img.shape[0] if len(img.shape) is 3 else img.shape[1]
+# Output each frame.
+for k in frames:
+    if len(img.shape) is 4:
+        frame = img[0, k]
+    else:
+        frame = img[k]
+    filepath = os.path.join(os.path.join(resultpath, gen), dat)
+    ph.saveimage_nolegend(filepath, '{0}-{1}'.format(dat, k), frame)
 
-        # Output each frame.
-        for k in range(frames):
-            if len(img.shape) is 4:
-                frame = img[0, k]
-            else:
-                frame = img[k]
+# Load kymograph.
+img, name = load_kymo(datfolder, dat)
 
-            filepath = os.path.join(os.path.join(resultpath, gen), dat)
-            ph.saveimage_nolegend(filepath, '{0}-{1}'.format(dat, k), frame)
+# Plot and save figures.
+ph.saveimage(os.path.join(*[resultpath, gen, dat]), name, img)
+
+
+def prepareimage(img: np.array) -> np.array:
+    # Remove cut.
+    img = np.vstack((img[0:5, :], img[4, :], img[6:, :]))
+
+    # Filter image.
+    img = ndimage.gaussian_filter(img, sigma=1.0)
+
+    # Normalise to [0, 1].
+    img = np.array(img, dtype=float)
+    img = (img - img.min()) / (img.max() - img.min())
+    return img
+
+
+# Figure 5: quantitative comparison.
+gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
+dat = '190216E8PSB1'
+
+# Load kymograph.
+datfolder = os.path.join(datapath, os.path.join(gen, dat))
+img, name = load_kymo(datfolder, dat)
+
+# Prepare image.
+imgp = prepareimage(img)
+
+# Set regularisation parameters for of1d.
+alpha0 = 5e-3
+alpha1 = 5e-3
+
+# Compute velocity.
+vel, res, fun = of1d_img(imgp, alpha0, alpha1, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'of1d', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.saveimage(path, name, imgp)
+ph.savevelocity(path, name, img, vel)
+
+# Set regularisation parameters for cms1dl2.
+alpha0 = 5e-3
+alpha1 = 5e-3
+gamma = 1e-1
+
+# Compute velocity and source.
+vel, k, res, fun = cms1dl2_img(imgp, alpha0, alpha1, gamma, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cms1dl2', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.saveimage(path, name, imgp)
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)
+
+# Set regularisation parameters for cms1d.
+alpha0 = 5e-3
+alpha1 = 5e-3
+alpha2 = 1e-4
+alpha3 = 1e-4
+
+# Compute velocity and source.
+vel, k, res, fun = cms1d_img(imgp, alpha0, alpha1, alpha2, alpha3, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cms1d', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.saveimage(path, name, imgp)
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)
+
+# Set regularisation parameters for cmscr1d.
+alpha0 = 5e-3
+alpha1 = 5e-3
+alpha2 = 1e-4
+alpha3 = 1e-4
+beta = 2.5e-3
+
+# Compute velocity and source.
+vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
+                                          alpha2, alpha3,
+                                          beta, 'mesh')
+
+resfolder = os.path.join(os.path.join(resultpath, gen), dat)
+if not os.path.exists(resfolder):
+    os.makedirs(resfolder)
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cmscr1d', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.saveimage(path, name, imgp)
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)
+
+# Figure 6: increasing parameter beta.
+alpha0 = 5e-3
+alpha1 = 5e-3
+alpha2 = 1e-4
+alpha3 = 1e-4
+beta = 1e-3
+
+# Compute velocity and source.
+vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
+                                          alpha2, alpha3,
+                                          beta, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cmscr1d', '0', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)
+
+alpha0 = 5e-3
+alpha1 = 5e-3
+alpha2 = 1e-4
+alpha3 = 1e-4
+beta = 5e-3
+
+# Compute velocity and source.
+vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
+                                          alpha2, alpha3,
+                                          beta, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cmscr1d', '1', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)
+
+alpha0 = 5e-3
+alpha1 = 5e-3
+alpha2 = 1e-4
+alpha3 = 1e-4
+beta = 1e-2
+
+# Compute velocity and source.
+vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
+                                          alpha2, alpha3,
+                                          beta, 'mesh')
+
+# Plot and save figures.
+path = os.path.join(*[resultpath, 'cmscr1d', '2', gen, dat])
+if not os.path.exists(resultpath):
+    os.makedirs(resultpath)
+
+ph.savevelocity(path, name, img, vel)
+ph.savesource(path, name, k)

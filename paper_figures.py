@@ -27,6 +27,8 @@ import re
 import warnings
 import ofmc.external.tifffile as tiff
 import ofmc.util.pyplothelpers as ph
+import ofmc.util.roihelpers as rh
+from read_roi import read_roi_zip
 from scipy import ndimage
 from ofmc.model.of import of1d_img
 from ofmc.model.cms import cms1dl2_img
@@ -108,7 +110,8 @@ def prepareimage(img: np.array) -> np.array:
 
 # Figure 5: quantitative comparison.
 gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
-dat = '190216E8PSB1'
+# dat = '190216E8PSB1'
+dat = '190216E5PSB2'
 
 # Load kymograph.
 datfolder = os.path.join(datapath, os.path.join(gen, dat))
@@ -116,6 +119,21 @@ img, name = load_kymo(datfolder, dat)
 
 # Prepare image.
 imgp = prepareimage(img)
+
+# Sanity check.
+roifile = 'manual_ROIs.zip'
+if roifile not in os.listdir(datfolder):
+    print("No ROI file found for {0}!".format(dat))
+
+# Load roi zip.
+roi = read_roi_zip(os.path.join(datfolder, roifile))
+
+# Fit splines.
+spl = rh.roi2splines(roi)
+
+# Save images.
+ph.saveroi(os.path.join(*[resultpath, gen, dat]), name, img, roi)
+ph.savespl(os.path.join(*[resultpath, gen, dat]), name, img, roi, spl)
 
 # Set regularisation parameters for of1d.
 alpha0 = 5e-3

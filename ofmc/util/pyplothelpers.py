@@ -252,6 +252,9 @@ def saveroi(path: str, name: str, img: np.array, roi):
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     im = ax.imshow(img, cmap=cm.gray)
@@ -283,6 +286,9 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     m, n = img.shape
 
     # Determine min/max velocity.
@@ -342,6 +348,9 @@ def saveerror(path: str, name: str, img: np.array, vel: np.array, roi, spl):
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     # Interpolate velocity.
     m, n = vel.shape
 
@@ -403,6 +412,9 @@ def save_spl_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     m, n = img.shape
 
     # Determine max. velocity of splines.
@@ -473,6 +485,9 @@ def save_roi_streamlines(path: str, name: str, img: np.array, vel: np.array,
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     # Determine max. of splines and computed velocities.
     maxvel = abs(vel).max()
     normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
@@ -525,6 +540,9 @@ def save_spl_curves(path: str, name: str, img: np.array,
 
     Returns:
     """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)

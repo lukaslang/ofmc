@@ -51,15 +51,15 @@ if not os.path.exists(resfolder):
 
 # Plot and save figures.
 ph.saveimage(resfolder, '{0}-a_sav'.format(name),
-             a_sav[:, rng].transpose(), 'a_sav')
+             a_sav[:, rng].transpose(), 'a\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
-             ca_sav[:, rng].transpose(), 'ca_sav')
+             ca_sav[:, rng].transpose(), 'ca\\_sav')
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
-             cd_sav[:, rng].transpose(), 'cd_sav')
+             cd_sav[:, rng].transpose(), 'cd\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca_sav + a_sav')
+             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
-             v_sav[:, rng].transpose(), 'v_sav')
+             v_sav[:, rng].transpose(), 'v\\_sav')
 
 # Set regularisation parameter.
 alpha0 = 5e0
@@ -72,8 +72,8 @@ beta = 5e-4
 start = 11
 
 # Define concentration.
-img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
-# img = ca_sav[:, 1:ii].transpose()
+# img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
+img = ca_sav[:, start:ii].transpose()
 # img = ca_sav[:, 11:ii].transpose()
 
 # Compute velocity and source.
@@ -112,15 +112,15 @@ if not os.path.exists(resfolder):
 
 # Plot and save figures.
 ph.saveimage(resfolder, '{0}-a_sav'.format(name),
-             a_sav[:, rng].transpose(), 'a_sav')
+             a_sav[:, rng].transpose(), 'a\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
-             ca_sav[:, rng].transpose(), 'ca_sav')
+             ca_sav[:, rng].transpose(), 'ca\\_sav')
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
-             cd_sav[:, rng].transpose(), 'cd_sav')
+             cd_sav[:, rng].transpose(), 'cd\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca_sav + a_sav')
+             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
-             v_sav[:, rng].transpose(), 'v_sav')
+             v_sav[:, rng].transpose(), 'v\\_sav')
 
 # Set regularisation parameter.
 alpha0 = 5e0
@@ -133,8 +133,8 @@ beta = 5e-4
 start = 1
 
 # Define concentration.
-img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
-# img = ca_sav[:, 1:ii].transpose()
+# img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
+img = ca_sav[:, start:ii].transpose()
 # img = ca_sav[:, 11:ii].transpose()
 
 # Compute velocity and source.

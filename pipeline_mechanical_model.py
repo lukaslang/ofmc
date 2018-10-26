@@ -57,7 +57,8 @@ ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
              cd_sav[:, rng].transpose(), 'cd\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca\\_sav + a\\_sav')
+             (cd_sav[:, rng] + a_sav[:, rng]).transpose(),
+             'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
              v_sav[:, rng].transpose(), 'v\\_sav')
 
@@ -118,7 +119,8 @@ ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
              cd_sav[:, rng].transpose(), 'cd\\_sav')
 ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(), 'ca\\_sav + a\\_sav')
+             (cd_sav[:, rng] + a_sav[:, rng]).transpose(),
+             'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
              v_sav[:, rng].transpose(), 'v\\_sav')
 

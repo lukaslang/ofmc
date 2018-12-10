@@ -26,6 +26,7 @@ from dolfin import interpolate
 from dolfin import UnitSquareMesh
 from matplotlib import cm
 from ofmc.model.mpi import mpi1d_exp_pb
+from ofmc.model.cms import cms1d_exp_pb
 import ofmc.util.dolfinhelpers as dh
 
 # Set font style.
@@ -328,3 +329,7 @@ saveresults(resultpath, 'analytic_example_decay_mpi_exp_pb',
 v, k = mpi1d_exp_pb(m, n, f + noise, ft + noise, fx + noise)
 saveresults(resultpath, 'analytic_example_decay_mpi_exp_pb_noise',
             fa_pb, v, k, -fa_pb/tau)
+
+v, k, a, b = cms1d_exp_pb(m, n, f, ft, fx, 1e-10, 1e-10, 1e-10, 1e-10)
+saveresults(resultpath, 'analytic_example_decay_cms1d_exp_pb', fa_pb, v, k,
+            -fa_pb/tau)

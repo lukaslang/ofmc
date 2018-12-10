@@ -32,6 +32,10 @@ resultpath = 'results/{0}'.format(
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
+# Set k_on and k_off as in timestepping.py.
+k_on = 1.0
+k_off = 3.0
+
 # Set artificial velocity.
 artvel = False
 
@@ -41,6 +45,14 @@ print('Done!\n')
 
 # Plot results.
 rng = range(ii)
+
+# Scale velocities.
+m, n = v_sav.shape
+hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
+v_sav = v_sav * hy / hx
+
+# Compute source.
+source_sav = k_on * a_sav[:, rng] - k_off * ca_sav[:, rng]
 
 # Set name.
 name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
@@ -56,11 +68,14 @@ ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
              ca_sav[:, rng].transpose(), 'ca\\_sav')
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
              cd_sav[:, rng].transpose(), 'cd\\_sav')
-ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(),
-             'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
              v_sav[:, rng].transpose(), 'v\\_sav')
+ph.saveimage(resfolder, '{0}-source_sav'.format(name), source_sav.transpose(),
+             'source\\_sav')
+ph.savevelocity(resfolder, '{0}-v_sav'.format(name),
+                ca_sav[:, 0:ii].transpose(),
+                v_sav[:, 0:ii].transpose())
+
 
 # Set regularisation parameter.
 alpha0 = 5e0
@@ -87,12 +102,13 @@ ph.savevelocity(resfolder, name, img, vel)
 ph.savesource(resfolder, name, k)
 ph.savestrainrate(resfolder, name, img, vel)
 
-# TODO: Fix scaling issue.
 # Compute and output errors.
 err_v = np.abs(vel - v_sav[0:-1, start:ii].transpose())
 ph.saveimage(resfolder, '{0}-error_v'.format(name),
              err_v, 'Absolute difference in v.')
-# TODO: Compute error in source term.
+err_k = np.abs(k - source_sav[:, start:ii].transpose())
+ph.saveimage(resfolder, '{0}-error_k'.format(name),
+             err_k, 'Absolute difference in k.')
 
 # Set artificial velocity.
 artvel = True
@@ -103,6 +119,14 @@ print('Done!\n')
 
 # Plot results.
 rng = range(ii)
+
+# Scale velocities.
+m, n = v_sav.shape
+hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
+v_sav = v_sav * hy / hx
+
+# Compute source.
+source_sav = k_on * a_sav[:, rng] - k_off * ca_sav[:, rng]
 
 # Set name.
 name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
@@ -118,11 +142,13 @@ ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
              ca_sav[:, rng].transpose(), 'ca\\_sav')
 ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
              cd_sav[:, rng].transpose(), 'cd\\_sav')
-ph.saveimage(resfolder, '{0}-ca_sav+a_sav'.format(name),
-             (cd_sav[:, rng] + a_sav[:, rng]).transpose(),
-             'ca\\_sav + a\\_sav')
 ph.saveimage(resfolder, '{0}-v_sav'.format(name),
              v_sav[:, rng].transpose(), 'v\\_sav')
+ph.saveimage(resfolder, '{0}-source_sav'.format(name), source_sav.transpose(),
+             'source\\_sav')
+ph.savevelocity(resfolder, '{0}-v_sav'.format(name),
+                ca_sav[:, 0:ii].transpose(),
+                v_sav[:, 0:ii].transpose())
 
 # Set regularisation parameter.
 alpha0 = 5e0
@@ -149,9 +175,10 @@ ph.savevelocity(resfolder, name, img, vel)
 ph.savesource(resfolder, name, k)
 ph.savestrainrate(resfolder, name, img, vel)
 
-# TODO: Fix scaling issue.
 # Compute and output errors.
 err_v = np.abs(vel - v_sav[0:-1, start:ii].transpose())
 ph.saveimage(resfolder, '{0}-error_v'.format(name),
              err_v, 'Absolute difference in v.')
-# TODO: Compute error in source term.
+err_k = np.abs(k - source_sav[:, start:ii].transpose())
+ph.saveimage(resfolder, '{0}-error_k'.format(name),
+             err_k, 'Absolute difference in k.')

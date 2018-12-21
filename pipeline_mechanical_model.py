@@ -22,9 +22,9 @@ import datetime
 import numpy as np
 from ofmc.model.cmscr import cmscr1d_img
 import ofmc.util.pyplothelpers as ph
-import sys
-sys.path.append('../cuts-octave')
-from timestepping import timestepping
+import math
+import ofmc.mechanics.solver as solver
+import scipy.stats as stats
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -32,69 +32,77 @@ resultpath = 'results/{0}'.format(
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
-# Set k_on and k_off as in timestepping.py.
-k_on = 1.0
-k_off = 3.0
-
 # Set artificial velocity.
 artvel = False
 
-# Run time stepping algorithm.
-N, ii, TimeS, ca_sav, cd_sav, a_sav, v_sav = timestepping(artvel)
-print('Done!\n')
+# Create model and solver parameters.
+mp = solver.ModelParams()
+sp = solver.SolverParams()
+sp.n = 300
+sp.m = 266
 
-# Plot results.
-rng = range(ii)
 
+# Define initial values.
+def ca_init(x):
+    return stats.uniform.pdf(x, 0, 1) * 20 \
+        - math.sin(40 * x + math.cos(40 * x)) / 5
+
+
+def rho_init(x):
+    return stats.uniform.pdf(x, 0, 1) \
+        + (1 + math.sin(40 * x + math.cos(40 * x))) / 10
+
+
+# Initialise tracers.
+x = np.array(np.linspace(0, 1, num=25))
+
+# Run solver.
+rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x)
+
+# Compute mean from staggered grid.
+v = (v[:, 0:-1] + v[:, 1:]) / 2
+
+# TODO: Fix scaling of velocities.
 # Scale velocities.
-m, n = v_sav.shape
+m, n = v.shape
 hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
-v_sav = v_sav * hy / hx
+# v = v * hy / hx
 
 # Compute source.
-source_sav = k_on * a_sav[:, rng] - k_off * ca_sav[:, rng]
+source = mp.k_on - mp.k_off * ca * rho
 
-# Set name.
-name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
-
+# Set name and create folder.
+name = 'mechanical_model_artvel_{0}_simulated'.format(str(artvel).lower())
 resfolder = os.path.join(resultpath, name)
 if not os.path.exists(resfolder):
     os.makedirs(resfolder)
 
 # Plot and save figures.
-ph.saveimage(resfolder, '{0}-a_sav'.format(name),
-             a_sav[:, rng].transpose(), 'a\\_sav')
-ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
-             ca_sav[:, rng].transpose(), 'ca\\_sav')
-ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
-             cd_sav[:, rng].transpose(), 'cd\\_sav')
-ph.saveimage(resfolder, '{0}-v_sav'.format(name),
-             v_sav[:, rng].transpose(), 'v\\_sav')
-ph.saveimage(resfolder, '{0}-source_sav'.format(name), source_sav.transpose(),
-             'source\\_sav')
-ph.savevelocity(resfolder, '{0}-v_sav'.format(name),
-                ca_sav[:, 0:ii].transpose(),
-                v_sav[:, 0:ii].transpose())
-
+ph.saveimage(resfolder, '{0}-ca'.format(name), ca, 'ca')
+ph.saveimage(resfolder, '{0}-rho'.format(name), rho, 'rho')
+ph.saveimage(resfolder, '{0}-v'.format(name), v, 'v')
+ph.saveimage(resfolder, '{0}-k'.format(name), source, 'k')
+ph.savevelocity(resfolder, '{0}-v'.format(name), ca, v)
 
 # Set regularisation parameter.
-alpha0 = 5e0
+alpha0 = 5e-1
 alpha1 = 1e-1
 alpha2 = 1e-2
 alpha3 = 1e-2
-beta = 5e-4
-
-# Set start time for analysis (eg. 11 or 12)
-start = 11
+beta = 5e-3
 
 # Define concentration.
-# img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
-img = ca_sav[:, start:ii].transpose()
-# img = ca_sav[:, 11:ii].transpose()
+img = ca[idx + 1:, :]
 
 # Compute velocity and source.
 vel, k, res, fun, converged = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3,
                                           beta, 'mesh')
+
+# Set name and create folder.
+name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
+resfolder = os.path.join(resultpath, name)
+if not os.path.exists(resfolder):
+    os.makedirs(resfolder)
 
 # Plot and save figures.
 ph.saveimage(resfolder, name, img)
@@ -103,82 +111,11 @@ ph.savesource(resfolder, name, k)
 ph.savestrainrate(resfolder, name, img, vel)
 
 # Compute and output errors.
-err_v = np.abs(vel - v_sav[0:-1, start:ii].transpose())
+err_v = np.abs(vel - v[idx+1:, :])
 ph.saveimage(resfolder, '{0}-error_v'.format(name),
              err_v, 'Absolute difference in v.')
-err_k = np.abs(k - source_sav[:, start:ii].transpose())
+err_k = np.abs(k - source[idx+1:, :])
 ph.saveimage(resfolder, '{0}-error_k'.format(name),
              err_k, 'Absolute difference in k.')
 
-# Set artificial velocity.
-artvel = True
-
-# Run time stepping algorithm.
-N, ii, TimeS, ca_sav, cd_sav, a_sav, v_sav = timestepping(artvel)
-print('Done!\n')
-
-# Plot results.
-rng = range(ii)
-
-# Scale velocities.
-m, n = v_sav.shape
-hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
-v_sav = v_sav * hy / hx
-
-# Compute source.
-source_sav = k_on * a_sav[:, rng] - k_off * ca_sav[:, rng]
-
-# Set name.
-name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
-
-resfolder = os.path.join(resultpath, name)
-if not os.path.exists(resfolder):
-    os.makedirs(resfolder)
-
-# Plot and save figures.
-ph.saveimage(resfolder, '{0}-a_sav'.format(name),
-             a_sav[:, rng].transpose(), 'a\\_sav')
-ph.saveimage(resfolder, '{0}-ca_sav'.format(name),
-             ca_sav[:, rng].transpose(), 'ca\\_sav')
-ph.saveimage(resfolder, '{0}-cd_sav'.format(name),
-             cd_sav[:, rng].transpose(), 'cd\\_sav')
-ph.saveimage(resfolder, '{0}-v_sav'.format(name),
-             v_sav[:, rng].transpose(), 'v\\_sav')
-ph.saveimage(resfolder, '{0}-source_sav'.format(name), source_sav.transpose(),
-             'source\\_sav')
-ph.savevelocity(resfolder, '{0}-v_sav'.format(name),
-                ca_sav[:, 0:ii].transpose(),
-                v_sav[:, 0:ii].transpose())
-
-# Set regularisation parameter.
-alpha0 = 5e0
-alpha1 = 1e-1
-alpha2 = 1e-2
-alpha3 = 1e-2
-beta = 5e-4
-
-# Set start time for analysis (eg. 11 or 12)
-start = 1
-
-# Define concentration.
-# img = (ca_sav[:, start:ii] + a_sav[:, start:ii]).transpose()
-img = ca_sav[:, start:ii].transpose()
-# img = ca_sav[:, 11:ii].transpose()
-
-# Compute velocity and source.
-vel, k, res, fun, converged = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3,
-                                          beta, 'mesh')
-
-# Plot and save figures.
-ph.saveimage(resfolder, name, img)
-ph.savevelocity(resfolder, name, img, vel)
-ph.savesource(resfolder, name, k)
-ph.savestrainrate(resfolder, name, img, vel)
-
-# Compute and output errors.
-err_v = np.abs(vel - v_sav[0:-1, start:ii].transpose())
-ph.saveimage(resfolder, '{0}-error_v'.format(name),
-             err_v, 'Absolute difference in v.')
-err_k = np.abs(k - source_sav[:, start:ii].transpose())
-ph.saveimage(resfolder, '{0}-error_k'.format(name),
-             err_k, 'Absolute difference in k.')
+# TODO: Add artificial velocity.

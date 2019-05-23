@@ -17,6 +17,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This script computes results for data created by the mechanical model.
+# Figures 10: set artvel=False
+# Figures 11: set artvel=True
 import os
 import datetime
 import numpy as np
@@ -24,7 +28,9 @@ from ofmc.model.cmscr import cmscr1d_img
 import ofmc.util.pyplothelpers as ph
 import math
 import ofmc.mechanics.solver as solver
+import ofmc.util.velocity as velocity
 import scipy.stats as stats
+import matplotlib.pyplot as plt
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -33,31 +39,78 @@ if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
 # Set artificial velocity.
-artvel = False
+artvel = True
 
 # Create model and solver parameters.
 mp = solver.ModelParams()
+mp.t_cut = 0
+mp.k_on = 0
+mp.k_off = 0
+
 sp = solver.SolverParams()
-sp.n = 300
-sp.m = 266
+sp.n = 400
+sp.m = 100
+sp.T = 0.01
+sp.dt = 1e-6
 
 
 # Define initial values.
 def ca_init(x):
-    return stats.uniform.pdf(x, 0, 1) * 20 \
-        - math.sin(40 * x + math.cos(40 * x)) / 5
+    return stats.uniform.pdf(x, 0, 1) \
+        + (1 + math.sin(50 * x + math.cos(50 * x))) / 10
+#    return stats.uniform.pdf(x, 0, 1) * 20 \
+#        - math.sin(40 * x + math.cos(40 * x)) / 5
 
 
 def rho_init(x):
     return stats.uniform.pdf(x, 0, 1) \
-        + (1 + math.sin(40 * x + math.cos(40 * x))) / 10
+        + (1 + math.sin(50 * x + math.cos(50 * x))) / 10
 
+
+# Define parameters of artificial velocity field.
+c0 = 0.05 / 2
+v0 = 30
+tau0 = 0.005
+tau1 = 0.1
+
+
+def vel(t: float, x: float) -> float:
+    return velocity.vel(t, x - 0.5, c0, v0, tau0, tau1)
+
+
+# Set evaluations.
+rng = np.linspace(0, sp.T, num=sp.m)
+Xs = np.linspace(0, 1, num=sp.n + 1)
+
+vvec = np.zeros((sp.m, sp.n + 1))
+
+# Plot evaluations for different times.
+k = 0
+plt.figure()
+for t in rng:
+    v = np.vectorize(vel, otypes=[float])(t, Xs)
+    vvec[k, :] = v
+    plt.plot(v)
+    k = k + 1
+
+plt.show()
+plt.close()
+
+plt.figure()
+plt.imshow(vvec)
+plt.show()
+plt.close()
 
 # Initialise tracers.
 x = np.array(np.linspace(0, 1, num=25))
 
 # Run solver.
-rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x)
+if artvel is True:
+    rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x,
+                                             vel=vel)
+else:
+    rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x)
+
 
 # Compute mean from staggered grid.
 v = (v[:, 0:-1] + v[:, 1:]) / 2
@@ -69,7 +122,7 @@ hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
 # v = v * hy / hx
 
 # Compute source.
-source = mp.k_on - mp.k_off * ca * rho
+source = mp.k_on - mp.k_off * ca
 
 # Set name and create folder.
 name = 'mechanical_model_artvel_{0}_simulated'.format(str(artvel).lower())
@@ -85,10 +138,10 @@ ph.saveimage(resfolder, '{0}-k'.format(name), source, 'k')
 ph.savevelocity(resfolder, '{0}-v'.format(name), ca, v)
 
 # Set regularisation parameter.
-alpha0 = 5e-1
-alpha1 = 1e-1
-alpha2 = 1e-2
-alpha3 = 1e-2
+alpha0 = 5e-2
+alpha1 = 1e-3
+alpha2 = 1e-1
+alpha3 = 1e-1
 beta = 5e-3
 
 # Define concentration.
@@ -117,5 +170,3 @@ ph.saveimage(resfolder, '{0}-error_v'.format(name),
 err_k = np.abs(k - source[idx+1:, :])
 ph.saveimage(resfolder, '{0}-error_k'.format(name),
              err_k, 'Absolute difference in k.')
-
-# TODO: Add artificial velocity.

@@ -94,6 +94,7 @@ def transport1d(vel: np.array, source: np.array, finit: np.array) -> np.array:
     maxvel = np.amax(np.abs(vel))
     maxvel = maxvel if maxvel > 0 else 1
     dt = 0.95 * 0.209 * h / abs(maxvel)
+    print('Size of time step: {0}'.format(dt))
 
     # Compute dump frequency.
     dumpfreq = max(np.int(T / dt / m), 1)

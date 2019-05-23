@@ -17,6 +17,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This script takes all the kymographs and computes results.
 import os
 import datetime
 import glob

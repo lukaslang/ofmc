@@ -35,7 +35,7 @@ class PeriodicBoundary(SubDomain):
     """Helper class to define periodic boundary for the second dimension."""
 
     def inside(self, x, on_boundary):
-        return bool(near(x[1], 0.0))
+        return bool(near(x[1], 0.0) and on_boundary)
 
     def map(self, x, y):
         y[0] = x[0]

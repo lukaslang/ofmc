@@ -18,6 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
+import scipy.ndimage.filters
 import scipy.sparse
 import scipy.sparse.linalg
 import sys
@@ -93,7 +94,7 @@ def solve_stress_velocity(A, c: np.array, dx: float, chi: float, eta: float,
                           xi: float) -> (np.array, np.array):
     """Computes stress and velocity.
 
-    The stress sigma obeys zero-Neumann boundary conditions.
+    The stress sigma obeys zero Neumann boundary conditions.
     The velocity v obeys zero Dirichlet boundary conditions.
 
     Args:
@@ -182,7 +183,6 @@ def flux(v: np.array, c: np.array, delta: float):
 
 
 def dump(var_dump: np.array, var: np.array, idx: int):
-    var_dump[idx, :] = var
     """Stores a row in an array at a given index.
 
     Args:
@@ -190,21 +190,33 @@ def dump(var_dump: np.array, var: np.array, idx: int):
         var (np.array): An array of shape (n,).
         idx (int): An index idx < n.
     """
+    var_dump[idx, :] = var
 
 
-def solve(mp: ModelParams, sp: SolverParams,
-          rho_init, ca_init, x: np.array):
-    """Computes the 1D transport via continuity equation.
+def solve(mp: ModelParams, sp: SolverParams, rho_init, ca_init, x: np.array,
+          **kwargs):
+    """Solves the following system of PDEs with explicit Euler time-stepping on
+    a staggered grid.
 
-    Description.
+    TODO: Add description and PDE system.
 
     Args:
-        n (int): Number of grid points.
-
+        mp (ModelParams): An instance of ModelParams.
+        sp (SolverParams): An instance of SolverParams.
+        rho_init: A function fun(x) that gives the initial concentration at x.
+        ca_init: A function fun(x) that gives the initial concentration at x.
+        x (np.array): An array of shape (k,) of initial tracer positions.
+        vel: A function vel(t, x) that gives the velocity (optional).
     Returns:
-        np.array: A 2D array of size (m + 1, n) with the transport.
-
+        np.array: A 2D array of size (m + 1, n) with rho.
+        np.array: A 2D array of size (m + 1, n) with ca.
+        np.array: A 2D array of size (m + 1, n + 1) with v.
+        np.array: A 2D array of size (m + 1, n + 2) with sigma.
+        np.array: A 2D array of size (m + 1, k) with tracer positions.
+        int: The array index at which the artificial cut was applied.
     """
+    vel = kwargs.get('vel', None)
+
     # Define start time.
     t = 0.0
 
@@ -230,17 +242,21 @@ def solve(mp: ModelParams, sp: SolverParams,
 
     # Define simulated laser ablation on cell-centred grid.
     cut = [0 if x <= 0.5 + mp.k / 2 and x >= 0.5 - mp.k / 2 else 1 for x in X]
+    # Smoothen cut.
+    #cut = scipy.ndimage.filters.gaussian_filter1d(np.array(cut, dtype=float),
+    #                                              sigma=1.5)
     cut_idx = 0
 
     # Concentration of actin.
-    rho = np.vectorize(rho_init)(X)
+    rho = np.vectorize(rho_init, otypes=[float])(X)
     rho_dump = np.zeros((sp.m + 1, sp.n))
-    rho_dump[0, :] = rho
+    dump(rho_dump, rho, 0)
 
     # Concentration of attached myosin.
-    ca = np.vectorize(ca_init)(X)
+    ca = np.vectorize(ca_init, otypes=[float])(X) if mp.t_cut > t \
+        else np.vectorize(ca_init, otypes=[float])(X) * cut
     ca_dump = np.zeros((sp.m + 1, sp.n))
-    ca_dump[0, :] = ca
+    dump(ca_dump, ca, 0)
 
     # Create stress and velocity.
     sigma_dump = np.zeros((sp.m + 1, sp.n + 2))
@@ -250,9 +266,13 @@ def solve(mp: ModelParams, sp: SolverParams,
     A = stress_matrix(sp.n, dx, mp.eta, mp.xi)
 
     # Compute initial stress and velocity.
-    sigma, v = solve_stress_velocity(A, ca, dx, mp.chi, mp.eta, mp.xi)
-    sigma_dump[0, :] = sigma
-    v_dump[0, :] = v
+    if vel is None:
+        sigma, v = solve_stress_velocity(A, ca, dx, mp.chi, mp.eta, mp.xi)
+    else:
+        v = np.vectorize(vel, otypes=[float])(t, Xs)
+        sigma = np.zeros((1, sp.n + 2))
+    dump(sigma_dump, sigma, 0)
+    dump(v_dump, v, 0)
 
     # Check if CFL condition is violated.
     check_cfl(v, sp.dt, dx, sp.CFL)
@@ -264,19 +284,24 @@ def solve(mp: ModelParams, sp: SolverParams,
         frho = flux(v, rho, sp.delta)
 
         # Add cut and save dump index.
-        if t >= mp.t_cut - 2 * sp.dt and t < mp.t_cut + 2 * sp.dt:
+        if t >= mp.t_cut - sp.dt / 2 and t < mp.t_cut + sp.dt / 2 \
+                and mp.t_cut > 0:
             ca = ca * cut
             cut_idx = d
 
         # Perform explicit forward Euler step.
         rho_new = rho - sp.dt * np.diff(frho) / dx
-        ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca * rho)
+        # ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca * rho)
+        ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca)
 
         # Update variable rho.
         rho = rho_new
 
         # Compute stress and velocity.
-        sigma, v = solve_stress_velocity(A, ca, dx, mp.chi, mp.eta, mp.xi)
+        if vel is None:
+            sigma, v = solve_stress_velocity(A, ca, dx, mp.chi, mp.eta, mp.xi)
+        else:
+            v = np.vectorize(vel, otypes=[float])(t, Xs)
 
         # Update position of tracers.
         x = x + sp.dt * np.interp(x, Xs, v)
@@ -299,8 +324,20 @@ def solve(mp: ModelParams, sp: SolverParams,
         check_cfl(v, sp.dt, dx, sp.CFL)
 
     # Compute conservation error.
-    conservation_error_rho = np.abs(np.sum(rho_dump[-1, :] - rho_dump[0, :]))
-    print('Initial mass rho: {0}'.format(np.sum(rho_dump[0, :])))
-    print('Conservation error rho: {0}'.format(conservation_error_rho))
+    print_conservation_error(rho_dump, 'rho', dx)
+    print_conservation_error(ca_dump, 'ca', dx)
 
     return rho_dump, ca_dump, v_dump, sigma_dump, x_dump, cut_idx
+
+
+def print_conservation_error(var: np.array, name: str, dx: float):
+    """Computes and prints the difference in the integrated mass between the
+    first and the last time instant.
+
+    Args:
+        var (np.array): An array of shape (m, n).
+        name (str): Name of the variabe.
+    """
+    conservation_error = dx * np.abs(np.sum(var[-1, :]) - np.sum(var[0, :]))
+    print('Initial mass {0}: {1}'.format(name, dx * np.sum(var[0, :])))
+    print('Conservation error {0}: {1}'.format(name, conservation_error))

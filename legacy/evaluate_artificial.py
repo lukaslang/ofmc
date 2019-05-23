@@ -17,10 +17,12 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+import math
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import scipy.stats as stats
 from dolfin import Expression
 from dolfin import FunctionSpace
 from dolfin import interpolate
@@ -127,6 +129,24 @@ def savestrainrate(path: str, name: str, sr: np.array):
     plt.close(fig)
 
 
+def saveerror(path: str, name: str, err: np.array):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    maxerr = abs(err).max()
+    normi = mpl.colors.Normalize(vmin=-maxerr, vmax=maxerr)
+
+    # Plot velocity.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    cax = ax.imshow(err, interpolation='nearest', norm=normi, cmap=cm.coolwarm)
+    ax.set_title('Error in velocity')
+    fig.colorbar(cax, orientation='horizontal')
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}-error-velocity.png'.format(name)))
+    plt.close(fig)
+
+
 # Set path where results are saved.
 resultpath = 'results'
 
@@ -165,7 +185,18 @@ class DoubleHat(Expression):
         return ()
 
 
+class InitialData(Expression):
+
+    def eval(self, value, x):
+        value[0] = stats.uniform.pdf(x[0], 0, 1) \
+            + (1 + math.sin(40 * x[0] + math.cos(40 * x[0]))) / 10
+
+    def value_shape(self):
+        return ()
+
+
 f0 = DoubleHat(degree=1)
+# f0 = InitialData(degree=1)
 f0 = interpolate(f0, V)
 
 # Compute transport
@@ -178,19 +209,35 @@ f = (f - f.min()) / (f.max() - f.min())
 # Add some noise.
 # f = f + 0.05 * np.random.randn(m + 1, n)
 
+
+# Check continuity equation for rho.
+def flux(v, f):
+    return f * v
+
+
+fv = np.array([flux(a, b) for a, b in zip(v, f)])
+dtf = np.diff(f, n=1, axis=0)
+
+err = np.abs(dtf[:, :-1] + np.diff(fv, n=1, axis=1))
+fig, ax = plt.subplots(figsize=(10, 5))
+cax = ax.imshow(err, cmap=cm.viridis)
+ax.set_title('Error')
+fig.colorbar(cax, orientation='vertical')
+
+
 # Set regularisation parameters.
 alpha0 = 1e-1
-alpha1 = 1e-1
-alpha2 = 1e-2
-alpha3 = 1e-2
-beta = 1e1
+alpha1 = 1e-2
+alpha2 = 1e3
+alpha3 = 1e3
+beta = 1e-10
 
 # Compute velocities.
 # vel = of1d(f, alpha0, alpha1)
 # vel = cm1d(f, alpha0, alpha1)
 # vel, k = cms1d(f, alpha0, alpha1, alpha2, alpha3)
 vel, k, res, fun, converged = cmscr1d_img(f, alpha0, alpha1, alpha2,
-                                          alpha3, beta, 'mesh'
+                                          alpha3, beta, 'mesh')
 # vel, k, res, fun converged = cmscr1dnewton(f, alpha0, alpha1, alpha2,
 # alpha3, beta)
 
@@ -199,6 +246,8 @@ saveimage(os.path.join(resultpath, 'artificial'), name, f)
 savevelocity(os.path.join(resultpath, 'artificial'), name, f, vel)
 savevelocity(os.path.join(resultpath, 'artificial'), 'artificial-gt', f, v)
 savesource(os.path.join(resultpath, 'artificial'), name, k)
+saveerror(os.path.join(resultpath, 'artificial'), name,
+          np.abs(v - vel[:-1, :]))
 
 # Compute differences.
 

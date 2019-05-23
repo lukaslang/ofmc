@@ -18,7 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
-from scipy import interpolate
+from scipy.interpolate import RegularGridInterpolator
 from scipy.interpolate import UnivariateSpline
 from scipy.integrate import solve_ivp
 
@@ -86,8 +86,11 @@ def compute_error(vel: np.array, roi, spl) -> dict:
         error (dict): A dictionary of errors.
     """
     m, n = vel.shape
-    gridx, gridy = np.mgrid[0:m, 0:n]
-    gridpoints = np.hstack([gridx.reshape(m * n, 1), gridy.reshape(m * n, 1)])
+    grid1 = np.linspace(0, m - 1, m)
+    grid2 = np.linspace(0, n - 1, n)
+    rgi = RegularGridInterpolator(points=[grid1, grid2], values=vel,
+                                  method='linear', bounds_error=False,
+                                  fill_value=0)
 
     error = dict()
     for v in roi:
@@ -96,8 +99,7 @@ def compute_error(vel: np.array, roi, spl) -> dict:
         # Interpolate velocity.
         y = np.arange(y[0], y[-1] + 1, 1)
         x = np.array(spl[v](y))
-        veval = interpolate.griddata(gridpoints, vel.flatten(), (y, x),
-                                     method='linear')
+        veval = rgi((y, x))
 
         # Compute derivative of spline.
         derivspl = spl[v].derivative()
@@ -121,17 +123,19 @@ def compute_endpoint_error(vel: np.array, roi, spl) -> (dict, dict):
         curve (dict): A dictionary of points of the trajectory.
     """
     m, n = vel.shape
-    gridx, gridy = np.mgrid[0:m, 0:n]
-    gridpoints = np.hstack([gridx.reshape(m * n, 1), gridy.reshape(m * n, 1)])
+    grid1 = np.linspace(0, m - 1, m)
+    grid2 = np.linspace(0, n - 1, n)
+    rgi = RegularGridInterpolator(points=[grid1, grid2], values=vel,
+                                  method='linear', bounds_error=False,
+                                  fill_value=0)
 
     # Scale according to grid.
     hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
     vel = vel * hx / hy
 
     # Define ODE.
-    def ode(t, y): return interpolate.griddata(gridpoints,
-                                               vel.flatten(), (t, y),
-                                               method='linear')
+    def ode(t, y): return rgi((t, y))
+
     error = dict()
     curve = dict()
     for v in roi:

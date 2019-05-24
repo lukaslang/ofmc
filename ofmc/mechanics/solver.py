@@ -136,7 +136,7 @@ def check_cfl(v: np.array, dt: float, dx: float, CFL: float):
     """
     cmax = CFL * dx / np.max(np.abs(v))
     if cmax < dt:
-        print('CFL condition violated as dt={0 > {1}!\n'.format(dt, cmax))
+        print('CFL condition violated as dt={0} > {1}!\n'.format(dt, cmax))
         sys.exit()
 
 
@@ -243,7 +243,7 @@ def solve(mp: ModelParams, sp: SolverParams, rho_init, ca_init, x: np.array,
     # Define simulated laser ablation on cell-centred grid.
     cut = [0 if x <= 0.5 + mp.k / 2 and x >= 0.5 - mp.k / 2 else 1 for x in X]
     # Smoothen cut.
-    #cut = scipy.ndimage.filters.gaussian_filter1d(np.array(cut, dtype=float),
+    # cut = scipy.ndimage.filters.gaussian_filter1d(np.array(cut, dtype=float),
     #                                              sigma=1.5)
     cut_idx = 0
 

@@ -26,6 +26,7 @@ from dolfin import interpolate
 from dolfin import UnitSquareMesh
 from matplotlib import cm
 from ofmc.model.cmscr import cmscr1d_exp_pb
+from ofmc.model.cm import cm1d_exp_pb
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import ofmc.util.dolfinhelpers as dh
 
@@ -364,3 +365,53 @@ v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
                                            alpha2, alpha3, beta)
 saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
+
+
+# The next example shows that for the initial concentration used in the
+# mechanical models the algorithm picks up the source well.
+class f_decay(Expression):
+    def eval(self, value, x):
+        value[0] = 20 - np.sin(10 * np.pi * x[1]
+                               + np.cos(10 * np.pi * x[1])) / 5 + c0 * x[0]
+
+    def value_shape(self):
+        return ()
+
+
+class f_decay_x(Expression):
+    def eval(self, value, x):
+        value[0] = - 2 * np.pi * (np.sin(10 * np.pi * x[1]) - 1) \
+            * np.cos(10 * np.pi * x[1] + np.cos(10 * np.pi * x[1]))
+
+    def value_shape(self):
+        return ()
+
+
+class f_decay_t(Expression):
+    def eval(self, value, x):
+        value[0] = c0
+
+    def value_shape(self):
+        return ()
+
+
+# Set parameters of data.
+w = 0
+lambdap = 1 / (4 * np.pi)
+tau = 1.0
+c0 = 0.1
+
+# Run experiments with decaying data.
+f = f_decay(degree=2)
+ft = f_decay_t(degree=1)
+fx = f_decay_x(degree=1)
+datastr = DecayingData().string()
+
+fa_pb = interpolate(f, W)
+fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+
+v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
+                                           alpha2, alpha3, beta)
+saveresults(resultpath,
+            'analytic_example_decay_static_cmscr1d_l2h1h1cr_exp_pb',
+            'l2h1h1cr', fa_pb, v, k, c0)

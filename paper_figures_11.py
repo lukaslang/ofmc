@@ -67,7 +67,7 @@ def rho_init(x):
 c0 = mp.k / 2
 v0 = 5
 tau0 = 0.05
-tau1 = 0.1
+tau1 = 0.05
 
 
 def vel(t: float, x: float) -> float:

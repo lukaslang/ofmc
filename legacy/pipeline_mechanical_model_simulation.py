@@ -118,7 +118,7 @@ img, name = load_kymo(datfolder, dat)
 # Prepare image.
 imgp = prepareimage(img)
 
-imgp = imgp[:, 40:125]
+#imgp = imgp[:, 40:125]
 
 m, n = imgp.shape
 

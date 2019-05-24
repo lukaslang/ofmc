@@ -29,9 +29,9 @@ class ModelParams:
     # Viscosity of the cortex.
     eta: float = 0.5
     # Friction with the membrane.
-    xi: float = 0.1
+    xi: float = 10
     # Contractility modulus.
-    chi: float = 1.5
+    chi: float = 2
     # Define time of simulated laser ablation.
     t_cut = 0.025
     # Define width of cut. Interval will be [0.5-k/2, 0.5+k/2].

@@ -93,17 +93,16 @@ if not os.path.exists(resfolder):
     os.makedirs(resfolder)
 
 # Plot and save figures.
-ph.saveimage(resfolder, '{0}-ca'.format(name), ca, 'ca')
-ph.saveimage(resfolder, '{0}-rho'.format(name), rho, 'rho')
-ph.saveimage(resfolder, '{0}-v'.format(name), v, 'v')
-ph.saveimage(resfolder, '{0}-k'.format(name), source, 'k')
+ph.saveimage(resfolder, '{0}-ca'.format(name), ca)
+ph.saveimage(resfolder, '{0}-v'.format(name), v)
+ph.saveimage(resfolder, '{0}-k'.format(name), source)
 ph.savevelocity(resfolder, '{0}-v'.format(name), ca, v)
 
 # Set regularisation parameter.
-alpha0 = 1e-1
-alpha1 = 1e-3
-alpha2 = 1e-2
-alpha3 = 1e-2
+alpha0 = 5e-2
+alpha1 = 5e-3
+alpha2 = 5e-3
+alpha3 = 5e-3
 beta = 1e-3
 
 # Define concentration.

@@ -213,7 +213,7 @@ def cmscr1d_exp_pb(m: int, n: int,
 def cmscr1d_img(img: np.array,
                 alpha0: float, alpha1: float,
                 alpha2: float, alpha3: float,
-                beta: float, deriv) \
+                beta: float, deriv, mesh=None) \
                 -> (np.array, np.array, float, float, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation.
@@ -231,6 +231,7 @@ def cmscr1d_img(img: np.array,
         deriv (str): Specifies how to approximate pertial derivatives.
                      When set to 'mesh' it uses FEniCS built in function.
                      When set to 'fd' it uses finite differences.
+        mesh: A custom mesh (optional). Must have (m - 1, n - 1) cells.
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
@@ -247,7 +248,8 @@ def cmscr1d_img(img: np.array,
 
     # Create mesh.
     m, n = img.shape
-    mesh = UnitSquareMesh(m - 1, n - 1)
+    if mesh is None:
+        mesh = UnitSquareMesh(m - 1, n - 1)
 
     # Define function spaces.
     V = dh.create_function_space(mesh, 'default')
@@ -360,7 +362,7 @@ def cmscr1dnewton(img: np.array, alpha0: float, alpha1: float, alpha2: float,
     """
     # Create mesh.
     [m, n] = img.shape
-    mesh = UnitSquareMesh(m-1, n-1)
+    mesh = UnitSquareMesh(m - 1, n - 1)
 
     # Define function space and functions.
     W = VectorFunctionSpace(mesh, 'CG', 1, dim=2)

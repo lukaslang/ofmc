@@ -24,7 +24,9 @@ import unittest
 import numpy as np
 from dolfin import Constant
 from dolfin import Function
+from dolfin import Point
 from dolfin import UnitSquareMesh
+from dolfin import RectangleMesh
 from ofmc.model.cmscr import cmscr1d_weak_solution
 from ofmc.model.cmscr import cmscr1d_exp
 from ofmc.model.cmscr import cmscr1d_exp_pb
@@ -146,6 +148,23 @@ class TestCmscr(unittest.TestCase):
         img = np.zeros((10, 25))
         v, k, res, fun, converged = cmscr1d_img_pb(img, 1.0, 1.0, 1.0, 1.0,
                                                    1.0, 'mesh')
+
+        np.testing.assert_allclose(v.shape, img.shape)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, img.shape)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cmscr1d_img_custom_mesh(self):
+        print("Running test 'test_cmscr1d_img_custom_mesh'")
+        # Create zero image.
+        img = np.zeros((10, 25))
+
+        # Create custom mesh.
+        m, n = img.shape
+        mesh = RectangleMesh(Point(0, 0), Point(0.1, 1), m - 1, n - 1)
+
+        v, k, res, fun, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                'mesh', mesh)
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

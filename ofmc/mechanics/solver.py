@@ -195,10 +195,9 @@ def dump(var_dump: np.array, var: np.array, idx: int):
 
 def solve(mp: ModelParams, sp: SolverParams, rho_init, ca_init, x: np.array,
           **kwargs):
-    """Solves the following system of PDEs with explicit Euler time-stepping on
-    a staggered grid.
-
-    TODO: Add description and PDE system.
+    """Solves the mechanical model. A system of PDEs using a finite volume
+    discretisation and explicit Euler time-stepping on staggered/centred grids
+    are solved.
 
     Args:
         mp (ModelParams): An instance of ModelParams.
@@ -291,8 +290,7 @@ def solve(mp: ModelParams, sp: SolverParams, rho_init, ca_init, x: np.array,
 
         # Perform explicit forward Euler step.
         rho_new = rho - sp.dt * np.diff(frho) / dx
-        # ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca * rho)
-        ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca)
+        ca = ca - sp.dt * (np.diff(fca) / dx - mp.k_on + mp.k_off * ca * rho)
 
         # Update variable rho.
         rho = rho_new
@@ -322,6 +320,8 @@ def solve(mp: ModelParams, sp: SolverParams, rho_init, ca_init, x: np.array,
 
         # Check if CFL condition is violated.
         check_cfl(v, sp.dt, dx, sp.CFL)
+
+    print('Final time: {0}'.format(t - sp.dt))
 
     # Compute conservation error.
     print_conservation_error(rho_dump, 'rho', dx)

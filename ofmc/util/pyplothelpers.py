@@ -38,8 +38,8 @@ plt.rc('text', usetex=True)
 cmap = cm.viridis
 
 # Streamlines.
-density = 2
-linewidth = 2
+density = 1
+linewidth = 1
 arrowstyle = '-'
 
 # Set output quality.
@@ -133,17 +133,22 @@ def savesource(path: str, name: str, img: np.array):
     plt.close(fig)
 
 
-def savevelocity(path: str, name: str, img: np.array, vel: np.array):
+def savevelocity(path: str, name: str, img: np.array, vel: np.array, **kwargs):
     """Takes a path string, a filename, and an array and saves the plotted
     array.
 
     Args:
         path (str): The path to save the image to.
         name (str): The filename.
-        img (np.array): The 2D array.
-
+        img (np.array): A 2D array of intensities.
+        vel (np.array): A 2D array with the velocity.
+        T (float): Specifies the time interval [0, T] (optional).
     Returns:
     """
+    T = kwargs.get('T', None)
+    if T is None:
+        T = 1.0
+
     if not os.path.exists(path):
         os.makedirs(path)
 
@@ -167,7 +172,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     plt.close(fig)
 
     m, n = vel.shape
-    hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
+    hx, hy = T / (m - 1), 1.0 / (n - 1)
 
     # Create grid for streamlines.
     Y, X = np.mgrid[0:m, 0:n]

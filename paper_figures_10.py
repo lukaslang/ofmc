@@ -66,7 +66,7 @@ mp.k_off = 10
 
 sp = solver.SolverParams()
 sp.n = 301
-sp.m = 534
+sp.m = 267
 sp.T = 0.1
 sp.dt = 2.5e-6
 sp.delta = 1e-3
@@ -113,7 +113,7 @@ ph.saveimage(resfolder, '{0}-ca'.format(name), ca)
 ph.saveimage(resfolder, '{0}-v'.format(name), v)
 ph.saveimage(resfolder, '{0}-sigma'.format(name), sigma)
 ph.saveimage(resfolder, '{0}-k'.format(name), source)
-ph.savevelocity(resfolder, '{0}-v'.format(name), ca, v, sp.T)
+ph.savevelocity(resfolder, '{0}-v'.format(name), ca, v, T=sp.T)
 
 # Set regularisation parameters for cmscr1d.
 alpha0 = 1e-2
@@ -146,7 +146,7 @@ if not os.path.exists(resfolder):
 
 # Plot and save figures.
 ph.saveimage(resfolder, name, img)
-ph.savevelocity(resfolder, name, img, vel, sp.T)
+ph.savevelocity(resfolder, name, img, vel, T=sp.T)
 ph.savesource(resfolder, name, k)
 # ph.savestrainrate(resfolder, name, img, vel)
 

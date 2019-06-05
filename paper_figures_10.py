@@ -61,7 +61,7 @@ sp = solver.SolverParams()
 sp.n = 300
 sp.m = 300
 sp.T = 0.1
-sp.dt = 1e-6
+sp.dt = 2.5e-6
 sp.delta = 1e-6
 
 

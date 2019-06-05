@@ -35,18 +35,18 @@ import matplotlib.pyplot as plt
 font = {'family': 'sans-serif',
         'serif': ['DejaVu Sans'],
         'weight': 'normal',
-        'size': 20}
+        'size': 30}
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
+
+# Set output quality.
+dpi = 100
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
-
-# Set artificial velocity.
-artvel = False
 
 # Create model and solver parameters.
 mp = solver.ModelParams()
@@ -89,7 +89,7 @@ v = (v[:, 0:-1] + v[:, 1:]) / 2
 source = mp.k_on - mp.k_off * ca * rho
 
 # Set name and create folder.
-name = 'mechanical_model_artvel_{0}_simulated'.format(str(artvel).lower())
+name = 'mechanical_model'
 resfolder = os.path.join(resultpath, name)
 if not os.path.exists(resfolder):
     os.makedirs(resfolder)
@@ -111,7 +111,7 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-ca-profile.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)
 
 # Perform linear regression on k = k_on + k_off * img * rho.
@@ -132,7 +132,7 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-regress.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)
 
 # Set regularisation parameters for cmscr1d.
@@ -158,7 +158,7 @@ vel, k, res, fun, converged = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3,
                                           beta, 'mesh', mesh, bc)
 
 # Set name and create folder.
-name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
+name = 'cmscr1d'
 resfolder = os.path.join(resultpath, name)
 if not os.path.exists(resfolder):
     os.makedirs(resfolder)
@@ -192,5 +192,5 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-regress.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)

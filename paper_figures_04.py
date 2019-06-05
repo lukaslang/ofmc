@@ -345,7 +345,7 @@ tau = 1.0
 c0 = 0.0
 
 # Create mesh and function spaces.
-m, n = 50, 100
+m, n = 40, 100
 mesh = UnitSquareMesh(m - 1, n - 1)
 V = dh.create_function_space(mesh, 'default')
 W = dh.create_function_space(mesh, 'periodic')

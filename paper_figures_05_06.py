@@ -26,8 +26,6 @@ import os
 import re
 import warnings
 import ofmc.util.pyplothelpers as ph
-import ofmc.util.roihelpers as rh
-from read_roi import read_roi_zip
 from scipy import ndimage
 from ofmc.model.of import of1d_img
 from ofmc.model.cms import cms1dl2_img
@@ -154,10 +152,6 @@ beta = 2.5e-3
 vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
                                           alpha2, alpha3,
                                           beta, 'mesh')
-
-resfolder = os.path.join(os.path.join(resultpath, gen), dat)
-if not os.path.exists(resfolder):
-    os.makedirs(resfolder)
 
 # Plot and save figures.
 path = os.path.join(*[resultpath, 'cmscr1d', gen, dat])

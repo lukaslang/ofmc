@@ -36,18 +36,18 @@ import matplotlib.pyplot as plt
 font = {'family': 'sans-serif',
         'serif': ['DejaVu Sans'],
         'weight': 'normal',
-        'size': 20}
+        'size': 30}
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
+
+# Set output quality.
+dpi = 100
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
-
-# Set artificial velocity.
-artvel = True
 
 # Create model and solver parameters.
 mp = solver.ModelParams()
@@ -57,13 +57,15 @@ mp.chi = 1
 mp.t_cut = 0
 mp.k_on = 200
 mp.k_off = 10
+# mp.k_on = 0
+# mp.k_off = 0
 
 sp = solver.SolverParams()
 sp.n = 300
 sp.m = 300
 sp.T = 0.1
 sp.dt = 2.5e-6
-sp.delta = 1e-6
+sp.delta = 1e-2
 
 
 # Define initial values.
@@ -129,7 +131,7 @@ v = (v[:, 0:-1] + v[:, 1:]) / 2
 source = mp.k_on - mp.k_off * ca * rho
 
 # Set name and create folder.
-name = 'mechanical_model_artvel_{0}_simulated'.format(str(artvel).lower())
+name = 'mechanical_model'
 resfolder = os.path.join(resultpath, name)
 if not os.path.exists(resfolder):
     os.makedirs(resfolder)
@@ -151,7 +153,7 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-ca-profile.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)
 
 # Perform linear regression on k = k_on + k_off * img * rho.
@@ -172,11 +174,11 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-regress.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)
 
 # Set regularisation parameters for cmscr1d.
-alpha0 = 5e-2
+alpha0 = 1e-1
 alpha1 = 1e-5
 alpha2 = 1e-4
 alpha3 = 1e-5
@@ -198,7 +200,7 @@ vel, k, res, fun, converged = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3,
                                           beta, 'mesh', mesh, bc)
 
 # Set name and create folder.
-name = 'mechanical_model_artvel_{0}'.format(str(artvel).lower())
+name = 'cmscr1d'
 resfolder = os.path.join(resultpath, name)
 if not os.path.exists(resfolder):
     os.makedirs(resfolder)
@@ -232,5 +234,5 @@ fig.tight_layout()
 plt.show()
 # Save figure.
 fig.savefig(os.path.join(resfolder, '{0}-regress.png'.format(name)),
-            dpi=100, bbox_inches='tight')
+            dpi=dpi, bbox_inches='tight')
 plt.close(fig)

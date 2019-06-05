@@ -30,7 +30,7 @@ import os
 font = {'family': 'sans-serif',
         'serif': ['DejaVu Sans'],
         'weight': 'normal',
-        'size': 20}
+        'size': 30}
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
 
@@ -95,10 +95,11 @@ def saveimage_nolegend(path: str, name: str, img: np.array):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(img, cmap=cm.gray)
+    # plt.axis('off')
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
 
 
@@ -262,21 +263,22 @@ def saveroi(path: str, name: str, img: np.array, roi):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.gray)
+    ax.imshow(img, cmap=cm.gray)
+    # plt.axis('off')
     # ax.set_title('Manual tracks')
 
     for v in roi:
         plt.plot(roi[v]['x'], roi[v]['y'], 'C3', lw=2)
 
     # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
+    # divider = make_axes_locatable(ax)
+    # cax = divider.append_axes("right", size="5%", pad=0.1)
+    # fig.colorbar(im, cax=cax, orientation='vertical')
 
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-roi.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
 
 
@@ -309,6 +311,7 @@ def savespl(path: str, name: str, img: np.array, roi, spl):
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
+    # plt.axis('off')
     # ax.set_title('Velocity of spline')
 
     # Plot splines.

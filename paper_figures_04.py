@@ -31,16 +31,26 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import ofmc.util.dolfinhelpers as dh
 
 # Set font style.
-font = {'weight': 'normal',
-        'size': 20}
+font = {'family': 'sans-serif',
+        'serif': ['DejaVu Sans'],
+        'weight': 'normal',
+        'size': 30}
 plt.rc('font', **font)
+plt.rc('text', usetex=True)
 
 # Set colormap.
 cmap = cm.viridis
 
 # Streamlines.
-density = 2
-linewidth = 2
+density = 1
+linewidth = 1
+
+# Set output quality.
+dpi = 100
+
+# Streamlines.
+density = 1
+linewidth = 1
 
 
 def saveimage(path: str, name: str, img: np.array):
@@ -49,8 +59,8 @@ def saveimage(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cmap)
-    ax.set_title('Concentration')
+    im = ax.imshow(img, cmap=cm.gray)
+    # ax.set_title('Concentration')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -59,7 +69,7 @@ def saveimage(path: str, name: str, img: np.array):
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -69,8 +79,8 @@ def savesource(path: str, name: str, img: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cmap)
-    ax.set_title('Source')
+    im = ax.imshow(img, cmap=cm.gray)
+    # ax.set_title('Source')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -80,7 +90,7 @@ def savesource(path: str, name: str, img: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-source.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -94,8 +104,8 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Plot velocity.
     fig, ax = plt.subplots(figsize=(10, 5))
     # im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
-    im = ax.imshow(vel, interpolation='nearest', cmap=cmap)
-    ax.set_title('Velocity')
+    im = ax.imshow(vel, interpolation='nearest', cmap=cm.gray)
+    # ax.set_title('Velocity')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -105,7 +115,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
     m, n = vel.shape
@@ -118,7 +128,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     # Plot streamlines.
     fig, ax = plt.subplots(figsize=(10, 5))
     plt.imshow(img, cmap=cm.gray)
-    ax.set_title('Streamlines')
+    # ax.set_title('Streamlines')
     strm = ax.streamplot(X, Y, vel * hx / hy, V, density=density,
                          color=vel, linewidth=linewidth, cmap=cmap)
 #                        color=vel, linewidth=linewidth, norm=normi, cmap=cmap)
@@ -131,7 +141,7 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
     # Save velocity profile after cut.
@@ -142,11 +152,11 @@ def savevelocity(path: str, name: str, img: np.array, vel: np.array):
     t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]), linewidth=linewidth)
     t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]), linewidth=linewidth)
     plt.legend(handles=[t0, t1, t2, t3], bbox_to_anchor=(1, 1))
-    ax.set_title('Velocity profile at different times')
+    # ax.set_title('Velocity profile at different times')
 
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -156,8 +166,8 @@ def saveerror(path: str, name: str, k: np.array, kgt: np.array):
 
     # Plot image.
     fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(np.abs(k - kgt), cmap=cmap)
-    ax.set_title('Error in k')
+    im = ax.imshow(np.abs(k - kgt), cmap=cm.gray)
+    # ax.set_title('Error in k')
 
     # Create colourbar.
     divider = make_axes_locatable(ax)
@@ -167,7 +177,7 @@ def saveerror(path: str, name: str, k: np.array, kgt: np.array):
     # Save figure.
     fig.tight_layout()
     fig.savefig(os.path.join(path, '{0}-sourceerror.png'.format(name)),
-                dpi=300, bbox_inches='tight')
+                dpi=dpi, bbox_inches='tight')
     plt.close(fig)
 
 
@@ -320,10 +330,6 @@ resultpath = 'results/{0}'.format(
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
-resultpath = os.path.join(resultpath, 'analytical_example')
-if not os.path.exists(resultpath):
-    os.makedirs(resultpath)
-
 # Set regularisation parameters.
 alpha0 = 1e-3  # v_x
 alpha1 = 1e-3  # v_t
@@ -339,7 +345,7 @@ tau = 1.0
 c0 = 0.0
 
 # Create mesh and function spaces.
-m, n = 30, 100
+m, n = 50, 100
 mesh = UnitSquareMesh(m - 1, n - 1)
 V = dh.create_function_space(mesh, 'default')
 W = dh.create_function_space(mesh, 'periodic')
@@ -358,12 +364,12 @@ fa_pb = interpolate(f, W)
 fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 
 v, res, fun = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'analytic_example_decay_cm1d_l2h1_exp_pb',
+saveresults(resultpath, 'decay_cm1d_l2h1_exp_pb',
             'l2h1', fa_pb, v)
 
 v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
                                            alpha2, alpha3, beta)
-saveresults(resultpath, 'analytic_example_decay_cmscr1d_l2h1h1cr_exp_pb',
+saveresults(resultpath, 'decay_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
 
 
@@ -413,5 +419,5 @@ fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
 v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
                                            alpha2, alpha3, beta)
 saveresults(resultpath,
-            'analytic_example_decay_static_cmscr1d_l2h1h1cr_exp_pb',
+            'decay_static_cmscr1d_l2h1h1cr_exp_pb',
             'l2h1h1cr', fa_pb, v, k, c0)

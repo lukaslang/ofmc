@@ -42,6 +42,13 @@ class PeriodicBoundary(SubDomain):
         y[1] = x[1] - 1.0
 
 
+class DirichletBoundary(SubDomain):
+    """Helper class to define boundary for the second dimension."""
+
+    def inside(self, x, on_boundary):
+        return bool((near(x[1], 0.0) or near(x[1], 1.0)) and on_boundary)
+
+
 def create_function_space(mesh: Mesh, boundary: str) -> FunctionSpace:
     """Creates a function space of piecewise linear functions on a given mesh
     for a given spatial boundary.

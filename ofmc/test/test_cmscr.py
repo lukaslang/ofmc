@@ -23,6 +23,7 @@ import imageio
 import unittest
 import numpy as np
 from dolfin import Constant
+from dolfin import DirichletBC
 from dolfin import Function
 from dolfin import Point
 from dolfin import UnitSquareMesh
@@ -74,6 +75,36 @@ class TestCmscr(unittest.TestCase):
                                                           f.dx(0), f.dx(1),
                                                           1.0, 1.0, 1.0,
                                                           1.0, 1.0)
+        v = v.vector().get_local()
+        k = k.vector().get_local()
+
+        np.testing.assert_allclose(v.shape, m * n)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, m * n)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cmscr1d_weak_solution_zero_Dirichlet(self):
+        print("Running test 'test_cmscr1d_weak_solution_zero_Dirichlet'")
+        # Define temporal and spatial sample points.
+        m, n = 10, 20
+
+        # Define mesh and function space.
+        mesh = UnitSquareMesh(m - 1, n - 1)
+        V = dh.create_function_space(mesh, 'default')
+        W = dh.create_vector_function_space(mesh, 'default')
+
+        # Define boundary conditions for velocity.
+        bc = DirichletBC(W.sub(0), Constant(0), dh.DirichletBoundary())
+
+        # Create zero function.
+        f = Function(V)
+
+        # Compute velocity.
+        v, k, res, fun, converged = cmscr1d_weak_solution(W, f,
+                                                          f.dx(0), f.dx(1),
+                                                          1.0, 1.0,
+                                                          1.0, 1.0, 1.0,
+                                                          bcs=bc)
         v = v.vector().get_local()
         k = k.vector().get_local()
 
@@ -164,7 +195,19 @@ class TestCmscr(unittest.TestCase):
         mesh = RectangleMesh(Point(0, 0), Point(0.1, 1), m - 1, n - 1)
 
         v, k, res, fun, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0,
-                                                'mesh', mesh)
+                                                'mesh', mesh=mesh)
+
+        np.testing.assert_allclose(v.shape, img.shape)
+        np.testing.assert_allclose(v, np.zeros_like(v))
+        np.testing.assert_allclose(k.shape, img.shape)
+        np.testing.assert_allclose(k, np.zeros_like(k))
+
+    def test_cmscr1d_img_zero_Dirichlet(self):
+        print("Running test 'test_cmscr1d_img_custom_mesh'")
+        # Create zero image.
+        img = np.zeros((10, 25))
+        v, k, res, fun, converged = cmscr1d_img(img, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                'mesh', bc='zero')
 
         np.testing.assert_allclose(v.shape, img.shape)
         np.testing.assert_allclose(v, np.zeros_like(v))

@@ -18,8 +18,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 from dolfin import assemble
+from dolfin import Constant
 from dolfin import derivative
 from dolfin import dx
+from dolfin import DirichletBC
 from dolfin import Function
 from dolfin import FunctionSpace
 from dolfin import Expression
@@ -46,7 +48,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
                           f: Function, ft: Function, fx: Function,
                           alpha0: float, alpha1: float,
                           alpha2: float, alpha3: float,
-                          beta: float) \
+                          beta: float, bcs=[]) \
                           -> (Function, Function, float, float, bool):
     """Solves the weak formulation of the Euler-Lagrange equations of the L2-H1
     mass conserving flow functional with source and with spatio-temporal and
@@ -63,6 +65,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
         alpha2 (float): The spatial regularisation parameter for k.
         alpha3 (float): The temporal regularisation parameter for k.
         beta (float): The convective regularisation parameter for.
+        bcs: boundary conditions (optional).
 
     Returns:
         v (Function): The velocity.
@@ -92,7 +95,7 @@ def cmscr1d_weak_solution(V: VectorFunctionSpace,
     DA = derivative(A, w)
 
     # Set up solver.
-    problem = NonlinearVariationalProblem(A, w, [], DA)
+    problem = NonlinearVariationalProblem(A, w, bcs, DA)
     solver = NonlinearVariationalSolver(problem)
 
     # Set solver parameters.
@@ -213,7 +216,7 @@ def cmscr1d_exp_pb(m: int, n: int,
 def cmscr1d_img(img: np.array,
                 alpha0: float, alpha1: float,
                 alpha2: float, alpha3: float,
-                beta: float, deriv, mesh=None) \
+                beta: float, deriv, mesh=None, bc='natural') \
                 -> (np.array, np.array, float, float, bool):
     """Computes the L2-H1 mass conserving flow with source for a 1D image
     sequence with spatio-temporal and convective regularisation.
@@ -232,6 +235,8 @@ def cmscr1d_img(img: np.array,
                      When set to 'mesh' it uses FEniCS built in function.
                      When set to 'fd' it uses finite differences.
         mesh: A custom mesh (optional). Must have (m - 1, n - 1) cells.
+        bc (str): One of {'natural', 'zero'} for boundary conditions for
+                    the velocity v (optional).
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
@@ -268,10 +273,23 @@ def cmscr1d_img(img: np.array,
         ft.vector()[:] = dh.img2funvec(imgt)
         fx.vector()[:] = dh.img2funvec(imgx)
 
+    # Check for valid arguments.
+    valid = {'natural', 'zero'}
+    if bc not in valid:
+        raise ValueError("Argument 'bc' must be one of %r." % valid)
+
+    # Define boundary conditions for velocity.
+    if bc is 'natural':
+        bc = []
+    if bc is 'zero':
+
+        bc = DirichletBC(W.sub(0), Constant(0), dh.DirichletBoundary())
+
     # Compute velocity.
     v, k, res, fun, converged = cmscr1d_weak_solution(W, f, ft, fx,
                                                       alpha0, alpha1,
-                                                      alpha2, alpha3, beta)
+                                                      alpha2, alpha3, beta,
+                                                      bcs=bc)
 
     # Convert back to array and return.
     v = dh.funvec2img(v.vector().get_local(), m, n)

@@ -27,7 +27,6 @@ import numpy as np
 import ofmc.util.roihelpers as rh
 import pickle
 import matplotlib.pyplot as plt
-from matplotlib import cm
 
 # Set font style.
 font = {'family': 'sans-serif',
@@ -135,14 +134,14 @@ def plot_error(path: str, filename: str, err: tuple, title=None):
     for gen in sorted(name.keys()):
         for dat in sorted(name[gen].keys()):
             vec = np.array([x[gen][dat] for x in err])
-            vec[vec > 1] = 1
+            # vec[vec > 1] = 1
             plt.plot(vec, linewidth=1)
 
     if title is not None:
         ax.set_title(title)
 
     # Set axis limits.
-    ax.set_ylim((0, 1))
+    ax.set_ylim((0, 1.5))
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(filename)),
@@ -150,21 +149,13 @@ def plot_error(path: str, filename: str, err: tuple, title=None):
     plt.close(fig)
 
 
-plot_error(resultpath, 'of1d-avg_error', err_of1d,
-           'Average error OF-H1.')
-plot_error(resultpath, 'cms1dl2-avg_error', err_cms1dl2,
-           'Average error CMS-H1-L2.')
-plot_error(resultpath, 'cms1d-avg_error', err_cms1d,
-           'Average error CMS-H1-H1.')
-plot_error(resultpath, 'cmscr1d-avg_error', err_cmscr1d,
-           'Average error CMS-H1-H1-CR.')
+plot_error(resultpath, 'of1d-avg_error', err_of1d)
+plot_error(resultpath, 'cms1dl2-avg_error', err_cms1dl2)
+plot_error(resultpath, 'cms1d-avg_error', err_cms1d)
+plot_error(resultpath, 'cmscr1d-avg_error', err_cmscr1d)
 
-plot_error(resultpath, 'of1d-max_error', max_err_of1d,
-           'Max. error OF-H1.')
-plot_error(resultpath, 'cms1dl2-max_error', max_err_cms1dl2,
-           'Max. error CMS-H1-L2.')
-plot_error(resultpath, 'cms1d-max_error', max_err_cms1d,
-           'Max. error CMS-H1-H1.')
-plot_error(resultpath, 'cmscr1d-max_error', max_err_cmscr1d,
-           'Max. error CMS-H1-H1-CR.')
+plot_error(resultpath, 'of1d-max_error', max_err_of1d)
+plot_error(resultpath, 'cms1dl2-max_error', max_err_cms1dl2)
+plot_error(resultpath, 'cms1d-max_error', max_err_cms1d)
+plot_error(resultpath, 'cmscr1d-max_error', max_err_cmscr1d)
 print("Done.")

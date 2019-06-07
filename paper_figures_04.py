@@ -141,7 +141,7 @@ def plot_error(path: str, filename: str, err: tuple, title=None):
         ax.set_title(title)
 
     # Set axis limits.
-    ax.set_ylim((0, 1.5))
+    ax.set_ylim((0, 1))
 
     # Save figure.
     fig.savefig(os.path.join(path, '{0}.png'.format(filename)),

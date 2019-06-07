@@ -18,7 +18,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Figure 10: computes results for data created by the mechanical model.
+# Figure 11: computes results for data created by the mechanical model with
+# predefined velocities.
 import os
 import datetime
 import numpy as np
@@ -28,6 +29,7 @@ from ofmc.model.cmscr import cmscr1d_img
 import ofmc.util.pyplothelpers as ph
 import math
 import ofmc.mechanics.solver as solver
+import ofmc.util.velocity as velocity
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 
@@ -56,13 +58,15 @@ mp.chi = 1
 mp.t_cut = 0
 mp.k_on = 200
 mp.k_off = 10
+# mp.k_on = 0
+# mp.k_off = 0
 
 sp = solver.SolverParams()
 sp.n = 300
 sp.m = 300
 sp.T = 0.1
 sp.dt = 2.5e-6
-sp.delta = 1e-6
+sp.delta = 1e-2
 
 
 # Define initial values.
@@ -76,11 +80,50 @@ def rho_init(x):
         + (1 + math.sin(40 * x + math.cos(40 * x))) / 10
 
 
+# Define parameters of artificial velocity field.
+c0 = mp.k / 2
+v0 = 1
+tau0 = 0.075
+tau1 = 0.05
+
+
+def vel(t: float, x: float) -> float:
+    return velocity.vel(t, x - 0.5, c0, v0, tau0, tau1)
+
+
+# Define zero velocity.
+# def vel(t: float, x: float) -> float:
+#    return 0
+
+
+# Set evaluations.
+rng = np.linspace(0, sp.T, num=sp.m)
+Xs = np.linspace(0, 1, num=sp.n + 1)
+
+vvec = np.zeros((sp.m, sp.n + 1))
+
+# Plot evaluations for different times.
+k = 0
+plt.figure()
+for t in rng:
+    v = np.vectorize(vel, otypes=[float])(t, Xs)
+    vvec[k, :] = v
+    plt.plot(v)
+    k = k + 1
+
+plt.show()
+plt.close()
+
+plt.figure()
+plt.imshow(vvec)
+plt.show()
+plt.close()
+
 # Initialise tracers.
 x = np.array(np.linspace(0, 1, num=25))
 
 # Run solver.
-rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x)
+rho, ca, v, sigma, x, idx = solver.solve(mp, sp, rho_init, ca_init, x, vel=vel)
 
 # Compute mean from staggered grid.
 v = (v[:, 0:-1] + v[:, 1:]) / 2
@@ -136,11 +179,11 @@ fig.savefig(os.path.join(resfolder, '{0}-regress.png'.format(name)),
 plt.close(fig)
 
 # Set regularisation parameters for cmscr1d.
-alpha0 = 1e-4
-alpha1 = 1e-4
-alpha2 = 5e-5
-alpha3 = 5e-5
-beta = 1e-6
+alpha0 = 1e-1
+alpha1 = 1e-5
+alpha2 = 1e-4
+alpha3 = 1e-5
+beta = 5e-4
 
 # Define concentration and normalise image.
 offset = idx

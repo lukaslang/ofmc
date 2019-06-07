@@ -17,6 +17,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Figure 1 and 2: Plots a dataset and a kymograph.
 import datetime
 import glob
 import imageio

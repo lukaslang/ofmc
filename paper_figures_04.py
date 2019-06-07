@@ -17,18 +17,17 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-import matplotlib.pyplot as plt
-import numpy as np
+#
+# Figure 9: creates error plots from the evaluation. This script requires
+# 'pipeline_eval.py' to be run and 'resultpath' to be set accordingly.
+import matplotlib
+matplotlib.use('agg')
 import os
-import datetime
-from dolfin import Expression
-from dolfin import interpolate
-from dolfin import UnitSquareMesh
+import numpy as np
+import ofmc.util.roihelpers as rh
+import pickle
+import matplotlib.pyplot as plt
 from matplotlib import cm
-from ofmc.model.cmscr import cmscr1d_exp_pb
-from ofmc.model.cm import cm1d_exp_pb
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import ofmc.util.dolfinhelpers as dh
 
 # Set font style.
 font = {'family': 'sans-serif',
@@ -38,386 +37,134 @@ font = {'family': 'sans-serif',
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
 
-# Set colormap.
-cmap = cm.viridis
-
-# Streamlines.
-density = 1
-linewidth = 1
-
-# Set output quality.
+# Plotting settings.
+linewidth = 2
 dpi = 100
 
-# Streamlines.
-density = 1
-linewidth = 1
-
-
-def saveimage(path: str, name: str, img: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.gray)
-    # ax.set_title('Concentration')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.savefig(os.path.join(path, '{0}.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-
-def savesource(path: str, name: str, img: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(img, cmap=cm.gray)
-    # ax.set_title('Source')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}-source.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-
-def savevelocity(path: str, name: str, img: np.array, vel: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # maxvel = abs(vel).max()
-    # normi = mpl.colors.Normalize(vmin=-maxvel, vmax=maxvel)
-
-    # Plot velocity.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    # im = ax.imshow(vel, interpolation='nearest', norm=normi, cmap=cmap)
-    im = ax.imshow(vel, interpolation='nearest', cmap=cm.gray)
-    # ax.set_title('Velocity')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}-velocity.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-    m, n = vel.shape
-    hx, hy = 1.0 / (m - 1), 1.0 / (n - 1)
-
-    # Create grid for streamlines.
-    Y, X = np.mgrid[0:m, 0:n]
-    V = np.ones_like(X)
-
-    # Plot streamlines.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    plt.imshow(img, cmap=cm.gray)
-    # ax.set_title('Streamlines')
-    strm = ax.streamplot(X, Y, vel * hx / hy, V, density=density,
-                         color=vel, linewidth=linewidth, cmap=cmap)
-#                        color=vel, linewidth=linewidth, norm=normi, cmap=cmap)
-#    fig.colorbar(strm.lines, orientation='vertical')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(strm.lines, cax=cax, orientation='vertical')
-
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}-streamlines.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-    # Save velocity profile after cut.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    t = np.linspace(0, m, 4, dtype=int, endpoint=False)
-    t0, = plt.plot(vel[t[0]], label='t={0}'.format(t[0]), linewidth=linewidth)
-    t1, = plt.plot(vel[t[1]], label='t={0}'.format(t[1]), linewidth=linewidth)
-    t2, = plt.plot(vel[t[2]], label='t={0}'.format(t[2]), linewidth=linewidth)
-    t3, = plt.plot(vel[t[3]], label='t={0}'.format(t[3]), linewidth=linewidth)
-    plt.legend(handles=[t0, t1, t2, t3], bbox_to_anchor=(1, 1))
-    # ax.set_title('Velocity profile at different times')
-
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}-profile.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-
-def saveerror(path: str, name: str, k: np.array, kgt: np.array):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Plot image.
-    fig, ax = plt.subplots(figsize=(10, 5))
-    im = ax.imshow(np.abs(k - kgt), cmap=cm.gray)
-    # ax.set_title('Error in k')
-
-    # Create colourbar.
-    divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad=0.1)
-    fig.colorbar(im, cax=cax, orientation='vertical')
-
-    # Save figure.
-    fig.tight_layout()
-    fig.savefig(os.path.join(path, '{0}-sourceerror.png'.format(name)),
-                dpi=dpi, bbox_inches='tight')
-    plt.close(fig)
-
-
-def saveparameters(resultpath: str, method: str):
-    f = open(os.path.join(resultpath, 'parameters.txt'), 'w')
-    f.write('Regularisation parameters:\n')
-    if method == 'l2h1':
-        f.write('alpha0={0} (v_x)\n'.format(alpha0))
-        f.write('alpha1={0} (v_t)\n\n'.format(alpha1))
-    elif method == 'l2h1h1':
-        f.write('alpha0={0} (v_x)\n'.format(alpha0))
-        f.write('alpha1={0} (v_t)\n'.format(alpha1))
-        f.write('alpha2={0} (k_x)\n'.format(alpha2))
-        f.write('alpha3={0} (k_t)\n\n'.format(alpha3))
-    elif method == 'l2h1h1cr':
-        f.write('alpha0={0} (v_x)\n'.format(alpha0))
-        f.write('alpha1={0} (v_t)\n'.format(alpha1))
-        f.write('alpha2={0} (k_x)\n'.format(alpha2))
-        f.write('alpha3={0} (k_t)\n'.format(alpha3))
-        f.write('beta={0} (D_v k)\n\n'.format(beta))
-    elif method == 'l2h1l2':
-        f.write('alpha0={0} (v_x)\n'.format(alpha0))
-        f.write('alpha1={0} (v_t)\n'.format(alpha1))
-        f.write('gamma={0} (k)\n\n'.format(gamma))
-    else:
-        f.write('Method not found!\n\n')
-
-    f.write('Data:\n')
-    f.write('c(t, x)={0}\n\n'.format(datastr))
-    f.write('Data parameters:\n')
-    f.write('w={0}\n'.format(w))
-    f.write('lambda={0}\n'.format(lambdap))
-    f.write('tau={0}\n'.format(tau))
-    f.write('c0={0}\n'.format(c0))
-    f.close()
-
-
-class Data:
-    def create(self, m: int, n: int, v: float,
-               lambdap: float, tau: float) -> np.array:
-
-        x, t = np.meshgrid(np.linspace(0, 1, num=n - 1),
-                           np.linspace(0, 1, num=m - 1))
-        return self.f(t, x)
-
-
-class ConstantData(Data):
-    def f(self, t, x):
-        return np.cos((x - w * t) / lambdap) + c0
-
-    def string(self):
-        return "cos((x - w * t) / lambda) + c0"
-
-
-class DecayingData(Data):
-    def f(self, t, x):
-        return np.exp(- t / tau) * np.cos((x - w * t) / lambdap) + c0
-
-    def string(self):
-        return "exp(- t / tau) * cos((x - w * t) / lambda) + c0"
-
-
-class f_const(Expression):
-    def eval(self, value, x):
-        value[0] = np.cos((x[1] - w * x[0]) / lambdap) + c0
-
-    def value_shape(self):
-        return ()
-
-
-class f_const_x(Expression):
-    def eval(self, value, x):
-        value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
-
-    def value_shape(self):
-        return ()
-
-
-class f_const_t(Expression):
-    def eval(self, value, x):
-        value[0] = np.sin((x[1] - w * x[0]) / lambdap) * w / lambdap
-
-    def value_shape(self):
-        return ()
-
-
-class f_decay(Expression):
-    def eval(self, value, x):
-        value[0] = np.exp(-x[0] / tau) * np.cos((x[1] - w * x[0]) / lambdap) \
-            + c0
-
-    def value_shape(self):
-        return ()
-
-
-class k_decay(Expression):
-    def eval(self, value, x):
-        value[0] = - np.exp(-x[0] / tau) \
-            * np.cos((x[1] - w * x[0]) / lambdap) / tau
-
-    def value_shape(self):
-        return ()
-
-
-class v_decay(Expression):
-    def eval(self, value, x):
-        value[0] = w
-
-    def value_shape(self):
-        return ()
-
-
-class f_decay_x(Expression):
-    def eval(self, value, x):
-        value[0] = - np.exp(- x[0] / tau) \
-            * np.sin((x[1] - w * x[0]) / lambdap) / lambdap
-
-    def value_shape(self):
-        return ()
-
-
-class f_decay_t(Expression):
-    def eval(self, value, x):
-        value[0] = np.exp(- x[0] / tau) * np.sin((x[1] - w * x[0]) / lambdap) \
-            * w / lambdap - np.exp(- x[0] / tau) \
-            * np.cos((x[1] - w * x[0]) / lambdap) / tau
-
-    def value_shape(self):
-        return ()
-
-
-def saveresults(resultpath: str, name: str, method: str, f: np.array,
-                v: np.array, k=None, kgt=None):
-    resultpath = os.path.join(resultpath, name)
-    if not os.path.exists(resultpath):
-        os.makedirs(resultpath)
-
-    saveimage(resultpath, name, f)
-    savevelocity(resultpath, name, f, v)
-    saveparameters(resultpath, method)
-    if k is not None:
-        savesource(resultpath, name, k)
-    if kgt is not None:
-        saveerror(resultpath, name, k, kgt)
-
-
 # Set path where results are saved.
-resultpath = 'results/{0}'.format(
-        datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
-if not os.path.exists(resultpath):
-    os.makedirs(resultpath)
+resultpath = 'results/2018-08-17-09-40-25/'
 
-# Set regularisation parameters.
-alpha0 = 1e-3  # v_x
-alpha1 = 1e-3  # v_t
-alpha2 = 1e-4  # k_x
-alpha3 = 1e-4  # k_t
-beta = 1e-3  # D_v k
-gamma = 1e-4  # k
-
-# Set parameters of data.
-w = 0.1
-lambdap = 1 / (4 * np.pi)
-tau = 1.0
-c0 = 0.0
-
-# Create mesh and function spaces.
-m, n = 40, 100
-mesh = UnitSquareMesh(m - 1, n - 1)
-V = dh.create_function_space(mesh, 'default')
-W = dh.create_function_space(mesh, 'periodic')
-
-# Run experiments with decaying data.
-f = f_decay(degree=2)
-ft = f_decay_t(degree=1)
-fx = f_decay_x(degree=1)
-datastr = DecayingData().string()
-
-# Interpolate function.
-fa = interpolate(f, V)
-fa = dh.funvec2img(fa.vector().get_local(), m, n)
-
-fa_pb = interpolate(f, W)
-fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
-
-v, res, fun = cm1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1)
-saveresults(resultpath, 'decay_cm1d_l2h1_exp_pb',
-            'l2h1', fa_pb, v)
-
-v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
-                                           alpha2, alpha3, beta)
-saveresults(resultpath, 'decay_cmscr1d_l2h1h1cr_exp_pb',
-            'l2h1h1cr', fa_pb, v, k, (c0 - fa_pb)/tau)
+# Flag whether to compute endpoint errors (slow).
+eval_endpoint = False
 
 
-# The next example shows that for the initial concentration used in the
-# mechanical models the algorithm picks up the source well.
-class f_decay(Expression):
-    def eval(self, value, x):
-        value[0] = 20 - np.sin(10 * np.pi * x[1]
-                               + np.cos(10 * np.pi * x[1])) / 5 + c0 * x[0]
-
-    def value_shape(self):
-        return ()
-
-
-class f_decay_x(Expression):
-    def eval(self, value, x):
-        value[0] = - 2 * np.pi * (np.sin(10 * np.pi * x[1]) - 1) \
-            * np.cos(10 * np.pi * x[1] + np.cos(10 * np.pi * x[1]))
-
-    def value_shape(self):
-        return ()
+def error(vel, roi, spl) -> (float, float):
+    # Compute accumulated error in velocity for each spline.
+    error = rh.compute_error(vel, roi, spl)
+    totalerr = 0
+    maxerror = 0
+    for v in roi:
+        err = sum(error[v]) / len(error[v])
+        totalerr += err
+        maxerror = max(maxerror, max(error[v]))
+    return (totalerr, maxerror)
 
 
-class f_decay_t(Expression):
-    def eval(self, value, x):
-        value[0] = c0
+def endpoint_error(vel, roi, spl) -> (float, float):
+    # Compute accumulated error in position for each spline.
+    error, curves = rh.compute_endpoint_error(vel, roi, spl)
+    totalerr = 0
+    maxerror = 0
+    for v in roi:
+        err = sum(error[v]) / len(error[v])
+        totalerr += err
+        maxerror = max(maxerror, max(error[v]))
+    return (totalerr, maxerror, curves)
 
-    def value_shape(self):
-        return ()
+
+# Load dataset.
+print('Loading results from {0}.'.format(resultpath))
+with open(os.path.join(resultpath, 'pkl', 'name.pkl'), 'rb') as f:
+    name = pickle.load(f)
+
+with open(os.path.join(resultpath, 'pkl', 'prod_of1d.pkl'), 'rb') as f:
+    prod_of1d = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1dl2.pkl'), 'rb') as f:
+    prod_cms1dl2 = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cms1d.pkl'), 'rb') as f:
+    prod_cms1d = pickle.load(f)
+with open(os.path.join(resultpath, 'pkl', 'prod_cmscr1d.pkl'), 'rb') as f:
+    prod_cmscr1d = pickle.load(f)
+
+with open(os.path.join(resultpath, 'pkl', 'converged_cmscr1d.pkl'), 'rb') as f:
+        converged_cmscr1d = pickle.load(f)
 
 
-# Set parameters of data.
-w = 0
-lambdap = 1 / (4 * np.pi)
-tau = 1.0
-c0 = 0.1
+# Check if error evaluation is present, otherwise compute.
+def load_error(model: str):
+    err_file = os.path.join(resultpath, 'pkl', 'err_{0}.pkl'.format(model))
+    max_err_file = os.path.join(resultpath,
+                                'pkl', 'max_err_{0}.pkl'.format(model))
+    if os.path.isfile(err_file) and \
+            os.path.isfile(max_err_file):
+        print('Loading error for {0}.'.format(model))
+        # Load existing results.
+        with open(err_file, 'rb') as f:
+            err = pickle.load(f)
+        with open(max_err_file, 'rb') as f:
+            max_err = pickle.load(f)
+    else:
+        print('No error file for {0}.'.format(model))
+    return err, max_err
 
-# Run experiments with decaying data.
-f = f_decay(degree=2)
-ft = f_decay_t(degree=1)
-fx = f_decay_x(degree=1)
-datastr = DecayingData().string()
 
-fa_pb = interpolate(f, W)
-fa_pb = dh.funvec2img_pb(fa_pb.vector().get_local(), m, n)
+# Load or compute errors.
+err_of1d, max_err_of1d = load_error('of1d')
+err_cms1dl2, max_err_cms1dl2 = load_error('cms1dl2')
+err_cms1d, max_err_cms1d = load_error('cms1d')
+err_cmscr1d, max_err_cmscr1d = load_error('cmscr1d')
 
-v, k, res, fun, converged = cmscr1d_exp_pb(m, n, f, ft, fx, alpha0, alpha1,
-                                           alpha2, alpha3, beta)
-saveresults(resultpath,
-            'decay_static_cmscr1d_l2h1h1cr_exp_pb',
-            'l2h1h1cr', fa_pb, v, k, c0)
+
+def plot_error(path: str, filename: str, err: tuple, title=None):
+    """Takes a path string, a filename, and a tuple with errors, and saves the
+    plotted array.
+
+    Args:
+        path (str): The path to save the image to.
+        name (str): The filename.
+        err (tuple): A tuple with dicts.
+        title(str): An optional title.
+
+    Returns:
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Plot image.
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for gen in sorted(name.keys()):
+        for dat in sorted(name[gen].keys()):
+            vec = np.array([x[gen][dat] for x in err])
+            vec[vec > 1] = 1
+            plt.plot(vec, linewidth=1)
+
+    if title is not None:
+        ax.set_title(title)
+
+    # Set axis limits.
+    ax.set_ylim((0, 1))
+
+    # Save figure.
+    fig.savefig(os.path.join(path, '{0}.png'.format(filename)),
+                dpi=dpi, bbox_inches='tight')
+    plt.close(fig)
+
+
+plot_error(resultpath, 'of1d-avg_error', err_of1d,
+           'Average error OF-H1.')
+plot_error(resultpath, 'cms1dl2-avg_error', err_cms1dl2,
+           'Average error CMS-H1-L2.')
+plot_error(resultpath, 'cms1d-avg_error', err_cms1d,
+           'Average error CMS-H1-H1.')
+plot_error(resultpath, 'cmscr1d-avg_error', err_cmscr1d,
+           'Average error CMS-H1-H1-CR.')
+
+plot_error(resultpath, 'of1d-max_error', max_err_of1d,
+           'Max. error OF-H1.')
+plot_error(resultpath, 'cms1dl2-max_error', max_err_cms1dl2,
+           'Max. error CMS-H1-L2.')
+plot_error(resultpath, 'cms1d-max_error', max_err_cms1d,
+           'Max. error CMS-H1-H1.')
+plot_error(resultpath, 'cmscr1d-max_error', max_err_cmscr1d,
+           'Max. error CMS-H1-H1-CR.')
+print("Done.")

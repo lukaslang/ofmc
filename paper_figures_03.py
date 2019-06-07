@@ -17,6 +17,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Figure 5: computes results for increasing convective regularisation.
 import datetime
 import glob
 import imageio

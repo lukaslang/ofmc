@@ -1,5 +1,5 @@
 OFMC - A Variational Model for the Analysis of Membrane Cuts
-Version 1.0, 2017
+Version 1.0, 2019
 
 Lukas Lang (ll542@cam.ac.uk)
 University of Cambridge
@@ -22,7 +22,7 @@ BibTeX:
   title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Biological Tissue Nanoablation Experiments},
   institution= {DAMTP, University of Cambridge, United Kingdom},
   type       = {Preprint},
-  year       = {2017}
+  year       = {2019}
 }
 
 2. License & Disclaimer
@@ -81,12 +81,6 @@ e. As of 18 July 2018 there is an issue with sympy, see https://groups.google.co
 In order to fix it downgrade using
 
 >> conda install -c conda-forge sympy=1.1.1
-
-Not yet in use:
-
-- dolfin-adjoint (2017.2.0-py36_0)
-
->> conda install -c conda-forge dolfin-adjoint
 
 e. In order to run/edit the scripts in an IDE install e.g. Spyder:
 

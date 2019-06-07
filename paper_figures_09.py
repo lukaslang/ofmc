@@ -18,20 +18,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Figure 12: this script estimates a source and plots concentration versus
-# k and fits a linear model.
+# This script estimates a source and plots concentration versus
+# k and fits a linear model for the MATLAB created concentration file.
 import datetime
-import glob
 import imageio
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-import re
 import scipy.stats as stats
-import warnings
 import ofmc.util.pyplothelpers as ph
-from scipy import ndimage
+from matplotlib import cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ofmc.model.cmscr import cmscr1d_img
 
 ffc_logger = logging.getLogger('FFC')
@@ -39,9 +37,11 @@ ffc_logger.setLevel(logging.WARNING)
 ufl_logger = logging.getLogger('UFL')
 ufl_logger.setLevel(logging.WARNING)
 
+# Set output quality.
+dpi = 100
+
 # Set path with data.
-datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
+datapath = ('data')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(
@@ -52,26 +52,12 @@ if not os.path.exists(resultpath):
 print('Processing {0}'.format(datapath))
 
 
-def load_kymo(datfolder, dat):
-    # Identify Kymograph and do sanity check.
-    kymos = glob.glob('{0}/SUM_Reslice of {1}*.tif'.format(datfolder, dat))
-    if len(kymos) != 1:
-        warnings.warn("No Kymograph found!")
-
-    # Extract name of kymograph and replace whitespaces.
-    name = os.path.splitext(os.path.basename(kymos[0]))[0]
-    name = re.sub(' ', '_', name)
-
-    # Load kymograph.
-    return imageio.imread(kymos[0]), name
-
-
-def prepareimage(img: np.array) -> np.array:
-    # Remove cut.
-    img = np.vstack((img[0:5, :], img[4, :], img[6:, :]))
+def prepareimage(img: np.array, idx: int) -> np.array:
+    # Remove first frame.
+    img = img[idx:, :]
 
     # Filter image.
-    img = ndimage.gaussian_filter(img, sigma=1.0)
+    # img = ndimage.gaussian_filter(img, sigma=1.0)
 
     # Normalise to [0, 1].
     img = np.array(img, dtype=float)
@@ -80,22 +66,53 @@ def prepareimage(img: np.array) -> np.array:
 
 
 # Select dataset.
-gen = 'SqAX3_SqhGFP42_GAP43_TM6B'
-# dat = '190216E8PSB1'
-dat = '190216E5PSB2'
+name = 'myo_int'
+# name = 'myo_int_jocelyn'
 
 # Load kymograph.
-datfolder = os.path.join(datapath, os.path.join(gen, dat))
-img, name = load_kymo(datfolder, dat)
+file = os.path.join(datapath, '{0}.png'.format(name))
+img = imageio.imread(file)
 
-# Use only small seciton.
-img = img[:, 40:125]
+# Set starting index.
+idx = 1
 
 # Prepare image.
-imgp = prepareimage(img)
+imgp = prepareimage(img, idx)
+
+# Estimate derivatives for plotting purpose.
+dtf = np.diff(imgp, n=1, axis=0)
+dxf = np.diff(imgp, n=1, axis=1)
+
+# Plot image.
+fig, ax = plt.subplots(figsize=(10, 5))
+im = ax.imshow(dtf, cmap=cm.viridis)
+
+# Create colourbar.
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.1)
+fig.colorbar(im, cax=cax, orientation='vertical')
+
+# Save figure.
+fig.savefig(os.path.join(resultpath, '{0}-dt.png'.format(name)),
+            dpi=dpi, bbox_inches='tight')
+plt.close(fig)
+
+# Plot image.
+fig, ax = plt.subplots(figsize=(10, 5))
+im = ax.imshow(dxf, cmap=cm.viridis)
+
+# Create colourbar.
+divider = make_axes_locatable(ax)
+cax = divider.append_axes("right", size="5%", pad=0.1)
+fig.colorbar(im, cax=cax, orientation='vertical')
+
+# Save figure.
+fig.savefig(os.path.join(resultpath, '{0}-dx.png'.format(name)),
+            dpi=dpi, bbox_inches='tight')
+plt.close(fig)
 
 # Set regularisation parameters for cmscr1d.
-alpha0 = 5e-3
+alpha0 = 1e-2
 alpha1 = 1e-3
 alpha2 = 1e-4
 alpha3 = 1e-4
@@ -107,7 +124,7 @@ vel, k, res, fun, converged = cmscr1d_img(imgp, alpha0, alpha1,
                                           beta, 'mesh')
 
 # Plot and save figures.
-path = os.path.join(*[resultpath, 'cmscr1d', gen, dat])
+path = os.path.join(*[resultpath, 'cmscr1d'])
 if not os.path.exists(resultpath):
     os.makedirs(resultpath)
 
@@ -129,9 +146,6 @@ font = {'family': 'sans-serif',
         'size': 20}
 plt.rc('font', **font)
 plt.rc('text', usetex=True)
-
-# Set output quality.
-dpi = 100
 
 fig, ax = plt.subplots(figsize=(10, 5))
 plt.scatter(imgp.flatten(), k.flatten(), s=1)

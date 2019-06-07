@@ -17,6 +17,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Figure 10: outputs best results from the evaluation. This script requires
+# 'pipeline_eval.py' to be run and 'resultpath' to be set accordingly.
 import matplotlib
 matplotlib.use('agg')
 import collections
@@ -30,7 +33,7 @@ import pickle
 # Set path where results are saved.
 resultpath = 'results/2018-08-17-09-40-25/'
 
-# Flag whether to compute endpoint errors.
+# Flag whether to compute endpoint errors (slow).
 eval_endpoint = False
 
 

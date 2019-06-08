@@ -18,7 +18,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Figure 11: computes results for data created by the mechanical model.
+# Figure 12: computes results for data created by the mechanical model.
 import os
 import datetime
 import numpy as np

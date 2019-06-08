@@ -43,10 +43,12 @@ class PeriodicBoundary(SubDomain):
 
 
 class DirichletBoundary(SubDomain):
-    """Helper class to define boundary for the second dimension."""
+    """Helper class to define boundary conditions for velocity."""
 
     def inside(self, x, on_boundary):
-        return bool((near(x[1], 0.0) or near(x[1], 1.0)) and on_boundary)
+        return bool((near(x[0], 0.0)
+                     or near(x[1], 0.0)
+                     or near(x[1], 1.0)) and on_boundary)
 
 
 def create_function_space(mesh: Mesh, boundary: str) -> FunctionSpace:

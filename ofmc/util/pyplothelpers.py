@@ -39,7 +39,7 @@ cmap = cm.viridis
 
 # Streamlines.
 density = 1
-linewidth = 1
+linewidth = 2
 arrowstyle = '-'
 
 # Set output quality.

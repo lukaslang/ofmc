@@ -46,7 +46,7 @@ cmap = cm.viridis
 
 # Streamlines.
 density = 1
-linewidth = 1
+linewidth = 2
 
 # Set output quality.
 dpi = 100

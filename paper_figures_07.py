@@ -58,8 +58,6 @@ mp.chi = 1
 mp.t_cut = 0
 mp.k_on = 200
 mp.k_off = 10
-# mp.k_on = 0
-# mp.k_off = 0
 
 sp = solver.SolverParams()
 sp.n = 300
@@ -194,7 +192,7 @@ m, n = img.shape
 mesh = RectangleMesh(Point(0.0, 0.0), Point(sp.T, 1.0), m - 1, n - 1)
 
 # Set boundary conditions for velocity.
-bc = 'zero'
+bc = 'zerospace'
 
 # Compute velocity and source.
 vel, k, res, fun, converged = cmscr1d_img(img, alpha0, alpha1, alpha2, alpha3,

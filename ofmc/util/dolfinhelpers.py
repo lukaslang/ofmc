@@ -51,6 +51,13 @@ class DirichletBoundary(SubDomain):
                      or near(x[1], 1.0)) and on_boundary)
 
 
+class DirichletBoundarySpace(SubDomain):
+    """Helper class to define boundary conditions for velocity."""
+
+    def inside(self, x, on_boundary):
+        return bool((near(x[1], 0.0) or near(x[1], 1.0)) and on_boundary)
+
+
 def create_function_space(mesh: Mesh, boundary: str) -> FunctionSpace:
     """Creates a function space of piecewise linear functions on a given mesh
     for a given spatial boundary.

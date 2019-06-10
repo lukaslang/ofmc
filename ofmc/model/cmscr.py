@@ -235,8 +235,8 @@ def cmscr1d_img(img: np.array,
                      When set to 'mesh' it uses FEniCS built in function.
                      When set to 'fd' it uses finite differences.
         mesh: A custom mesh (optional). Must have (m - 1, n - 1) cells.
-        bc (str): One of {'natural', 'zero'} for boundary conditions for
-                    the velocity v (optional).
+        bc (str): One of {'natural', 'zero', 'zerospace'} for boundary
+                    conditions for the velocity v (optional).
 
     Returns:
         v (np.array): A velocity array of shape (m, n).
@@ -274,7 +274,7 @@ def cmscr1d_img(img: np.array,
         fx.vector()[:] = dh.img2funvec(imgx)
 
     # Check for valid arguments.
-    valid = {'natural', 'zero'}
+    valid = {'natural', 'zero', 'zerospace'}
     if bc not in valid:
         raise ValueError("Argument 'bc' must be one of %r." % valid)
 
@@ -282,8 +282,9 @@ def cmscr1d_img(img: np.array,
     if bc is 'natural':
         bc = []
     if bc is 'zero':
-
         bc = DirichletBC(W.sub(0), Constant(0), dh.DirichletBoundary())
+    if bc is 'zerospace':
+        bc = DirichletBC(W.sub(0), Constant(0), dh.DirichletBoundarySpace())
 
     # Compute velocity.
     v, k, res, fun, converged = cmscr1d_weak_solution(W, f, ft, fx,

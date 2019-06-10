@@ -17,7 +17,7 @@ If you use this software in your work please cite the abovementioned paper in a 
 
 BibTeX:
 
-@techreport{LanDutScaSanSchoEti17,
+@techreport{LanDutScaSanSchoEti19,
   author     = {Lang, L.~F. and Dutta, N. and Scarpa, E. and Sanson, B. and Sch\"{o}nlieb, C.~B. and \'{E}tienne, J.},
   title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Biological Tissue Nanoablation Experiments},
   institution= {DAMTP, University of Cambridge, United Kingdom},

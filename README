@@ -19,7 +19,7 @@ BibTeX:
 
 @techreport{LanDutScaSanSchoEti19,
   author     = {Lang, L.~F. and Dutta, N. and Scarpa, E. and Sanson, B. and Sch\"{o}nlieb, C.~B. and \'{E}tienne, J.},
-  title      = {Joint Motion Estimation and Source Identification with an Application to the Analysis of Biological Tissue Nanoablation Experiments},
+  title      = {Joint Motion Estimation and Source Identification using Convective Regularisation for Analysing Biological Tissue Nanoablation Experiments},
   institution= {DAMTP, University of Cambridge, United Kingdom},
   type       = {Preprint},
   year       = {2019}

@@ -339,7 +339,7 @@ alpha1 = 1e-3  # v_t
 alpha2 = 1e-4  # k_x
 alpha3 = 1e-4  # k_t
 beta = 1e-3  # D_v k
-# gamma = 1e-4  # k
+gamma = 1e-4  # k
 
 # Set parameters of data.
 w = 0.1

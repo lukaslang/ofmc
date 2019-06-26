@@ -36,17 +36,15 @@ from ofmc.model.of import of1d_img
 from ofmc.model.cms import cms1dl2_img
 from ofmc.model.cms import cms1d_img
 from ofmc.model.cmscr import cmscr1d_img
+import datapath as dp
+
+# Get path where data is located.
+datapath = dp.path
 
 ffc_logger = logging.getLogger('FFC')
 ffc_logger.setLevel(logging.WARNING)
 ufl_logger = logging.getLogger('UFL')
 ufl_logger.setLevel(logging.WARNING)
-
-# Set path with data.
-# datapath = ('/Users/lukaslang/'
-#             'Dropbox (Cambridge University)/Drosophila/Data from Elena')
-datapath = ('/home/ll542/store/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(

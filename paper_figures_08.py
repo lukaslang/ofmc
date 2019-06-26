@@ -33,15 +33,15 @@ import warnings
 import ofmc.util.pyplothelpers as ph
 from scipy import ndimage
 from ofmc.model.cmscr import cmscr1d_img
+import datapath as dp
+
+# Get path where data is located.
+datapath = dp.path
 
 ffc_logger = logging.getLogger('FFC')
 ffc_logger.setLevel(logging.WARNING)
 ufl_logger = logging.getLogger('UFL')
 ufl_logger.setLevel(logging.WARNING)
-
-# Set path with data.
-datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(

@@ -32,15 +32,15 @@ import ofmc.util.pyplothelpers as ph
 import ofmc.util.roihelpers as rh
 from read_roi import read_roi_zip
 from scipy import ndimage
+import datapath as dp
+
+# Get path where data is located.
+datapath = dp.path
 
 ffc_logger = logging.getLogger('FFC')
 ffc_logger.setLevel(logging.WARNING)
 ufl_logger = logging.getLogger('UFL')
 ufl_logger.setLevel(logging.WARNING)
-
-# Set path with data.
-datapath = ('/Users/lukaslang/'
-            'Dropbox (Cambridge University)/Drosophila/Data from Elena')
 
 # Set path where results are saved.
 resultpath = 'results/{0}'.format(

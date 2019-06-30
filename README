@@ -1,4 +1,4 @@
-OFMC - A Variational Model for the Analysis of Membrane Cuts
+Joint Motion Estimation and Source Identification using Convective Regularisation
 Version 1.0, 2019
 
 Lukas F. Lang (ll542@cam.ac.uk)
@@ -23,9 +23,9 @@ Downing Site, Cambridge CB2 3DY, United Kingdom
 
 This is a Python implementation of the methods described in:
 
-L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne.
-Joint Motion Estimation and Source Identification using Convective
-Regularisation with an Application to the Analysis of Laser Nanoablations.
+L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. Joint Motion 
+Estimation and Source Identification using Convective Regularisation with an Application 
+to the Analysis of Laser Nanoablations. Preprint, 2019.
 
 If you use this software in your work please cite the abovementioned paper in
 resulting publications.

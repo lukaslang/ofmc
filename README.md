@@ -1,12 +1,10 @@
 # Joint Motion Estimation and Source Identification using Convective Regularisation
-==================================
 
 This repository contains a Python implementation of the methods described in the paper [Joint Motion 
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations](https://doi.org/10.1101/686261)
 
 ## Cite
-----
 
 If you use this software in your work please cite our paper in
 resulting publications:
@@ -15,10 +13,11 @@ L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. J
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations, bioRxiv 686261, 2019.
 
-URL: https://doi.org/10.1101/686261
+URL: [https://doi.org/10.1101/686261](https://doi.org/10.1101/686261)
 
 BibTeX:
 
+```
 @article {LanDutScaSanSchoEti19,
 	author = {Lang, Lukas F. and Dutta, Nilankur and Scarpa, Elena and Sanson, B{\'e}n{\'e}dicte and Sch{\"o}nlieb, Carola-Bibiane and {\'E}tienne, Jocelyn},
 	title = {Joint Motion Estimation and Source Identification using Convective Regularisation with an Application to the Analysis of Laser Nanoablations},
@@ -30,9 +29,9 @@ BibTeX:
 	eprint = {https://www.biorxiv.org/content/early/2019/07/02/686261.full.pdf},
 	journal = {bioRxiv}
 }
+```
 
 ## Dependencies
---------
 
 This software was written for and tested with:
 - MacOS Mojave (version 10.14.6)
@@ -50,7 +49,7 @@ The following libraries are required for parts of this code:
 
 Installation instructions:
 
-1. Download and install Anaconda from https://anaconda.org/
+1. Download and install Anaconda from [https://anaconda.org/](https://anaconda.org/)
 
 There are two ways to create the conda environment using the correct library versions:
 
@@ -92,7 +91,7 @@ To run the test cases execute
 We have added scripts that generate the figures in the paper. First, download 
 the microscopy data (ZIP file) from:
 
-https://doi.org/10.5281/zenodo.3257654
+[https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)
 
 Uncompress the data, and place it some directory. Second, set the path to this 
 directory in the script "datapath.py".
@@ -102,7 +101,6 @@ Run the scripts, e.g. [`paper_figures_01.py`](paper_figures_01.py), to re-create
 In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first.
 
 ## License & Disclaimer
---------------------
 
 Copyright 2019 Lukas Lang.
 
@@ -124,12 +122,11 @@ Moreover, the package includes third-party libraries:
 
 Name: tifffile.py
 Author: Christoph Gohlke
-URL: http://www.lfd.uci.edu/~gohlke/
+URL: [http://www.lfd.uci.edu/~gohlke/](http://www.lfd.uci.edu/~gohlke/)
 
-See ofmc/external/tifffile.py for its license.
+See [`ofmc/external/tifffile.py`](ofmc/external/tifffile.py) for its license.
 
 ## Contact
--------
 
 Lukas F. Lang (ll542@cam.ac.uk)
 Carola-Bibiane Schönlieb (cbs31@cam.ac.uk)

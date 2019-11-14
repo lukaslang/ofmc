@@ -86,9 +86,7 @@ python -m unittest discover
 
 We have added scripts that generate the figures in the paper.
 
-1. Download the microscopy data (ZIP file) from:
-
-[https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)
+1. Download the microscopy data (ZIP file) from [https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)
 
 2. Uncompress the data, and place it some directory. Second, set the path to this 
 directory in the script [`datapath.py`](datapath.py).

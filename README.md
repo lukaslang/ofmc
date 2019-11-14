@@ -81,7 +81,6 @@ Alternatively, you can use e.g. PyCharm and create a run environment by selectin
 To run the test cases, execute
 
 ```bash
-conda activate fenicsproject
 python -m unittest discover
 ```
 

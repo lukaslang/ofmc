@@ -29,11 +29,11 @@ Here is the BibTeX entry:
 }
 ```
 
-This code is accompanied by a dataset:
+This code is accompanied by a [dataset](http://doi.org/10.5281/zenodo.3257654):
 ```
 L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. (2019). Microscopy 
 image sequences and annotated kymographs of laser ablation experiments in Drosophila 
-embryos [Data set]. Zenodo. [http://doi.org/10.5281/zenodo.3257654](http://doi.org/10.5281/zenodo.3257654)
+embryos [Data set]. Zenodo.
 ```
 
 ## Dependencies

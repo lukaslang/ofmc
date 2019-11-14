@@ -25,19 +25,25 @@ This is a Python implementation of the methods described in:
 
 L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. Joint Motion 
 Estimation and Source Identification using Convective Regularisation with an Application 
-to the Analysis of Laser Nanoablations. Preprint, 2019.
+to the Analysis of Laser Nanoablations, bioRxiv 686261, 2019.
+
+URL: https://doi.org/10.1101/686261
 
 If you use this software in your work please cite the abovementioned paper in
 resulting publications.
 
 BibTeX:
 
-@techreport{LanDutScaSanSchoEti19,
-  author     = {Lang, L.~F. and Dutta, N. and Scarpa, E. and Sanson, B. and Sch\"{o}nlieb, C.~B. and \'{E}tienne, J.},
-  title      = {Joint Motion Estimation and Source Identification using Convective Regularisation with an Application to the Analysis of Laser Nanoablations},
-  institution= {DAMTP, University of Cambridge, United Kingdom},
-  type       = {Preprint},
-  year       = {2019}
+@article {LanDutScaSanSchoEti19,
+	author = {Lang, Lukas F. and Dutta, Nilankur and Scarpa, Elena and Sanson, B{\'e}n{\'e}dicte and Sch{\"o}nlieb, Carola-Bibiane and {\'E}tienne, Jocelyn},
+	title = {Joint Motion Estimation and Source Identification using Convective Regularisation with an Application to the Analysis of Laser Nanoablations},
+	elocation-id = {686261},
+	year = {2019},
+	doi = {10.1101/686261},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2019/07/02/686261},
+	eprint = {https://www.biorxiv.org/content/early/2019/07/02/686261.full.pdf},
+	journal = {bioRxiv}
 }
 
 2. License & Disclaimer
@@ -68,75 +74,49 @@ See ofmc/external/tifffile.py for its license.
 
 3. Requirements
 
-This software was written for and tested with Anaconda (conda version 4.6.4)
-and Python 3.6.
+This software was written for and tested with:
+- MacOS Mojave (version 10.14.6)
+- Anaconda (conda version 4.7.12)
+- Python (version 3.6.7)
 
 The following libraries are required for parts of this sofware:
 
-- FEniCS (2017.2.0-np113py36_3)
-- scipy (1.0.1-py36_blas_openblashd3ea46f_201)
-- matplotlib (2.2.2-py36_1)
-- pillow (5.2.0-py36_0)
-- read-roi (1.4.2-py36_0)
-- imageio (2.3.0-py_1)
+- FEniCS (version 2018.1.0)
+- scipy
+- matplotlib
+- pillow
+- read-roi
+- imageio
 
-Installation instructions on MacOS using Anaconda  (conda version 4.6.4):
+Installation instructions:
 
 a. Download and install Anaconda from https://anaconda.org/
-b. Create environment and install FEniCS:
 
->> conda create -n fenicsproject -c conda-forge fenics=2017.2.0
+There are two ways to create the conda environment using the correct library versions:
 
-c. Activate the environment:
+1) Use the provided environment file (environment.yml):
 
->> source activate fenicsproject
+>> conda env create -f environment.yml
 
-d. Install scipy, matplotlib, pillow, and read-roi:
+2) Manually create the environment:
 
->> conda install -c conda-forge scipy=1.1.0=py36_blas_openblashd3ea46f_201
->> conda install -c conda-forge matplotlib=2.2.2=py36_1
->> conda install -c conda-forge pillow=5.2.0=py36_0
->> conda install -c conda-forge read-roi=1.4.2=py36_0
->> conda install -c conda-forge imageio=2.3.0=py_1
+>> conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio
 
-e. As of 18 July 2018 there is an issue with sympy, see https://groups.google.com/forum/#!topic/fenics-support/wfGpk7T1aFc
+b. Activate the environment:
 
-In order to fix it downgrade using
+>> conda activate fenicsproject
 
->> conda install -c conda-forge sympy=1.1.1
-
-f. In order to run/edit the scripts in an IDE install e.g. Spyder:
+c. In order to run/edit the scripts in an IDE install e.g. Spyder:
 
 >> conda install -c conda-forge spyder
 
-g. In order to run test cases in Spyder install spyder-unittest:
-
->> conda install -c conda-forge spyder-unittest
-
 Alternatively, use PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
-
-We've added a file "environment.yaml" that allows to recreate the enviromnent 
-easily via
-
->> conda env create -f environment.yaml
-
-Caveat: There seems to be an issue with some packages that have become 
-unavailable for some reason resulting in the error
-
-ResolvePackageNotFound: 
-  - nbconvert==5.3.1=py_1
-  - matplotlib==2.2.2=py36_1
-  - libssh2==1.8.0=h5b517e9_3
-  - qt==5.6.2=h9e3eb04_4
-
-Try using a different build for these versions. However, an upgrade to a
-never version of fenics must be avoided!
 
 4. Usage
 
 To run the test cases execute
 
->> source activate fenicsproject
+>> conda activate fenicsproject
 >> python -m unittest discover
 
 We have added scripts that generate the figures in the paper. First, download 
@@ -148,8 +128,6 @@ Uncompress the data, and place it some directory. Second, set the path to this
 directory in the script "datapath.py".
 
 Run the scripts "paper_figures_X.py" to generate the figures in the paper.
-
-Note that to reproduce the experimental evaluation, 
 
 5. Acknowledgements
 

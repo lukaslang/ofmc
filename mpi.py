@@ -21,7 +21,7 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import interpolate
 from dolfin import UnitSquareMesh
 from matplotlib import cm
@@ -173,7 +173,7 @@ class DecayingData(Data):
         return "exp(- t / tau) * cos((x - w * t) / lambda)"
 
 
-class f_const(Expression):
+class f_const(UserExpression):
     def eval(self, value, x):
         value[0] = np.cos((x[1] - w * x[0]) / lambdap)
 
@@ -181,7 +181,7 @@ class f_const(Expression):
         return ()
 
 
-class f_const_x(Expression):
+class f_const_x(UserExpression):
     def eval(self, value, x):
         value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
 
@@ -189,7 +189,7 @@ class f_const_x(Expression):
         return ()
 
 
-class f_const_t(Expression):
+class f_const_t(UserExpression):
     def eval(self, value, x):
         value[0] = np.sin((x[1] - w * x[0]) / lambdap) * w / lambdap
 
@@ -197,7 +197,7 @@ class f_const_t(Expression):
         return ()
 
 
-class f_decay(Expression):
+class f_decay(UserExpression):
     def eval(self, value, x):
         value[0] = np.exp(-x[0] / tau) * np.cos((x[1] - w * x[0]) / lambdap)
 
@@ -205,7 +205,7 @@ class f_decay(Expression):
         return ()
 
 
-class k_decay(Expression):
+class k_decay(UserExpression):
     def eval(self, value, x):
         value[0] = - np.exp(-x[0] / tau) \
             * np.cos((x[1] - w * x[0]) / lambdap) / tau
@@ -214,7 +214,7 @@ class k_decay(Expression):
         return ()
 
 
-class v_decay(Expression):
+class v_decay(UserExpression):
     def eval(self, value, x):
         value[0] = w
 
@@ -222,7 +222,7 @@ class v_decay(Expression):
         return ()
 
 
-class f_decay_x(Expression):
+class f_decay_x(UserExpression):
     def eval(self, value, x):
         value[0] = - np.exp(- x[0] / tau) \
             * np.sin((x[1] - w * x[0]) / lambdap) / lambdap
@@ -231,7 +231,7 @@ class f_decay_x(Expression):
         return ()
 
 
-class f_decay_t(Expression):
+class f_decay_t(UserExpression):
     def eval(self, value, x):
         value[0] = np.exp(- x[0] / tau) * np.sin((x[1] - w * x[0]) / lambdap) \
             * w / lambdap - np.exp(- x[0] / tau) \
@@ -278,7 +278,7 @@ W = dh.create_function_space(mesh, 'periodic')
 
 
 # Create noise.
-class noise(Expression):
+class noise(UserExpression):
     def eval(self, value, x):
         value[0] = 0.5 * np.random.randn()
 

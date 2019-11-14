@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import ofmc.util.dolfinhelpers as dh
 from dolfin import Constant
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import project
@@ -49,13 +49,13 @@ class TestDolfinHelpers(unittest.TestCase):
         V = FunctionSpace(mesh, 'CG', 1,
                           constrained_domain=dh.PeriodicBoundary())
 
-        class MyExpression(Expression):
+        class MyUserExpression(UserExpression):
             def eval(self, value, x):
                 value[0] = x[0]
 
             def value_shape(self):
                 return (1, )
-        f = interpolate(MyExpression(element=V.ufl_element()), V)
+        f = interpolate(MyUserExpression(element=V.ufl_element()), V)
 
         v = dh.funvec2img_pb(f.vector().get_local(), m, n)
         np.testing.assert_allclose(v.shape, (m, n))

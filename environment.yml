@@ -1,0 +1,14 @@
+name: fenicsproject
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - read-roi
+  - scipy
+  - pillow
+  - imageio
+  - fenics=2018.1.0
+  - python=3.6
+  - matplotlib
+prefix: /Users/lukaslang/anaconda3/envs/fenicsproject
+

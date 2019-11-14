@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import datetime
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import interpolate
 from dolfin import UnitSquareMesh
 from matplotlib import cm
@@ -243,7 +243,7 @@ class DecayingData(Data):
         return "exp(- t / tau) * cos((x - w * t) / lambda) + c0"
 
 
-class f_const(Expression):
+class f_const(UserExpression):
     def eval(self, value, x):
         value[0] = np.cos((x[1] - w * x[0]) / lambdap) + c0
 
@@ -251,7 +251,7 @@ class f_const(Expression):
         return ()
 
 
-class f_const_x(Expression):
+class f_const_x(UserExpression):
     def eval(self, value, x):
         value[0] = - np.sin((x[1] - w * x[0]) / lambdap) / lambdap
 
@@ -259,7 +259,7 @@ class f_const_x(Expression):
         return ()
 
 
-class f_const_t(Expression):
+class f_const_t(UserExpression):
     def eval(self, value, x):
         value[0] = np.sin((x[1] - w * x[0]) / lambdap) * w / lambdap
 
@@ -267,7 +267,7 @@ class f_const_t(Expression):
         return ()
 
 
-class f_decay(Expression):
+class f_decay(UserExpression):
     def eval(self, value, x):
         value[0] = np.exp(-x[0] / tau) * np.cos((x[1] - w * x[0]) / lambdap) \
             + c0
@@ -276,7 +276,7 @@ class f_decay(Expression):
         return ()
 
 
-class k_decay(Expression):
+class k_decay(UserExpression):
     def eval(self, value, x):
         value[0] = - np.exp(-x[0] / tau) \
             * np.cos((x[1] - w * x[0]) / lambdap) / tau
@@ -285,7 +285,7 @@ class k_decay(Expression):
         return ()
 
 
-class v_decay(Expression):
+class v_decay(UserExpression):
     def eval(self, value, x):
         value[0] = w
 
@@ -293,7 +293,7 @@ class v_decay(Expression):
         return ()
 
 
-class f_decay_x(Expression):
+class f_decay_x(UserExpression):
     def eval(self, value, x):
         value[0] = - np.exp(- x[0] / tau) \
             * np.sin((x[1] - w * x[0]) / lambdap) / lambdap
@@ -302,7 +302,7 @@ class f_decay_x(Expression):
         return ()
 
 
-class f_decay_t(Expression):
+class f_decay_t(UserExpression):
     def eval(self, value, x):
         value[0] = np.exp(- x[0] / tau) * np.sin((x[1] - w * x[0]) / lambdap) \
             * w / lambdap - np.exp(- x[0] / tau) \
@@ -378,7 +378,7 @@ saveresults(resultpath, 'decay_cmscr1d_l2h1h1cr_exp_pb',
 
 # The next example shows that for the initial concentration used in the
 # mechanical models the algorithm picks up the source well.
-class f_decay(Expression):
+class f_decay(UserExpression):
     def eval(self, value, x):
         value[0] = 20 - np.sin(10 * np.pi * x[1]
                                + np.cos(10 * np.pi * x[1])) / 5 + c0 * x[0]
@@ -387,7 +387,7 @@ class f_decay(Expression):
         return ()
 
 
-class f_decay_x(Expression):
+class f_decay_x(UserExpression):
     def eval(self, value, x):
         value[0] = - 2 * np.pi * (np.sin(10 * np.pi * x[1]) - 1) \
             * np.cos(10 * np.pi * x[1] + np.cos(10 * np.pi * x[1]))
@@ -396,7 +396,7 @@ class f_decay_x(Expression):
         return ()
 
 
-class f_decay_t(Expression):
+class f_decay_t(UserExpression):
     def eval(self, value, x):
         value[0] = c0
 

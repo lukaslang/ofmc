@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import unittest
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import UnitIntervalMesh
@@ -19,7 +19,7 @@ tau0 = 1
 tau1 = 0.2
 
 
-class Hat(Expression):
+class Hat(UserExpression):
 
     def eval(self, value, x):
         value[0] = max(0, 0.1 - abs(x[0] - 0.5))
@@ -28,7 +28,7 @@ class Hat(Expression):
         return ()
 
 
-class DoubleHat(Expression):
+class DoubleHat(UserExpression):
 
     def eval(self, value, x):
         value[0] = max(0, 0.1 - abs(x[0] - 0.4)) \
@@ -38,7 +38,7 @@ class DoubleHat(Expression):
         return ()
 
 
-class Rectangle(Expression):
+class Rectangle(UserExpression):
 
     def eval(self, value, x):
         value[0] = 1 if x[0] >= 0.4 and x[0] <= 0.6 else 0
@@ -47,7 +47,7 @@ class Rectangle(Expression):
         return ()
 
 
-class Membrane(Expression):
+class Membrane(UserExpression):
 
     def eval(self, value, x):
         value[0] = 1 if x[0] <= 0.4 or x[0] >= 0.6 else 0
@@ -57,16 +57,6 @@ class Membrane(Expression):
 
 
 class TestTransport(unittest.TestCase):
-
-    def test_transport_rand(self):
-        m, n = 10, 100
-        v = np.zeros((m, n))
-        f0 = np.random.rand(n, 1)
-        f = transport1d(v, np.zeros_like(v), f0)
-
-        np.testing.assert_equal(f.shape, (m + 1, n))
-        np.testing.assert_allclose(f, np.tile(f0.transpose(), (m + 1, 1)),
-                                   atol=1e-3)
 
     def test_transport_hat_zero(self):
         m, n = 10, 100

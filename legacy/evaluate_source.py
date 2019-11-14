@@ -21,7 +21,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import FunctionSpace
 from dolfin import interpolate
 from dolfin import UnitIntervalMesh
@@ -120,7 +120,7 @@ mesh = UnitIntervalMesh(n - 1)
 V = FunctionSpace(mesh, 'CG', 1)
 
 
-class DoubleHat(Expression):
+class DoubleHat(UserExpression):
 
     def eval(self, value, x):
         value[0] = max(0, 0.1 - abs(x[0] - 0.4)) \

@@ -17,7 +17,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with OFMC.  If not, see <http://www.gnu.org/licenses/>.
-from dolfin import Expression
+from dolfin import UserExpression
 from dolfin import Function
 from dolfin import FunctionSpace
 from dolfin import interpolate
@@ -73,7 +73,7 @@ def velocityslice(t: float, n: int, c0: float, v0: float, tau0: float,
     V = FunctionSpace(mesh, 'CG', 1)
 
     # Create velocity expression.
-    class velocity(Expression):
+    class velocity(UserExpression):
 
         def eval(self, value, x):
             value[0] = vel(t, x[0] - 0.5, c0, v0, tau0, tau1)
@@ -112,7 +112,7 @@ def velocity(m: int, n: int, c0: float, v0: float, tau0: float,
     V = FunctionSpace(mesh, 'CG', 1)
 
     # Create velocity expression.
-    class velocity(Expression):
+    class velocity(UserExpression):
 
         def eval(self, value, x):
             value[0] = vel(x[0], x[1] - 0.5, c0, v0, tau0, tau1)

@@ -14,8 +14,7 @@ Estimation and Source Identification using Convective Regularisation with an App
 to the Analysis of Laser Nanoablations, bioRxiv 686261, 2019.
 ```
 
-BibTeX:
-
+Herre's the BibTeX entry for the paper:
 ```
 @article {LanDutScaSanSchoEti19,
 	author = {Lang, Lukas F. and Dutta, Nilankur and Scarpa, Elena and Sanson, B{\'e}n{\'e}dicte and Sch{\"o}nlieb, Carola-Bibiane and {\'E}tienne, Jocelyn},
@@ -28,6 +27,11 @@ BibTeX:
 	eprint = {https://www.biorxiv.org/content/early/2019/07/02/686261.full.pdf},
 	journal = {bioRxiv}
 }
+```
+
+This code is accompanied by a dataset:
+```
+L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. (2019). Microscopy image sequences and annotated kymographs of laser ablation experiments in Drosophila embryos [Data set]. Zenodo. [http://doi.org/10.5281/zenodo.3257654](http://doi.org/10.5281/zenodo.3257654)
 ```
 
 ## Dependencies
@@ -48,7 +52,7 @@ The following libraries are required for parts of this code:
 
 ## Installation
 
-Download and install Anaconda from [https://anaconda.org/](https://anaconda.org/)
+Download and install [Anaconda](https://anaconda.org/).
 
 There are two ways to create the conda environment with the correct library versions:
 

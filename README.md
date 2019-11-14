@@ -1,36 +1,21 @@
-Joint Motion Estimation and Source Identification using Convective Regularisation
-Version 1.0, 2019
+# Joint Motion Estimation and Source Identification using Convective Regularisation
+==================================
 
-Lukas F. Lang (ll542@cam.ac.uk)
-Carola-Bibiane Schönlieb (cbs31@cam.ac.uk)
-Department of Applied Mathematics and Theoretical Physics
-University of Cambridge
-Wilberforce Road, Cambridge CB3 0WA, United Kingdom
+This repository contains a Python implementation of the methods described in the paper [Joint Motion 
+Estimation and Source Identification using Convective Regularisation with an Application 
+to the Analysis of Laser Nanoablations](https://doi.org/10.1101/686261)
 
-Nilankur Dutta (nilankur.dutta@univ-grenoble-alpes.fr)
-Jocelyn Étienne (jocelyn.etienne@univ-grenoble-alpes.fr)
-Laboratoire Interdisciplinaire de Physique
-Université Grenoble Alpes
-F-38000 Grenoble, France
+## Cite
+----
 
-Bénédicte Sanson (bs251@cam.ac.uk)
-Elena Scarpa (es697@cam.ac.uk)
-Department of Physiology, Development and Neuroscience
-University of Cambridge
-Downing Site, Cambridge CB2 3DY, United Kingdom
-
-1. Introduction
-
-This is a Python implementation of the methods described in:
+If you use this software in your work please cite our paper in
+resulting publications:
 
 L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. Joint Motion 
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations, bioRxiv 686261, 2019.
 
 URL: https://doi.org/10.1101/686261
-
-If you use this software in your work please cite the abovementioned paper in
-resulting publications.
 
 BibTeX:
 
@@ -46,9 +31,80 @@ BibTeX:
 	journal = {bioRxiv}
 }
 
-2. License & Disclaimer
+## Dependencies
+--------
 
-Copyright 2017 Lukas Lang.
+This software was written for and tested with:
+- MacOS Mojave (version 10.14.6)
+- Anaconda (conda version 4.7.12)
+- Python (version 3.6.7)
+
+The following libraries are required for parts of this code:
+
+- FEniCS (version 2018.1.0)
+- scipy
+- matplotlib
+- pillow
+- read-roi
+- imageio
+
+Installation instructions:
+
+1. Download and install Anaconda from https://anaconda.org/
+
+There are two ways to create the conda environment using the correct library versions:
+
+a) Use the provided environment file (environment.yml):
+
+```bash
+conda env create -f environment.yml
+```
+
+b) Manually create the environment:
+
+```bash
+conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio
+```
+
+2. Activate the environment:
+
+```bash
+conda activate fenicsproject
+```
+
+3. In order to run/edit the scripts in an IDE install e.g. Spyder:
+
+```bash
+conda install -c conda-forge spyder
+```
+
+Alternatively, you can use e.g. PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
+
+## Usage
+
+To run the test cases execute
+
+```bash
+>> conda activate fenicsproject
+>> python -m unittest discover
+```
+
+We have added scripts that generate the figures in the paper. First, download 
+the microscopy data (ZIP file) from:
+
+https://doi.org/10.5281/zenodo.3257654
+
+Uncompress the data, and place it some directory. Second, set the path to this 
+directory in the script "datapath.py".
+
+Run the scripts, e.g. [`paper_figures_01.py`](paper_figures_01.py), to re-create the figures in the paper.
+
+In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first.
+
+## License & Disclaimer
+--------------------
+
+Copyright 2019 Lukas Lang.
 
 This file is part of OFMC. OFMC is free software: you can redistribute it
 and/or modify it under the terms of the GNU General Public License as published
@@ -72,64 +128,28 @@ URL: http://www.lfd.uci.edu/~gohlke/
 
 See ofmc/external/tifffile.py for its license.
 
-3. Requirements
+## Contact
+-------
 
-This software was written for and tested with:
-- MacOS Mojave (version 10.14.6)
-- Anaconda (conda version 4.7.12)
-- Python (version 3.6.7)
+Lukas F. Lang (ll542@cam.ac.uk)
+Carola-Bibiane Schönlieb (cbs31@cam.ac.uk)
+Department of Applied Mathematics and Theoretical Physics
+University of Cambridge
+Wilberforce Road, Cambridge CB3 0WA, United Kingdom
 
-The following libraries are required for parts of this sofware:
+Nilankur Dutta (nilankur.dutta@univ-grenoble-alpes.fr)
+Jocelyn Étienne (jocelyn.etienne@univ-grenoble-alpes.fr)
+Laboratoire Interdisciplinaire de Physique
+Université Grenoble Alpes
+F-38000 Grenoble, France
 
-- FEniCS (version 2018.1.0)
-- scipy
-- matplotlib
-- pillow
-- read-roi
-- imageio
+Bénédicte Sanson (bs251@cam.ac.uk)
+Elena Scarpa (es697@cam.ac.uk)
+Department of Physiology, Development and Neuroscience
+University of Cambridge
+Downing Site, Cambridge CB2 3DY, United Kingdom
 
-Installation instructions:
-
-a. Download and install Anaconda from https://anaconda.org/
-
-There are two ways to create the conda environment using the correct library versions:
-
-1) Use the provided environment file (environment.yml):
-
->> conda env create -f environment.yml
-
-2) Manually create the environment:
-
->> conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio
-
-b. Activate the environment:
-
->> conda activate fenicsproject
-
-c. In order to run/edit the scripts in an IDE install e.g. Spyder:
-
->> conda install -c conda-forge spyder
-
-Alternatively, use PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
-
-4. Usage
-
-To run the test cases execute
-
->> conda activate fenicsproject
->> python -m unittest discover
-
-We have added scripts that generate the figures in the paper. First, download 
-the microscopy data (ZIP file) from:
-
-https://doi.org/10.5281/zenodo.3257654
-
-Uncompress the data, and place it some directory. Second, set the path to this 
-directory in the script "datapath.py".
-
-Run the scripts "paper_figures_X.py" to generate the figures in the paper.
-
-5. Acknowledgements
+## Acknowledgements
 
 LFL and CBS acknowledge support from the Leverhulme Trust project "Breaking the non-convexity barrier", the EPSRC grant EP/M00483X/1, the EPSRC Centre Nr.\ EP/N014588/1, the RISE projects ChiPS and NoMADS, the Cantab Capital Institute for the Mathematics of Information, and the Alan Turing Institute.
 ND and JE were supported by ANR-11-LABX-0030 "Tec21", by a CNRS Momentum grant, and by IRS "AnisoTiss" of Idex Univ. Grenoble Alpes. 

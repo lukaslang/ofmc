@@ -4,6 +4,10 @@ This repository contains a Python implementation of the methods described in the
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations](https://doi.org/10.1101/686261)
 
+![SUM_Reslice_of_190216E5PSB2PMT-streamlines](https://user-images.githubusercontent.com/551031/68870917-f24e5800-06fb-11ea-96f7-02a1724c1a37.png)
+
+![SUM_Reslice_of_190216E5PSB2PMT-source](https://user-images.githubusercontent.com/551031/68870935-f7130c00-06fb-11ea-885d-5ea482655be8.png)
+
 If you use this code in your work please cite our paper:
 
 ```

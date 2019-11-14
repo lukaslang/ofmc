@@ -131,14 +131,11 @@ Downing Site, Cambridge CB2 3DY, United Kingdom
 
 LFL and CBS acknowledge support from the Leverhulme Trust project "Breaking the non-convexity barrier", the EPSRC grant EP/M00483X/1, the EPSRC Centre Nr. EP/N014588/1, the RISE projects ChiPS and NoMADS, the Cantab Capital Institute for the Mathematics of Information, and the Alan Turing Institute.
 
-ND and JE were supported by ANR-11-LABX-0030 "Tec21", by a CNRS Momentum grant, and by IRS "AnisoTiss" of Idex Univ. Grenoble Alpes. 
-
+ND and JE were supported by ANR-11-LABX-0030 "Tec21", by a CNRS Momentum grant, and by IRS "AnisoTiss" of Idex Univ. Grenoble Alpes.
 ND and JE are members of GDR 3570 MecaBio and GDR 3070 CellTiss of CNRS.
-
 Some of the computations were performed using the Cactus cluster of the CIMENT infrastructure, supported by the Rhone-Alpes region (GRANT CPER07_13 CIRA) and the authors thank Philippe Beys, who manages the cluster.
 
 Overall laboratory work was supported by Wellcome Trust Investigator Awards to BS (099234/Z/12/Z and 207553/Z/17/Z).
-
 ES was also supported by a University of Cambridge Herchel Smith Fund Postdoctoral Fellowship.
 
 The authors also wish to thank Pierre Recho for fruitful discussions and the re-use of his numerical simulation code.

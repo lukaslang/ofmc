@@ -110,20 +110,17 @@ See [`ofmc/external/tifffile.py`](ofmc/external/tifffile.py) for its license.
 
 ## Contact
 
-Lukas F. Lang (ll542@cam.ac.uk)  
-Carola-Bibiane Schönlieb (cbs31@cam.ac.uk)  
+[Lukas F. Lang](https://lukaslang.github.io) and [Carola-Bibiane Schönlieb](http://www.damtp.cam.ac.uk/user/cbs31)
 Department of Applied Mathematics and Theoretical Physics  
 University of Cambridge  
 Wilberforce Road, Cambridge CB3 0WA, United Kingdom
 
-Nilankur Dutta (nilankur.dutta@univ-grenoble-alpes.fr)  
-Jocelyn Étienne (jocelyn.etienne@univ-grenoble-alpes.fr)  
+[Nilankur Dutta](https://www-liphy.ujf-grenoble.fr/infos_pratiques/fiches_identites/danr.html) and [Jocelyn Étienne](https://www-liphy.ujf-grenoble.fr/pagesperso/etienne/)
 Laboratoire Interdisciplinaire de Physique  
 Université Grenoble Alpes  
 F-38000 Grenoble, France
 
-Bénédicte Sanson (bs251@cam.ac.uk)  
-Elena Scarpa (es697@cam.ac.uk)  
+[Bénédicte Sanson](https://www.pdn.cam.ac.uk/directory/benedicte-sanson) and Elena Scarpa
 Department of Physiology, Development and Neuroscience  
 University of Cambridge  
 Downing Site, Cambridge CB2 3DY, United Kingdom

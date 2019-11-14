@@ -53,25 +53,25 @@ There are two ways to create the conda environment with the correct library vers
 a) Use the provided [`environment.yml`](environment.yml) file:
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment.yml 
 ```
 
 b) Manually create the environment:
 
 ```bash
-conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio
+conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio 
 ```
 
 Then, activate the environment:
 
 ```bash
-conda activate fenicsproject
+conda activate fenicsproject 
 ```
 
 In order to run/edit the scripts using an IDE, install e.g. Spyder:
 
 ```bash
-conda install -c conda-forge spyder
+conda install -c conda-forge spyder 
 ```
 
 Alternatively, you can use e.g. PyCharm and create a run environment by selecting anaconda3/envs/fenicsproject environment.
@@ -81,7 +81,7 @@ Alternatively, you can use e.g. PyCharm and create a run environment by selectin
 To run the test cases, execute
 
 ```bash
-python -m unittest discover
+python -m unittest discover 
 ```
 
 We have added scripts that generate the figures in the paper.

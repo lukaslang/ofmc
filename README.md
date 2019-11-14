@@ -4,17 +4,13 @@ This repository contains a Python implementation of the methods described in the
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations](https://doi.org/10.1101/686261)
 
-## Cite
-
-If you use this software in your work please cite our paper:
+If you use this code in your work please cite our paper:
 
 ```
 L. F. Lang, N. Dutta, E. Scarpa, B. Sanson, C.-B. Schönlieb, and J. Étienne. Joint Motion 
 Estimation and Source Identification using Convective Regularisation with an Application 
 to the Analysis of Laser Nanoablations, bioRxiv 686261, 2019.
 ```
-
-URL: [https://doi.org/10.1101/686261](https://doi.org/10.1101/686261)
 
 BibTeX:
 
@@ -52,9 +48,9 @@ The following libraries are required for parts of this code:
 
 Download and install Anaconda from [https://anaconda.org/](https://anaconda.org/)
 
-There are two ways to create the conda environment using the correct library versions:
+There are two ways to create the conda environment with the correct library versions:
 
-a) Use the provided environment file (environment.yml):
+a) Use the provided [`environment.yml`](environment.yml) file:
 
 ```bash
 conda env create -f environment.yml
@@ -66,13 +62,13 @@ b) Manually create the environment:
 conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio
 ```
 
-Activate the environment:
+Then, activate the environment:
 
 ```bash
 conda activate fenicsproject
 ```
 
-In order to run/edit the scripts in an IDE install e.g. Spyder:
+In order to run/edit the scripts using an IDE, install e.g. Spyder:
 
 ```bash
 conda install -c conda-forge spyder
@@ -82,24 +78,25 @@ Alternatively, you can use e.g. PyCharm and create a run environment by selectin
 
 ## Usage
 
-To run the test cases execute
+To run the test cases, execute
 
 ```bash
 conda activate fenicsproject
 python -m unittest discover
 ```
 
-We have added scripts that generate the figures in the paper. First, download 
-the microscopy data (ZIP file) from:
+We have added scripts that generate the figures in the paper.
+
+1. Download the microscopy data (ZIP file) from:
 
 [https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)
 
-Uncompress the data, and place it some directory. Second, set the path to this 
-directory in the script "datapath.py".
+2. Uncompress the data, and place it some directory. Second, set the path to this 
+directory in the script [`datapath.py`](datapath.py).
 
-Run the scripts, e.g. [`paper_figures_01.py`](paper_figures_01.py), to re-create the figures in the paper.
+3. Run the scripts (e.g. [`paper_figures_01.py`](paper_figures_01.py)) to re-create the figures in the paper.
 
-In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first.
+In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first (this may take a few hours).
 
 ## License & Disclaimer
 
@@ -108,35 +105,35 @@ For the full license statement see the file [`LICENSE`](LICENSE).
 
 Moreover, the package includes a third-party library:
 
-Name: tifffile.py 
-Author: Christoph Gohlke 
+Name: tifffile.py  
+Author: Christoph Gohlke  
 URL: [http://www.lfd.uci.edu/~gohlke/](http://www.lfd.uci.edu/~gohlke/) 
 
 See [`ofmc/external/tifffile.py`](ofmc/external/tifffile.py) for its license.
 
 ## Contact
 
-Lukas F. Lang (ll542@cam.ac.uk) 
-Carola-Bibiane Schönlieb (cbs31@cam.ac.uk) 
-Department of Applied Mathematics and Theoretical Physics 
-University of Cambridge 
+Lukas F. Lang (ll542@cam.ac.uk)  
+Carola-Bibiane Schönlieb (cbs31@cam.ac.uk)  
+Department of Applied Mathematics and Theoretical Physics  
+University of Cambridge  
 Wilberforce Road, Cambridge CB3 0WA, United Kingdom
 
-Nilankur Dutta (nilankur.dutta@univ-grenoble-alpes.fr) 
-Jocelyn Étienne (jocelyn.etienne@univ-grenoble-alpes.fr) 
-Laboratoire Interdisciplinaire de Physique 
-Université Grenoble Alpes 
+Nilankur Dutta (nilankur.dutta@univ-grenoble-alpes.fr)  
+Jocelyn Étienne (jocelyn.etienne@univ-grenoble-alpes.fr)  
+Laboratoire Interdisciplinaire de Physique  
+Université Grenoble Alpes  
 F-38000 Grenoble, France
 
-Bénédicte Sanson (bs251@cam.ac.uk) 
-Elena Scarpa (es697@cam.ac.uk) 
-Department of Physiology, Development and Neuroscience 
-University of Cambridge 
+Bénédicte Sanson (bs251@cam.ac.uk)  
+Elena Scarpa (es697@cam.ac.uk)  
+Department of Physiology, Development and Neuroscience  
+University of Cambridge  
 Downing Site, Cambridge CB2 3DY, United Kingdom
 
 ## Acknowledgements
 
-LFL and CBS acknowledge support from the Leverhulme Trust project "Breaking the non-convexity barrier", the EPSRC grant EP/M00483X/1, the EPSRC Centre Nr.\ EP/N014588/1, the RISE projects ChiPS and NoMADS, the Cantab Capital Institute for the Mathematics of Information, and the Alan Turing Institute.
+LFL and CBS acknowledge support from the Leverhulme Trust project "Breaking the non-convexity barrier", the EPSRC grant EP/M00483X/1, the EPSRC Centre Nr. EP/N014588/1, the RISE projects ChiPS and NoMADS, the Cantab Capital Institute for the Mathematics of Information, and the Alan Turing Institute.
 
 ND and JE were supported by ANR-11-LABX-0030 "Tec21", by a CNRS Momentum grant, and by IRS "AnisoTiss" of Idex Univ. Grenoble Alpes. 
 

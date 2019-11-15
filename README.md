@@ -96,10 +96,11 @@ We have added scripts that generate the figures in the paper.
 
 1. Download the microscopy data (ZIP file) from [https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)
 
-2. Uncompress the data, and place it some directory. Second, set the path to this 
-directory in the script [`datapath.py`](datapath.py).
+2. Uncompress the data, and place it some directory.
 
-3. Run the scripts (e.g. [`paper_figures_01.py`](paper_figures_01.py)) to re-create the figures in the paper.
+3. Set the path to this directory in the script [`datapath.py`](datapath.py).
+
+4. Run the scripts (e.g. [`paper_figures_01.py`](paper_figures_01.py)) to re-create the figures in the paper.
 
 In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first (this may take a few hours).
 

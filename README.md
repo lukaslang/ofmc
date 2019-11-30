@@ -93,6 +93,13 @@ To run the test cases, execute
 python -m unittest discover 
 ```
 
+By default, we have switched off plotting of figures during the tests.
+To enable plotting for a test case, just comment
+```bash
+# matplotlib.use('agg')
+```
+in the individual test and figures should be output during execution.
+
 We have added scripts that generate the figures in the paper.
 
 1. Download the microscopy data (ZIP file) from [https://doi.org/10.5281/zenodo.3257654](https://doi.org/10.5281/zenodo.3257654)

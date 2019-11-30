@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import warnings
-import ofmc.external.tifffile as tiff
+import tifffile.tifffile as tiff
 from matplotlib import cm
 from ofmc.model.of import of2dmcs
 from scipy import ndimage

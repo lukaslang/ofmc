@@ -44,7 +44,7 @@ import numpy as np
 import os
 import re
 import warnings
-import ofmc.external.tifffile as tiff
+import tifffile.tifffile as tiff
 import ofmc.util.pyplothelpers as ph
 import ofmc.util.roihelpers as rh
 from read_roi import read_roi_zip

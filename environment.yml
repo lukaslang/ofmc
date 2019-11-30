@@ -10,5 +10,6 @@ dependencies:
   - fenics=2018.1.0
   - python=3.6
   - matplotlib
+  - tifffile
 prefix: /Users/lukaslang/anaconda3/envs/fenicsproject
 

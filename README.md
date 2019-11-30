@@ -51,6 +51,7 @@ The following libraries are required for parts of this code:
 - pillow
 - read-roi
 - imageio
+- tifffile
 
 ## Installation
 
@@ -67,7 +68,7 @@ conda env create -f environment.yml
 b) Manually create the environment:
 
 ```bash
-conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio 
+conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio tifffile
 ```
 
 Then, activate the environment:
@@ -108,14 +109,6 @@ In order to generate the results from the evaluation you must run [`pipeline_eva
 
 This code is released under GNU GPL version 3. 
 For the full license statement see the file [`LICENSE`](LICENSE).
-
-Moreover, the package includes a third-party library:
-
-Name: tifffile.py  
-Author: Christoph Gohlke  
-URL: [http://www.lfd.uci.edu/~gohlke/](http://www.lfd.uci.edu/~gohlke/) 
-
-See [`ofmc/external/tifffile.py`](ofmc/external/tifffile.py) for its license.
 
 ## Contact
 

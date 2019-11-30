@@ -7,7 +7,7 @@ import numpy as np
 from scipy import misc
 from scipy import ndimage
 
-import ofmc.external.tifffile as tiff
+import tifffile.tifffile as tiff
 
 # Set regularisation parameter.
 alpha = 1e-2

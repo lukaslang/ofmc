@@ -110,7 +110,8 @@ We have added scripts that generate the figures in the paper.
 
 4. Run the scripts (e.g. [`paper_figures_01.py`](paper_figures_01.py)) to re-create the figures in the paper.
 
-In order to generate the results from the evaluation you must run [`pipeline_eval.py`](pipeline_eval.py) first (this may take a few hours).
+In order to generate the results from the evaluation, i.e. Figs. 9-11 and Tables 1-2, you must run [`pipeline_eval.py`](pipeline_eval.py) before executing [`paper_figures_04.py`](paper_figures_04.py) and [`paper_figures_05.py`](paper_figures_05.py).
+Depending on the number of parameter combinations set in [`pipeline_eval.py`](pipeline_eval.py) this may take hours.
 
 ## License & Disclaimer
 

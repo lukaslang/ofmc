@@ -1,4 +1,4 @@
-name: lukas_cactus2
+name: fenicsproject
 channels:
   - defaults
   - conda-forge

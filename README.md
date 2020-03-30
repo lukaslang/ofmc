@@ -68,7 +68,7 @@ conda env create -f environment.yml
 b) Manually create the environment:
 
 ```bash
-conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio tifffile
+conda create -n fenicsproject -c conda-forge python=3.6 fenics=2018.1.0 scipy matplotlib pillow read-roi imageio tifffile mpi4py
 ```
 
 Then, activate the environment:

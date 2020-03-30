@@ -1,4 +1,4 @@
-name: fenicsproject
+name: lukas_cactus2
 channels:
   - defaults
   - conda-forge
@@ -11,5 +11,6 @@ dependencies:
   - python=3.6
   - matplotlib
   - tifffile
+  - mpi4py
 prefix: /Users/lukaslang/anaconda3/envs/fenicsproject
 
